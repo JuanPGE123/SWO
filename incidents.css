@@ -1,0 +1,238 @@
+/* incidents.css
+   Estilos para el panel de incidentes, siguiendo las variables y paleta del proyecto.
+*/
+:root {
+    --bg: #071018;
+    --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    --muted: #9aa5b1;
+    --accent: #05d0e6;
+    --green: #19d38f;
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, Arial;
+    background: var(--bg);
+    color: #e6eef6
+}
+
+.app {
+    display: flex;
+    min-height: 100vh
+}
+
+.sidebar {
+    width: 220px;
+    padding: 24px;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(2, 6, 10, 0.6)
+}
+
+.sidebar .sidebar-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+
+.logo-wrap {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    overflow: visible
+}
+
+.logo-wrap img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    z-index: 2
+}
+
+.brand {
+    text-align: center;
+    margin-top: 8px;
+    color: #dff0ff;
+    font-weight: 700
+}
+
+.search {
+    margin-top: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: transparent;
+    color: var(--muted);
+    width: 100%
+}
+
+.nav {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+}
+
+.nav-item {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 10px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, #1b2b33, #0f1720);
+    color: #dff0ff
+}
+
+.main {
+    flex: 1;
+    padding: 22px
+}
+
+.sidebar-foot{
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    width: calc(100% - 36px);
+}
+
+.user-mini{display:flex;gap:10px;align-items:center;color:var(--muted);}
+.user-mini .avatar{width:36px;height:36px;background:linear-gradient(90deg,#0f1720,#183141);border-radius:8px}
+
+.pending-editor td{background:rgba(255,255,255,0.02);}
+.pending-box{display:flex;flex-direction:column;gap:8px}
+.pending-box textarea{width:100%;min-height:80px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+.editor-actions{display:flex;gap:8px;justify-content:flex-end}
+.editor-actions .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;color:var(--muted)}
+
+.select-small{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px
+}
+
+.title {
+    font-weight: 700
+}
+
+.top-actions {
+    display: flex;
+    gap: 8px
+}
+
+.btn {
+    background: var(--accent);
+    color: #04232f;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    margin-bottom: 14px
+}
+
+.metrics {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px
+}
+
+.metric {
+    flex: 1
+}
+
+.metric .big {
+    font-size: 28px;
+    margin-top: 6px
+}
+
+.list .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px
+}
+
+.incidents {
+    width: 100%;
+    border-collapse: collapse
+}
+
+.incidents th,
+.incidents td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    text-align: left
+}
+
+.incidents thead {
+    background: linear-gradient(90deg, #183141, #0f1720)
+}
+
+.action-btn {
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer
+}
+
+.select-small {
+    padding: 6px;
+    border-radius: 8px
+}
+
+/* Detalle de incidente: formularios y organización */
+.detail-card { max-width: 980px; margin: 0 auto; }
+.section-group { margin-bottom: 16px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.02); }
+.section-group h4 { margin: 0 0 8px 0; color: #dff0ff }
+.grid { display: flex; flex-wrap: wrap; gap: 8px }
+.grid label { display: block; flex: 1 1 200px }
+.col-2 { flex: 0 0 12% }
+.col-4 { flex: 0 0 25% }
+.col-6 { flex: 0 0 48% }
+.col-12{ flex:0 0 100% }
+.input-primary, .input-muted, .input-priority, .input-state { width:100%; padding:8px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted) }
+.input-muted { opacity:0.8 }
+.input-area{ width:100%; min-height:80px; padding:8px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted) }
+.comments .comment{ padding:8px; border-radius:8px; background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); margin-bottom:8px }
+.actions-right{ display:flex; gap:8px; justify-content:flex-end }
+.btn.primary{ background: var(--green); color:#04232f }
+
+@media (max-width:900px) {
+    .metrics {
+        flex-direction: column
+    }
+
+    .sidebar {
+        display: none
+    }
+
+    .logo-wrap img {
+        width: 120px;
+        height: 120px;
+        left: 50%;
+        transform: translateX(-50%)
+    }
+}

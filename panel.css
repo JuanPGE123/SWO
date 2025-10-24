@@ -1,0 +1,395 @@
+/*
+    panel.css
+    Estilos para el panel principal (dashboard).
+    - Variables en :root para mantener coherencia del tema.
+    - Layout: sidebar + main con columna central y columna derecha.
+    - Componentes: tarjetas, feed, canales, user-card.
+*/
+:root {
+        /* Tokens de color y variables reutilizables */
+        --bg: #071018;
+        --panel: #0b1116;
+        --muted: #9aa5b1;
+        --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+        --accent: #05d0e6;
+        --blue: #2545a8;
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, Arial;
+    background: var(--bg);
+    color: #e6eef6
+}
+
+.app {
+    display: flex;
+    min-height: 100vh
+}
+
+/* Sidebar izquierdo: navegación principal */
+.sidebar {
+    width: 220px;
+    padding: 24px;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(2, 6, 10, 0.6)
+}
+
+.sidebar .logo-wrap {
+    /* Contenedor superior del sidebar: reservamos espacio para el logo grande
+       y lo centramos sobre la marca. Esto coloca el logo encima de "ServiceDesk". */
+    width: 100%;
+    height: 200px;
+    display: block;
+    border-radius: 999px;
+    overflow: visible;
+    position: relative;
+}
+
+/* Imagen de logo dentro del sidebar: visual 200x200 pero absolute para no afectar layout */
+.logo-img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    display: block;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.brand {
+    margin-top: 10px;
+    font-weight: 700;
+    color: #dff0ff
+}
+
+.sidebar .brand {
+    text-align: center; /* centrar el texto bajo el logo */
+    margin-top: 8px;
+}
+
+/* Centrar la parte superior del sidebar (logo + marca) */
+.sidebar .sidebar-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.brand .badge {
+    background: #17313b;
+    color: #9be8d8;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-size: 12px
+}
+
+.nav {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
+.nav-item {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, #1b2b33, #0f1720);
+    color: #dff0ff
+}
+
+.sidebar-foot {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 13px
+}
+
+/* Área principal y cabecera */
+.main {
+    flex: 1;
+    padding: 24px
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px
+}
+
+.topbar h2 {
+    margin: 0;
+    font-size: 18px
+}
+
+.status {
+    background: #0bbf6b;
+    color: #04231a;
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    margin-left: 10px;
+    font-size: 12px
+}
+
+.top-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center
+}
+
+.search {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: transparent;
+    color: inherit
+}
+
+.btn.ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: var(--muted);
+    cursor: pointer
+}
+
+/* Layout de contenido: columna central flexible y columna derecha fija */
+.content {
+    display: flex;
+    gap: 20px
+}
+
+.col.center {
+    flex: 1
+}
+
+.col.right {
+    width: 360px
+}
+
+/* Tarjetas reutilizables con fondo translúcido y borde sutil */
+.card {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    margin-bottom: 18px
+}
+
+.card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px
+}
+
+.pill {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 8px 10px;
+    border-radius: 12px;
+    color: var(--muted);
+    cursor: pointer
+}
+
+.pill.small {
+    padding: 6px 8px;
+    font-size: 12px
+}
+
+.feed {
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
+.feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px
+}
+
+.feed-item.blue {
+    background: linear-gradient(90deg, #2545a8, #1f4fbf)
+}
+
+.feed-item .dot {
+    width: 8px;
+    height: 8px;
+    background: #19d38f;
+    border-radius: 999px;
+    margin-top: 6px
+}
+
+.feed-item .meta {
+    flex: 1
+}
+
+.feed-item .time {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px
+}
+
+.feed-item .sub {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    margin-top: 6px
+}
+
+.history {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
+.history li {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: transparent
+}
+
+.history .sub {
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between
+}
+
+.channels .channel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
+    cursor: pointer
+}
+
+.switch {
+    padding: 6px 10px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--muted)
+}
+
+.switch.on {
+    background: linear-gradient(90deg, #1dd28f, #0fbf89);
+    color: #06301c
+}
+
+.quick .rule {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.02)
+}
+
+.preview .preview-item {
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    color: white
+}
+
+.preview .success {
+    background: #19d38f;
+    color: #04311b
+}
+
+.preview .warn {
+    background: #f2a800;
+    color: #2b1700
+}
+
+.preview .error {
+    background: #f04a4a;
+    color: #2b0a0a
+}
+
+.welcome {
+    margin-bottom: 18px
+}
+
+.welcome-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px
+}
+
+.tile {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 12px;
+    border-radius: 8px
+}
+
+.muted {
+    color: var(--muted)
+}
+
+/* Tarjeta de usuario fija en la esquina inferior derecha */
+.user-card {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    background: var(--card-bg);
+    padding: 10px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.04)
+}
+
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    object-fit: cover
+}
+
+.user-name {
+    font-weight: 700
+}
+
+.user-role {
+    color: var(--muted);
+    font-size: 13px
+}
+
+/* adjust welcome grid on small screens */
+@media (max-width:900px) {
+    .content {
+        flex-direction: column
+    }
+
+    .col.right {
+        width: 100%
+    }
+
+    .welcome-grid {
+        grid-template-columns: 1fr
+    }
+}

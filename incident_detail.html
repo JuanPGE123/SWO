@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Detalle de Incidente</title>
+    <link rel="stylesheet" href="incidents.css">
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="logo-wrap"><img src="imagenes/logoSWO_sinFondo.png" alt="logo" class="logo-img"/></div>
+          <div class="brand">ServiceDesk <span class="badge">SWO</span></div>
+        </div>
+        <nav class="nav">
+          <a class="nav-item" href="panel.html">Inicio</a>
+          <a class="nav-item" href="panel.html">Panel</a>
+          <a class="nav-item" href="incidents.html">Incidencias</a>
+          <a class="nav-item" href="reports.html">Reportes</a>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="user-mini"><span class="avatar"></span><div>Juan Pablo<br/><small>Administrador</small></div></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title">Detalle de incidente</div>
+          <div class="top-actions">
+            <a class="btn" href="incidents.html">Volver</a>
+          </div>
+        </header>
+
+        <section class="card detail-card">
+          <h3 id="detailTitle">Incidente</h3>
+          <form id="detailForm">
+            <div class="section-group">
+              <h4>Información general</h4>
+              <div class="grid">
+                <label class="col-2">Id:<input readonly id="fieldId" class="input-muted"/></label>
+                <label class="col-6">Título:<input id="fieldTitle" class="input-primary"/></label>
+                <label class="col-4">Proyecto:<select id="fieldProject" class="input-primary"></select></label>
+                <label class="col-4">Aplicativo:<input id="fieldApp" class="input-primary"/></label>
+                <label class="col-4">Prioridad:<select id="fieldPriority" class="input-priority"><option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option></select></label>
+                <label class="col-4">Estado:<select id="fieldState" class="input-state"><option value="open">Abierto</option><option value="inprogress">En proceso</option><option value="pending">Pendiente</option><option value="resolved">Resuelto</option></select></label>
+              </div>
+            </div>
+
+            <div class="section-group">
+              <h4>Contacto</h4>
+              <div class="grid">
+                <label class="col-6">Usuario afectado:<input id="fieldUser" class="input-primary"/></label>
+                <label class="col-6">Correo usuario:<input id="fieldEmail" class="input-primary"/></label>
+                <label class="col-12">Teléfonos de contacto:<input id="fieldPhones" class="input-primary"/></label>
+              </div>
+            </div>
+
+            <div class="section-group">
+              <h4>Contexto / actividad</h4>
+              <label>Motivo del error:<textarea id="fieldReason" class="input-area"></textarea></label>
+              <label>Qué estaba realizando:<textarea id="fieldActivity" class="input-area"></textarea></label>
+            </div>
+
+            <div class="comments section-group">
+              <h4>Comentarios</h4>
+              <div id="commentsList"></div>
+              <textarea id="newComment" placeholder="Agregar comentario..." class="input-area"></textarea>
+              <div class="actions-right"><button type="button" id="addComment" class="btn">Agregar comentario</button></div>
+            </div>
+
+            <div class="actions-right" style="margin-top:12px">
+              <button type="button" id="saveDetail" class="btn primary">Guardar</button>
+              <a class="btn" href="incidents.html">Cancelar</a>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="incident_detail.js"></script>
+  </body>
+</html>

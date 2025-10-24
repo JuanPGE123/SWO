@@ -1,0 +1,136 @@
+/* chatbot.css - Estilos para el ChatBot y paneles laterales (coherente con incidents.css) */
+@import url('incidents.css');
+
+.chatbot-main .chat-area {
+    display: flex;
+    gap: 12px
+}
+
+.left-panel {
+    width: 240px;
+    padding: 12px
+}
+
+.right-panel {
+    width: 240px;
+    padding: 12px
+}
+
+.chat-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px
+}
+
+.messages {
+    flex: 1;
+    overflow: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+}
+
+.message {
+    max-width: 80%;
+    padding: 8px 10px;
+    border-radius: 10px
+}
+
+.message.user {
+    background: linear-gradient(90deg, #04232f, #07363a);
+    color: #dff0ff;
+    align-self: flex-end
+}
+
+.message.bot {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--muted);
+    align-self: flex-start
+}
+
+.composer {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px
+}
+
+.composer input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--muted)
+}
+
+.suggestions {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    flex-wrap: wrap
+}
+
+.sugg {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--muted);
+    padding: 6px 8px;
+    border-radius: 8px
+}
+
+.log-area {
+    max-height: 220px;
+    overflow: auto;
+    padding: 8px
+}
+
+.pill {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 8px;
+    border-radius: 8px;
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 6px;
+    cursor: pointer
+}
+
+.quick-list .pill {
+    text-align: left
+}
+
+/* Ajustes específicos para ChatBot: forzar texto claro en botones/pills en este marco */
+.chatbot-main .btn {
+    color: #ffffff;
+}
+
+.chatbot-main .pill {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.chatbot-main .sugg {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.chatbot-main .pill,
+.chatbot-main .sugg {
+    background: transparent
+}
+
+/* responsive */
+@media (max-width:900px) {
+
+    .left-panel,
+    .right-panel {
+        display: none
+    }
+
+    .chat-card {
+        padding: 8px
+    }
+}

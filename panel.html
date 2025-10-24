@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Panel - Principal</title>
+    <link rel="stylesheet" href="panel.css">
+  </head>
+  <body>
+    <div class="app">
+  <!-- Sidebar izquierdo: navegación principal del sistema -->
+  <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="logo-wrap"><img src="imagenes/logoSWO_sinFondo.png" alt="logo" class="logo-img"/></div>
+          <div class="brand">ServiceDesk <span class="badge">SWO</span></div>
+        </div>
+
+  <!-- Menú de navegación: botones que apuntan a secciones principales -->
+  <nav class="nav">
+          <a class="nav-item" href="panel.html">Inicio</a>
+          <button class="nav-item active">Panel</button>
+          <a class="nav-item" href="incidents.html">Incidencias</a>
+          <button id="navReports" class="nav-item">Reportes</button>
+          <a class="nav-item" href="chatbot.html">ChatBot</a>
+          <button class="nav-item">Usuarios</button>
+          <button class="nav-item">Utilidades</button>
+        </nav>
+
+        <div class="sidebar-foot">Configura canales y reglas para avisos en tiempo real.</div>
+      </aside>
+
+      <!-- Área principal: cabecera superior, contenido y elementos secundarios -->
+      <main class="main">
+        <!-- Cabecera superior: título del área y acciones (buscar, probar alerta, cerrar sesión) -->
+        <header class="topbar">
+          <!-- Botón Inicio que lleva al panel principal (esta misma página) -->
+          <div style="display:flex;align-items:center;gap:12px">
+            <a class="btn" href="panel.html">Inicio</a>
+            <h2>Notificaciones en Tiempo Real <span class="status">Activo</span></h2>
+          </div>
+          <div class="top-actions">
+            <input class="search" placeholder="Buscar incidencias o usuarios" />
+            <button class="btn ghost" id="testAlert">Probar alerta</button>
+            <button class="btn ghost" id="logoutBtn">Cerrar sesión</button>
+          </div>
+        </header>
+
+        <!-- Contenido principal dividido en columna central y columna derecha -->
+        <section class="content">
+          <!-- Columna central: información importante, bienvenida e incidentes -->
+          <div class="col center">
+              <div class="card welcome">
+                <h3>Bienvenido, Juan Pablo</h3>
+              <p class="muted">Resumen rápido de su sesión y tareas importantes.</p>
+              <div class="welcome-grid">
+                <div class="tile">
+                  <strong>Incidentes mayores pendientes</strong>
+                  <ul>
+                    <li>INC-2314 — Prioridad Alta</li>
+                    <li>INC-2298 — Requiere atención</li>
+                  </ul>
+                </div>
+                <div class="tile">
+                  <strong>Mensajes</strong>
+                  <p class="muted">No hay mensajes nuevos.</p>
+                </div>
+                <div class="tile">
+                  <strong>Resumen de sistema</strong>
+                  <p class="muted">Estado del sistema: Operativo</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card recent">
+              <div class="card-head"><h3>Eventos recientes</h3></div>
+              <ul class="history">
+                <li><strong>INC-2314 actualizado</strong><div class="sub">Cambio de prioridad a Alta <span class="time">11:04</span></div></li>
+                <li><strong>Archivo adjunto</strong><div class="sub">Se subió captura para INC-2298 <span class="time">10:42</span></div></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Columna derecha: paneles secundarios (canales, reglas, vista previa) -->
+          <aside class="col right">
+            <div class="card channels">
+              <div class="card-head"><h4>Canales</h4><button class="pill small">+ Agregar</button></div>
+              <div class="channel"><label>Email</label><div class="switch on">On</div></div>
+              <div class="channel"><label>SMS</label><div class="switch on">On</div></div>
+              <div class="channel"><label>Push</label><div class="switch on">On</div></div>
+            </div>
+
+            <div class="card quick">
+              <div class="card-head"><h4>Reglas rápidas</h4></div>
+              <div class="rule"><div class="title">Alta prioridad</div><button class="pill small">Editar</button></div>
+              <div class="rule"><div class="title">Nueva asignación</div><button class="pill small">Editar</button></div>
+            </div>
+
+            <div class="card preview">
+              <div class="card-head"><h4>Vista previa (simulada)</h4></div>
+              <div class="preview-item success">✓ INC-2314 pasó a Resuelto</div>
+              <div class="preview-item warn">🔔 INC-2298 tiene nueva actividad</div>
+              <div class="preview-item error">❌ Falla al enviar a SMS</div>
+            </div>
+          </aside>
+        </section>
+
+  <!-- Tarjeta de usuario fija en la esquina inferior derecha -->
+  <div class="user-card">
+          <img src="imagenes/logoSWO_sinFondo.png" alt="avatar" class="user-avatar" />
+          <div class="user-info"><div class="user-name">Juan Pablo</div><div class="user-role">Administrador</div></div>
+        </div>
+      </main>
+    </div>
+    <script src="panel.js"></script>
+    <!-- Redirección simple: al hacer clic en 'Reportes' abrimos reports.html -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        var btn = document.getElementById('navReports');
+        if(btn){
+          btn.addEventListener('click', function(){
+            // En un app real podría usar navegación SPA; aquí hacemos una navegación simple
+            window.location.href = 'reports.html';
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

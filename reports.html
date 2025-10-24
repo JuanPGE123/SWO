@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reportes - Dashboard</title>
+    <link rel="stylesheet" href="reports.css">
+  </head>
+  <body>
+    <!--
+      reports.html
+      Archivo: Diseño del dashboard de reportes.
+      Comentarios en español: cada sección describe su propósito y los elementos
+      interactivos que usa `reports.js` (ids: updateBtn, exportBtn, botones .btn.small).
+    -->
+    <div class="app">
+      <aside class="sidebar">
+        <!-- Sidebar: navegación lateral con logo, búsqueda y enlaces a secciones -->
+        <div class="sidebar-top">
+          <div class="logo-wrap"><img src="imagenes/logoSWO_sinFondo.png" alt="logo"/></div>
+          <div class="brand">ServiceDesk <span class="badge">SWO</span></div>
+        </div>
+        <input class="search" placeholder="Buscar" />
+        <!-- Nav lateral sincronizada con panel.html -->
+        <nav class="nav">
+          <!-- Inicio como opción de navegación lateral (apunta al panel principal) -->
+          <a class="nav-item" href="panel.html">Inicio</a>
+          <button class="nav-item">Panel</button>
+          <button class="nav-item">Incidencias</button>
+          <button class="nav-item active">Reportes</button>
+          <button class="nav-item">ChatBot</button>
+          <button class="nav-item">Usuarios</button>
+          <button class="nav-item">Utilidades</button>
+        </nav>
+        <div class="sidebar-foot">
+          <!-- Pie del sidebar: mini-usuario o información secundaria -->
+          <div class="user-mini"><span class="avatar"></span><div>Juan Pablo<br/><small>Administrador</small></div></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title">Panel de Control de Reportes</div>
+        </header>
+
+        <!--
+          Filtros y acciones principales
+          - Los botones tienen IDs usados por `reports.js`:
+            * #updateBtn -> dispara una acción simulada de actualización
+            * #exportBtn -> dispara la exportación (simulada)
+        -->
+        <section class="filters card">
+          <div class="chips"><button class="chip">Últimos 30 días</button><button class="chip">Todas las categorías</button><button class="chip">Todos los estados</button></div>
+          <div class="actions"><button id="updateBtn" class="btn">Actualizar</button><button id="exportBtn" class="btn primary">Exportar</button></div>
+        </section>
+
+        <!-- Métricas principales: tarjetas con valores resumidos y píldoras explicativas -->
+        <section class="metrics">
+          <div class="metric card">
+            <h4>Incidencias totales</h4>
+            <div class="big">324 <span class="delta">+12% vs periodo anterior</span></div>
+            <div class="pills"><span class="pill">Abiertas 98</span><span class="pill">En progreso 142</span><span class="pill">Resueltas 64</span></div>
+          </div>
+          <div class="metric card">
+            <h4>Tiempo medio de resolución</h4>
+            <div class="big">18.4 h <span class="delta small">-9% mejora</span></div>
+            <div class="pills"><span class="pill blue">Objetivo semanal: 16 h</span></div>
+          </div>
+          <div class="metric card">
+            <h4>SLA cumplimiento</h4>
+            <div class="big">92% <span class="delta">+3 pts</span></div>
+            <div class="pills"><span class="pill">Críticas 88%</span><span class="pill">Alta 90%</span></div>
+          </div>
+        </section>
+
+        <!-- Bottom row: tres columnas con top-categorías, tabla de reportes y accesos rápidos -->
+        <section class="bottom-row">
+          <aside class="card left">
+            <h4>Top categorías</h4>
+              <ul class="topcat"><li>Red y conectividad <span class="count">86</span></li><li>Aplicaciones <span class="count">74</span></li><li>Hardware <span class="count">61</span></li><li>Seguridad <span class="count">44</span></li></ul>
+          </aside>
+
+          <section class="card center">
+            <h4>Reportes recientes</h4>
+            <table class="reports">
+              <thead><tr><th>Reporte</th><th>Fecha</th><th>Formato</th><th>Acción</th></tr></thead>
+              <tbody>
+                <!-- Las filas de la tabla muestran reportes; los botones con clase .btn.small son capturados por `reports.js` para simular descarga -->
+                <tr><td>Incidencias Semana 34</td><td>25/08/2025</td><td>PDF</td><td><button class="btn small">Descargar</button></td></tr>
+                <tr><td>Backlog por categoría</td><td>22/08/2025</td><td>CSV</td><td><button class="btn small">Descargar</button></td></tr>
+                <tr><td>SLA Mensual</td><td>20/08/2025</td><td>Excel</td><td><button class="btn small">Descargar</button></td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <aside class="card right">
+            <h4>Accesos rápidos</h4>
+            <div class="quick"><button class="btn small">Nuevo reporte</button><button class="btn small">Configurar filtros</button><button class="btn small">Programar exportación</button></div>
+          </aside>
+        </section>
+
+      </main>
+    </div>
+    <!-- Script: contiene la lógica mínima para simular acciones (toasts) y capturar clicks en botones -->
+    <script src="reports.js"></script>
+  </body>
+</html>

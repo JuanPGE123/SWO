@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Autenticación segura</title>
+				<!-- Estilos principales: tema oscuro, tarjeta central y componentes del login -->
+				<link rel="stylesheet" href="styles.css">
+	</head>
+	<body>
+				<!-- Contenedor principal: tarjeta centrada que contiene el formulario de autenticación -->
+				<main class="container" role="main">
+			<div class="header">
+				<div class="logo">
+					<img src="imagenes/logoSWO_sinFondo.png" alt="Logo" class="logo-img" id="logoImg" />
+					<span class="logo-fallback">SD</span>
+				</div>
+				<div style="display:flex;align-items:center;gap:8px">
+					<div style="display:flex;flex-direction:column">
+						<div style="display:flex;align-items:center;gap:8px">
+							<div class="brand">
+								<div style="display:flex;align-items:center;gap:8px">
+									<span class="name">Inicia sesión</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Título y descripción: explican al usuario el propósito del formulario -->
+			<h1>Autenticación segura</h1>
+			<p class="lead">Accede con tus credenciales protegidas para gestionar incidencias, usuarios y reportes.</p>
+
+			<!-- Formulario de inicio de sesión: usa onSubmit definido en scripts.js -->
+			<form class="form" id="loginForm" onsubmit="return onSubmit(event)">
+			<!-- Campo de correo (email) -->
+			<input class="input" id="email" name="email" type="email" placeholder="Correo electrónico" required />
+				<div style="position:relative">
+					  <!-- Campo de contraseña + botón para alternar visibilidad (toggle) -->
+					  <input class="input" id="password" name="password" type="password" placeholder="Contraseña" required />
+					  <button type="button" id="togglePwd" aria-label="Mostrar contraseña" style="position:absolute;right:10px;top:8px;background:transparent;border:none;color:var(--muted);padding:6px;border-radius:6px;cursor:pointer">👁️</button>
+				</div>
+
+						<!-- Opciones adicionales: mantener sesión y enlace para recuperar contraseña -->
+						<div class="row">
+							<label class="checkbox"><input type="checkbox" id="remember" style="width:16px;height:16px"/> Mantener sesión</label>
+							<a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+						</div>
+
+				<button class="btn" type="submit">Iniciar sesión</button>
+
+			<!-- Separador visual entre el botón principal y métodos alternativos -->
+			<div class="divider"></div>
+
+				<div style="display:flex;align-items:center;justify-content:space-between">
+					<div style="color:var(--muted)">Métodos alternativos</div>
+					<div class="recommended">Recomendado</div>
+				</div>
+
+				<div class="alt" style="margin-top:12px">
+					<div class="methods" style="width:100%">
+						<button type="button" class="pill" style="width:100%">Iniciar sesión con doble factor</button>
+					</div>
+				</div>
+
+			<!-- Nota informativa sobre 2FA y roles -->
+			<div class="note">Sugerencia: Habilita 2FA desde tu perfil tras iniciar sesión. Roles admitidos: Creador, Soporte y Jefe.</div>
+
+						<!-- Pie de tarjeta con información legal o de versión -->
+						<div class="footer">© 2025 SWO • Seguridad de sesión reforzada</div>
+			</form>
+		<script src="scripts.js"></script>
+	</body>
+</html>

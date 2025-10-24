@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChatBot - Asistente</title>
+    <link rel="stylesheet" href="chatbot.css">
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="logo-wrap"><img src="imagenes/logoSWO_sinFondo.png" alt="logo" class="logo-img"/></div>
+          <div class="brand">ServiceDesk <span class="badge">SWO</span></div>
+        </div>
+        <input class="search" placeholder="Buscar" />
+        <nav class="nav">
+          <a class="nav-item" href="panel.html">Inicio</a>
+          <a class="nav-item" href="panel.html">Panel</a>
+          <a class="nav-item" href="incidents.html">Incidencias</a>
+          <a class="nav-item" href="reports.html">Reportes</a>
+          <button class="nav-item active">ChatBot</button>
+          <a class="nav-item" href="users.html">Usuarios</a>
+          <a class="nav-item" href="utilidades.html">Utilidades</a>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="user-mini"><span class="avatar"></span><div>Juan Pablo<br/><small>Administrador</small></div></div>
+        </div>
+      </aside>
+
+      <main class="main chatbot-main">
+        <header class="topbar">
+          <div class="title">ChatBot - Asistente para analistas</div>
+          <div class="top-actions">
+            <input class="search" placeholder="Buscar en chat" id="chatSearch" />
+            <button class="btn" id="clearChat">Limpiar</button>
+          </div>
+        </header>
+
+        <section class="chat-area">
+          <aside class="left-panel card">
+            <h4>Acciones rápidas</h4>
+            <div class="quick-list">
+              <button class="pill" data-action="faq">Validar conocimiento</button>
+              <button class="pill" data-action="restore">Restaurar usuario</button>
+              <button class="pill" data-action="escalate">Escalar analista</button>
+              <button class="pill" data-action="search_inc">Buscar incidente</button>
+              <button class="pill" data-action="ticket_template">Generar plantilla</button>
+            </div>
+
+            <h4 style="margin-top:12px">Analistas</h4>
+            <ul id="analystList" class="muted small"></ul>
+
+            <h4 style="margin-top:12px">Historial</h4>
+            <div id="sessionInfo" class="small muted">Sesión activa</div>
+          </aside>
+
+          <section class="chat-card card">
+            <div id="messages" class="messages"></div>
+            <div class="composer">
+              <input id="chatInput" placeholder="Escribe aquí tu consulta... (ej: restaurar usuario jmartinez)" />
+              <button id="sendBtn" class="btn primary">Enviar</button>
+            </div>
+            <div class="suggestions">
+              <button class="sugg">¿Cómo restauro un usuario?</button>
+              <button class="sugg">¿Qué significa estado Pendiente?</button>
+              <button class="sugg">Escalar a 2do nivel</button>
+            </div>
+          </section>
+
+          <aside class="right-panel card">
+            <h4>Registro de acciones</h4>
+            <div id="logArea" class="log-area muted small">Sin acciones recientes</div>
+            <h4 style="margin-top:12px">Opciones</h4>
+            <div class="tools">
+              <label><input type="checkbox" id="saveHistory" checked/> Guardar historial</label>
+              <button class="pill" id="exportChat">Exportar chat</button>
+            </div>
+          </aside>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="chatbot.js"></script>
+  </body>
+</html>

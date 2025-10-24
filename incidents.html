@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incidentes - Panel</title>
+    <link rel="stylesheet" href="incidents.css">
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="logo-wrap"><img src="imagenes/logoSWO_sinFondo.png" alt="logo" class="logo-img"/></div>
+          <div class="brand">ServiceDesk <span class="badge">SWO</span></div>
+        </div>
+        <input class="search" placeholder="Buscar" />
+        <nav class="nav">
+          <a class="nav-item" href="panel.html">Inicio</a>
+          <a class="nav-item" href="panel.html">Panel</a>
+          <button class="nav-item active">Incidencias</button>
+          <a class="nav-item" href="reports.html">Reportes</a>
+          <button class="nav-item">ChatBot</button>
+          <button class="nav-item">Usuarios</button>
+          <button class="nav-item">Utilidades</button>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="user-mini"><span class="avatar"></span><div>Juan Pablo<br/><small>Administrador</small></div></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title">Panel de Incidentes</div>
+          <div class="top-actions">
+            <input class="search" placeholder="Filtrar incidentes" id="globalSearch" />
+            <button class="btn" id="refreshBtn">Actualizar</button>
+          </div>
+        </header>
+
+        <section class="metrics">
+          <div class="metric card">
+            <h4>Abiertos</h4>
+            <div class="big" id="countOpen">0</div>
+          </div>
+          <div class="metric card">
+            <h4>En proceso</h4>
+            <div class="big" id="countInProgress">0</div>
+          </div>
+          <div class="metric card">
+            <h4>Pendientes</h4>
+            <div class="big" id="countPending">0</div>
+          </div>
+          <div class="metric card">
+            <h4>Resueltos</h4>
+            <div class="big" id="countResolved">0</div>
+          </div>
+        </section>
+
+        <section class="list card">
+          <div class="card-head"><h3>Incidentes</h3><div class="actions"><select id="filterState"><option value="all">Todos</option><option value="open">Abierto</option><option value="inprogress">En proceso</option><option value="pending">Pendiente</option></select></div></div>
+          <table class="incidents" id="incidentsTable">
+            <thead><tr><th>ID</th><th>Título</th><th>Estado</th><th>Prioridad</th><th>Asignado</th><th>Proyecto</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="incidents.js"></script>
+  </body>
+</html>
