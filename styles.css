@@ -4,21 +4,21 @@
     Comentarios en español describen las variables y secciones.
 */
 :root {
-        /* Colores y tokens reutilizables para mantener coherencia visual */
-        --bg: #0f1720;
-    /* fondo general */
-    --card: #0f172833;
-    /* slightly transparent card */
-    --panel: #0b1116;
-    /* inner panel */
-    --muted: #9aa5b1;
-    --accent: #05d0e6;
-    /* cyan button */
-    --accent-dark: #08bfcf;
-    --pill: #0f1720;
-    --glass: rgba(255, 255, 255, 0.03);
-    --success: #00c28a;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        /*
+            Variables globales del tema: colores y tokens reutilizables.
+            Mantener pequeñas y descriptivas para facilitar ajustes.
+        */
+        --bg: #0f1720; /* fondo general */
+        --card: rgba(15,23,32,0.2); /* tarjeta ligeramente translúcida */
+        --panel: #0b1116; /* panel interior */
+        --muted: #9aa5b1; /* texto secundario */
+        --accent: #05d0e6; /* color acento principal */
+        --accent-dark: #08bfcf; /* acento oscuro */
+        --pill: #0f1720; /* fondo de píldoras */
+        --glass: rgba(255, 255, 255, 0.03); /* efecto glass */
+        --success: #00c28a;
+        --card-radius: 12px;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
 /* Reset y layout de página
@@ -45,11 +45,11 @@ body {
 .container {
     width: 420px;
     max-width: 94vw;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-    border-radius: 18px;
-    padding: 30px 34px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    box-shadow: 0 8px 30px rgba(2, 6, 10, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: var(--card-radius);
+    padding: 26px 28px;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 8px 30px rgba(2,6,10,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
 }
 
 .header {
@@ -82,11 +82,12 @@ body {
 
 /* Imagen del logo: ajusta su tamaño y comportamiento dentro del contenedor */
 .logo-img {
-    width: 200px;
-    height: 200px;
+    /* Imagen del logo: adaptativa y no invade el layout */
+    max-width: 100%;
+    height: auto;
     object-fit: contain;
     display: block;
-    border-radius: 999px
+    border-radius: 999px;
 }
 
 /* Texto fallback mostrado cuando la imagen del logo no carga */

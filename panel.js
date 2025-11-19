@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       if(confirm('¿Cerrar sesión?')){
         alert('Sesión cerrada (simulado).');
         // Redirigimos a la página de login local (archivo HTML)
-        window.location.href = 'autenticacion.html';
+        // En este proyecto la página de autenticación es `index.html`.
+        window.location.href = 'index.html';
       }
     });
   }

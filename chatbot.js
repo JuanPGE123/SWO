@@ -8,6 +8,11 @@ const analysts = [
 ];
 const chatLogKey = "chatbot_log_v1";
 
+/*
+  toast(msg)
+  Muestra una notificación temporal en la esquina inferior derecha.
+  - msg: texto a mostrar.
+*/
 function toast(msg) {
   const t = document.createElement("div");
   t.textContent = msg;
@@ -22,6 +27,12 @@ function toast(msg) {
   setTimeout(() => t.remove(), 3000);
 }
 
+/*
+  addLog(text)
+  Añade una línea al registro de acciones dentro del panel derecho y
+  opcionalmente lo persiste en localStorage si la casilla "Guardar historial" está activa.
+  - text: texto descriptivo de la acción.
+*/
 function addLog(text) {
   const el = document.getElementById("logArea");
   if (el.innerText === "Sin acciones recientes") el.innerText = "";
@@ -35,6 +46,11 @@ function addLog(text) {
   }
 }
 
+/*
+  loadAnalysts()
+  Rellena la lista de analistas en el panel izquierdo a partir del array
+  `analysts`. Mantiene la UI actualizada con nombres de contacto.
+*/
 function loadAnalysts() {
   const ul = document.getElementById("analystList");
   ul.innerHTML = "";
@@ -45,6 +61,11 @@ function loadAnalysts() {
   });
 }
 
+/*
+  addMessage(text, who)
+  Inserta un mensaje en la zona de mensajes. `who` controla la clase
+  ("user" o "bot") para el estilo visual.
+*/
 function addMessage(text, who = "user") {
   const m = document.createElement("div");
   m.className = "message " + (who === "user" ? "user" : "bot");
@@ -53,6 +74,12 @@ function addMessage(text, who = "user") {
   document.getElementById("messages").scrollTop = 99999;
 }
 
+/*
+  processCommand(raw)
+  Interpreta comandos rápidos escritos en el input del chat y ejecuta
+  acciones simuladas (restaurar usuario, escalar, buscar incidente, etc.).
+  - raw: cadena introducida por el usuario.
+*/
 function processCommand(raw) {
   const cmd = raw.trim().toLowerCase();
   addLog(`Comando: ${raw}`);
@@ -99,6 +126,12 @@ function processCommand(raw) {
   );
 }
 
+/*
+  Inicialización del chat al cargarse el DOM:
+  - Carga analistas
+  - Recupera historial desde localStorage
+  - Conecta listeners de botones, sugerencias y export/limpiar
+*/
 document.addEventListener("DOMContentLoaded", () => {
   loadAnalysts();
   // cargar historial de chat

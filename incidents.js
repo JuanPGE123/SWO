@@ -16,6 +16,11 @@ const sampleProjects = ['Ecommerce','Portal','Infra','MobileApp','Integraciones'
 // Guardar motivos para pendientes
 const pendingReasons = {};
 
+/*
+  toast(msg)
+  Muestra un pequeño toast de notificación en la esquina inferior derecha.
+  - msg: texto a mostrar.
+*/
 function toast(msg){
   const t = document.createElement('div');
   t.textContent = msg;
@@ -26,6 +31,11 @@ function toast(msg){
   setTimeout(()=> t.remove(),3000);
 }
 
+/*
+  renderCounts(list)
+  Actualiza las métricas numéricas en la cabecera (Abiertos, En proceso, Pendientes, Resueltos)
+  a partir de la lista de incidentes proporcionada.
+*/
 function renderCounts(list){
   document.getElementById('countOpen').textContent = list.filter(i=>i.state==='open').length;
   document.getElementById('countInProgress').textContent = list.filter(i=>i.state==='inprogress').length;
@@ -34,6 +44,11 @@ function renderCounts(list){
   if(resEl) resEl.textContent = list.filter(i=>i.state==='resolved').length;
 }
 
+/*
+  renderTable(list)
+  Rellena la tabla de incidentes con filas generadas dinámicamente
+  y asocia los listeners para selects y botones dentro de cada fila.
+*/
 function renderTable(list){
   const tbody = document.querySelector('#incidentsTable tbody');
   tbody.innerHTML = '';
@@ -116,6 +131,13 @@ function renderTable(list){
 }
 
 // Editor para pendiente
+/*
+  showPendingEditor(id, inc)
+  Inserta una fila editora justo debajo del incidente seleccionado para
+  capturar el motivo cuando se marca como 'Pendiente'.
+  - id: identificador del incidente
+  - inc: objeto incidente (referencia desde sampleIncidents)
+*/
 function showPendingEditor(id, inc){
   const tbody = document.querySelector('#incidentsTable tbody');
   const row = Array.from(tbody.querySelectorAll('tr')).find(r=> r.querySelector('.state-select')?.dataset.id === id);
@@ -139,6 +161,11 @@ function showPendingEditor(id, inc){
   editor.querySelector('.cancel-reason').addEventListener('click', ()=>{ const select = document.querySelector(`.state-select[data-id="${id}"]`); if(select) select.value = select.dataset.prev; editor.remove(); });
 }
 
+/*
+  Inicialización al cargar la página de Incidentes:
+  - Renderiza métricas y tabla inicial
+  - Conecta filtros y búsqueda global
+*/
 document.addEventListener('DOMContentLoaded', ()=>{
   renderCounts(sampleIncidents);
   renderTable(sampleIncidents);

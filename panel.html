@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="panel.css">
   </head>
   <body>
+    <!--
+      Panel principal (Dashboard)
+      - Elementos: sidebar de navegación, cabecera con acciones y contenido dividido en columnas
+      - `panel.js` contiene interacciones de prueba (alertas, toggles y logout simulado)
+      - Mantener coherencia visual con variables en `panel.css`
+    -->
     <div class="app">
   <!-- Sidebar izquierdo: navegación principal del sistema -->
   <aside class="sidebar">
@@ -16,14 +22,14 @@
         </div>
 
   <!-- Menú de navegación: botones que apuntan a secciones principales -->
-  <nav class="nav">
+        <nav class="nav">
           <a class="nav-item" href="panel.html">Inicio</a>
-          <button class="nav-item active">Panel</button>
+          <a class="nav-item active" href="panel.html">Panel</a>
           <a class="nav-item" href="incidents.html">Incidencias</a>
-          <button id="navReports" class="nav-item">Reportes</button>
+          <a class="nav-item" href="reports.html">Reportes</a>
           <a class="nav-item" href="chatbot.html">ChatBot</a>
-          <button class="nav-item">Usuarios</button>
-          <button class="nav-item">Utilidades</button>
+          <a class="nav-item" href="#">Usuarios</a>
+          <a class="nav-item" href="#">Utilidades</a>
         </nav>
 
         <div class="sidebar-foot">Configura canales y reglas para avisos en tiempo real.</div>
@@ -112,17 +118,5 @@
       </main>
     </div>
     <script src="panel.js"></script>
-    <!-- Redirección simple: al hacer clic en 'Reportes' abrimos reports.html -->
-    <script>
-      document.addEventListener('DOMContentLoaded', function(){
-        var btn = document.getElementById('navReports');
-        if(btn){
-          btn.addEventListener('click', function(){
-            // En un app real podría usar navegación SPA; aquí hacemos una navegación simple
-            window.location.href = 'reports.html';
-          });
-        }
-      });
-    </script>
   </body>
 </html>

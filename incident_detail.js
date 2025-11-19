@@ -2,13 +2,31 @@
 // Carga un incidente por id desde localStorage (o sampleIncidents en memoria)
 // Permite editar campos principales y agregar comentarios.
 
+/*
+  readStorage()
+  Lee el array de incidentes desde localStorage (clave: incidents_v1).
+  Devuelve null si no existe o si hay un error en parsing.
+*/
 function readStorage(){
   try{ const raw = localStorage.getItem('incidents_v1'); return raw? JSON.parse(raw): null }catch(e){ return null }
 }
+
+/*
+  writeStorage(data)
+  Persiste el array de incidentes en localStorage.
+*/
 function writeStorage(data){ localStorage.setItem('incidents_v1', JSON.stringify(data)); }
 
+/*
+  getQueryParam(name)
+  Obtiene un parámetro de la query string de la URL.
+*/
 function getQueryParam(name){ const url = new URL(window.location.href); return url.searchParams.get(name); }
 
+/*
+  renderComments(list)
+  Renderiza la lista de comentarios en la sección de comentarios del detalle.
+*/
 function renderComments(list){
   const el = document.getElementById('commentsList'); el.innerHTML = '';
   if(!list || list.length===0){ el.innerHTML = '<div class="muted">Sin comentarios</div>'; return; }
