@@ -119,8 +119,8 @@ body {
 
 .brand .tag {
     font-size: 12px;
-    background: #1b2b33;
-    color: #9be8d8;
+    background: rgba(5, 208, 230, 0.15);
+    color: var(--accent);
     padding: 4px 8px;
     border-radius: 999px;
     margin-left: 6px;

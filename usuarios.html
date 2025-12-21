@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Usuarios - Panel</title>
+    <link rel="stylesheet" href="usuarios.css">
+  </head>
+  <body>
+    <!--
+      Panel de Usuarios
+      - Listado de usuarios del proyecto con información completa
+      - `usuarios.js` contiene datos y funcionalidad de búsqueda/filtrado
+      - Diseño responsive: tabla adaptable en versión móvil
+    -->
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="logo-wrap"><img src="imagenes/logoSWO_sinFondo.png" alt="logo" class="logo-img"/></div>
+          <div class="brand">ServiceDesk <span class="badge">SWO</span></div>
+        </div>
+        <input class="search" placeholder="Buscar" />
+        <nav class="nav">
+          <a class="nav-item" href="panel.html">Inicio</a>
+          <a class="nav-item" href="panel.html">Panel</a>
+          <a class="nav-item" href="incidents.html">Incidencias</a>
+          <a class="nav-item" href="reports.html">Reportes</a>
+          <a class="nav-item" href="chatbot.html">ChatBot</a>
+          <a class="nav-item active" href="usuarios.html">Usuarios</a>
+          <a class="nav-item" href="#">Utilidades</a>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="user-mini"><span class="avatar"></span><div>Juan Pablo<br/><small>Administrador</small></div></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title">Gestión de Usuarios</div>
+          <div class="top-actions">
+            <input class="search" placeholder="Buscar usuarios" id="globalSearch" />
+            <select id="filterArea" class="filter-select">
+              <option value="all">Todas las áreas</option>
+              <option value="TI">TI</option>
+              <option value="Soporte">Soporte</option>
+              <option value="Desarrollo">Desarrollo</option>
+              <option value="Infraestructura">Infraestructura</option>
+              <option value="RRHH">RRHH</option>
+              <option value="Administración">Administración</option>
+            </select>
+            <button class="btn" id="refreshBtn">Actualizar</button>
+            <button class="btn primary" id="addUserBtn">+ Agregar Usuario</button>
+          </div>
+        </header>
+
+        <section class="metrics">
+          <div class="metric card">
+            <h4>Total Usuarios</h4>
+            <div class="big" id="countTotal">0</div>
+          </div>
+          <div class="metric card">
+            <h4>Área TI</h4>
+            <div class="big" id="countTI">0</div>
+          </div>
+          <div class="metric card">
+            <h4>Área Soporte</h4>
+            <div class="big" id="countSoporte">0</div>
+          </div>
+          <div class="metric card">
+            <h4>Otros</h4>
+            <div class="big" id="countOtros">0</div>
+          </div>
+        </section>
+
+        <section class="list card">
+          <div class="card-head">
+            <h3>Listado de Usuarios</h3>
+            <div class="actions">
+              <button class="btn ghost" id="exportBtn">Exportar</button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="usuarios" id="usuariosTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Apellido</th>
+                  <th>Correo</th>
+                  <th>Celular</th>
+                  <th>Área</th>
+                  <th>Jefe Directo</th>
+                  <th>Correo Jefe</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="usuarios.js"></script>
+  </body>
+</html>

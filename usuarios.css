@@ -1,0 +1,467 @@
+/* usuarios.css
+   Estilos para el panel de usuarios, siguiendo las variables y paleta del proyecto.
+*/
+:root {
+    --bg: #071018;
+    --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    --muted: #9aa5b1;
+    --accent: #05d0e6;
+    --green: #19d38f;
+    --primary: #05d0e6;
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, Arial;
+    background: var(--bg);
+    color: #e6eef6
+}
+
+.app {
+    display: flex;
+    min-height: 100vh
+}
+
+.sidebar {
+    width: 220px;
+    padding: 24px;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(2, 6, 10, 0.6);
+    position: relative;
+}
+
+.sidebar .sidebar-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+
+.logo-wrap {
+    width: 100%;
+    height: 240px;
+    position: relative;
+    overflow: visible;
+}
+
+.logo-wrap img {
+    max-width: 180px;
+    height: auto;
+    object-fit: contain;
+}
+
+.brand {
+    text-align: center;
+    font-weight: 700;
+    margin-top: 10px;
+    font-size: 15px;
+    color: #dff0ff;
+}
+
+.badge {
+    display: inline-block;
+    background: rgba(5, 208, 230, 0.15);
+    color: var(--accent);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.sidebar .search {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px 10px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    color: var(--muted);
+    outline: none;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.nav-item {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: var(--muted);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #e6eef6
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, #1b2b33, #0f1720);
+    color: #dff0ff;
+    font-weight: 500
+}
+
+.sidebar-foot {
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    width: calc(100% - 48px);
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.user-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--green));
+    display: inline-block
+}
+
+.main {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px
+}
+
+.title {
+    font-size: 26px;
+    font-weight: 600
+}
+
+.top-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center
+}
+
+.top-actions .search {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: #e6eef6;
+    outline: none;
+    width: 240px
+}
+
+.filter-select {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: #e6eef6;
+    outline: none;
+    cursor: pointer
+}
+
+.filter-select option {
+    background: #0a1927;
+    color: #e6eef6
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #e6eef6;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 14px;
+    font-weight: 500
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.1)
+}
+
+.btn.primary {
+    background: var(--primary);
+    color: #0a1927
+}
+
+.btn.primary:hover {
+    background: #06e4fc
+}
+
+.btn.ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1)
+}
+
+.btn.ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent)
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px
+}
+
+.metric {
+    text-align: center;
+    padding: 20px
+}
+
+.metric h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px
+}
+
+.metric .big {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--accent)
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 20px
+}
+
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05)
+}
+
+.card-head h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600
+}
+
+.actions {
+    display: flex;
+    gap: 8px
+}
+
+.table-wrapper {
+    overflow-x: auto
+}
+
+.usuarios {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px
+}
+
+.usuarios th {
+    text-align: left;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06)
+}
+
+.usuarios td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03)
+}
+
+.usuarios tbody tr {
+    transition: .2s
+}
+
+.usuarios tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02)
+}
+
+.usuarios .id-col {
+    color: var(--accent);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    font-size: 13px
+}
+
+.usuarios .email-col {
+    color: var(--muted);
+    font-size: 13px
+}
+
+.usuarios .area-col {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(5, 208, 230, 0.1);
+    color: var(--accent);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500
+}
+
+.usuarios .jefe-col {
+    font-size: 13px
+}
+
+.btn-actions {
+    display: flex;
+    gap: 6px
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #e6eef6;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 12px
+}
+
+.btn-sm:hover {
+    background: rgba(255, 255, 255, 0.1)
+}
+
+.btn-sm.edit {
+    background: rgba(5, 208, 230, 0.1);
+    color: var(--accent)
+}
+
+.btn-sm.edit:hover {
+    background: rgba(5, 208, 230, 0.2)
+}
+
+.btn-sm.delete {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30
+}
+
+.btn-sm.delete:hover {
+    background: rgba(255, 59, 48, 0.2)
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app {
+        flex-direction: column
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        padding: 16px
+    }
+
+    .logo-wrap {
+        height: 120px
+    }
+
+    .logo-wrap img {
+        max-width: 100px
+    }
+
+    .nav {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 8px
+    }
+
+    .nav-item {
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 13px
+    }
+
+    .sidebar-foot {
+        margin-top: 16px;
+        padding-top: 16px
+    }
+
+    .main {
+        padding: 16px
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start
+    }
+
+    .title {
+        font-size: 20px
+    }
+
+    .top-actions {
+        width: 100%;
+        flex-wrap: wrap
+    }
+
+    .top-actions .search {
+        width: 100%
+    }
+
+    .filter-select {
+        flex: 1
+    }
+
+    .metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px
+    }
+
+    .metric .big {
+        font-size: 28px
+    }
+
+    .table-wrapper {
+        margin: 0 -20px;
+        padding: 0 20px
+    }
+
+    .usuarios {
+        font-size: 12px
+    }
+
+    .usuarios th,
+    .usuarios td {
+        padding: 10px 8px
+    }
+
+    .btn-sm {
+        font-size: 11px;
+        padding: 3px 8px
+    }
+}

@@ -12,6 +12,7 @@
         --muted: #9aa5b1;
         --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
         --accent: #05d0e6;
+        --green: #19d38f;
         --blue: #2545a8;
 }
 
@@ -37,13 +38,14 @@ body {
     padding: 24px;
     border-right: 1px solid rgba(255, 255, 255, 0.03);
     background: rgba(2, 6, 10, 0.6);
+    position: relative;
 }
 
 .sidebar .logo-wrap {
     /* Contenedor superior del sidebar: reservamos espacio para el logo grande
        y lo centramos sobre la marca. Esto coloca el logo encima de "ServiceDesk". */
     width: 100%;
-    height: 200px;
+    height: 240px;
     display: block;
     border-radius: 999px;
     overflow: visible;
@@ -85,8 +87,8 @@ body {
 }
 
 .brand .badge {
-    background: #17313b;
-    color: #9be8d8;
+    background: rgba(5, 208, 230, 0.15);
+    color: var(--accent);
     padding: 4px 8px;
     border-radius: 12px;
     margin-left: 8px;
@@ -94,20 +96,27 @@ body {
 }
 
 .nav {
-    margin-top: 24px;
+    margin-top: 18px;
     display: flex;
     flex-direction: column;
-    gap: 10px
+    gap: 8px
 }
 
 .nav-item {
     background: transparent;
     border: none;
     color: var(--muted);
-    padding: 10px 12px;
+    padding: 10px;
     border-radius: 10px;
     text-align: left;
-    cursor: pointer
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    transition: background 0.2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .nav-item.active {
@@ -116,9 +125,14 @@ body {
 }
 
 .sidebar-foot {
-    margin-top: 22px;
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    width: calc(100% - 48px);
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 12px;
     color: var(--muted);
-    font-size: 13px
 }
 
 /* Área principal y cabecera */
@@ -170,13 +184,31 @@ body {
     color: inherit
 }
 
+.btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #04232f;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-weight: 500;
+}
+
+.btn:hover {
+    background: #06e4fc;
+}
+
 .btn.ghost {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.04);
-    padding: 8px 12px;
-    border-radius: 10px;
     color: var(--muted);
-    cursor: pointer
+}
+
+.btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 /* Layout de contenido: columna central flexible y columna derecha fija */

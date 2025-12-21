@@ -55,20 +55,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     const password = pwd.value;
+    const project = document.getElementById('project').value;
     // Validación básica de presencia
-    if(!email || !password){
-      alert('Por favor rellena los campos.');
+    if(!email || !password || !project){
+      alert('Por favor rellena todos los campos.');
       return false;
     }
     // NOTA: Esto es solo una comprobación en frontend para demo.
     // Nunca validar credenciales sensibles solo en el cliente en producción.
-    if(email === 'administrador@swo.com' && password === '123456'){
+    if(email === 'administrador@swo.com' && password === '123456' && project === '101'){
       // Credenciales correctas (demo) -> redirigimos al panel
       window.location.href = 'panel.html';
       return true;
     } else {
       // Credenciales incorrectas -> retroalimentación al usuario
-      alert('Credenciales incorrectas.');
+      alert('Credenciales incorrectas o proyecto no válido.');
       return false;
     }
   }
