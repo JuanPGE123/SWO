@@ -1,0 +1,77 @@
+<!--
+  incident-detail.component.html
+-->
+
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-area">
+    <header class="topbar">
+      <a routerLink="/incidents" class="btn-back">← Volver</a>
+      <h1 *ngIf="incidente">{{ incidente.id }} - {{ incidente.title }}</h1>
+      <div></div>
+    </header>
+
+    <div class="content" *ngIf="incidente">
+      <!-- Información principal -->
+      <section class="detail-section">
+        <h3>Información General</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Estado</label>
+            <div class="value">{{ incidente.state }}</div>
+          </div>
+          <div class="info-item">
+            <label>Prioridad</label>
+            <div class="value">{{ incidente.priority }}</div>
+          </div>
+          <div class="info-item">
+            <label>Asignado a</label>
+            <div class="value">{{ incidente.assignee }}</div>
+          </div>
+          <div class="info-item">
+            <label>Proyecto</label>
+            <div class="value">{{ incidente.project }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Información del usuario reportante -->
+      <section class="detail-section">
+        <h3>Información del Reportante</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Usuario</label>
+            <div class="value">{{ incidente.user }}</div>
+          </div>
+          <div class="info-item">
+            <label>Correo</label>
+            <div class="value">{{ incidente.userEmail }}</div>
+          </div>
+          <div class="info-item">
+            <label>Aplicación Afectada</label>
+            <div class="value">{{ incidente.app }}</div>
+          </div>
+          <div class="info-item">
+            <label>Motivo</label>
+            <div class="value">{{ incidente.reason }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comentarios -->
+      <section class="detail-section">
+        <h3>Comentarios ({{ incidente.comments.length }})</h3>
+        <div class="comments-list">
+          <div *ngFor="let comment of incidente.comments" class="comment">
+            <div class="comment-header">
+              <strong>{{ comment.author }}</strong>
+              <span class="comment-date">{{ comment.date }}</span>
+            </div>
+            <div class="comment-body">{{ comment.text }}</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

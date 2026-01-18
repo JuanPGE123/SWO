@@ -1,0 +1,248 @@
+/*
+ * auth.component.scss
+ * 
+ * Estilos para el componente de autenticación.
+ * - Diseño responsivo
+ * - Tema oscuro consistente
+ * - Animaciones suaves
+ */
+
+.auth-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(7, 20, 30, 0.6), transparent),
+              linear-gradient(180deg, #0b1116 0%, #071018 100%),
+              #0f1720;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 32px 28px;
+  animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cabecera con logo */
+.auth-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.3s ease;
+
+  &.hidden {
+    display: none;
+  }
+}
+
+.logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #05d0e6, #08bfcf);
+  border-radius: 50%;
+  font-weight: bold;
+  color: #04232f;
+  font-size: 24px;
+}
+
+.title {
+  font-size: 24px;
+  margin: 0 0 8px;
+  color: #e6eef6;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #9aa5b1;
+  margin: 0;
+}
+
+/* Formulario */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12px;
+    color: #9aa5b1;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+}
+
+.form-input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: #0b1116;
+  color: #e6eef6;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+
+  &::placeholder {
+    color: #9aa5b1;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #05d0e6;
+    box-shadow: 0 0 0 3px rgba(5, 208, 230, 0.1);
+    background: rgba(5, 208, 230, 0.02);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  color: #9aa5b1;
+  font-size: 18px;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+    color: #05d0e6;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Botón de login */
+.btn-login {
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #05d0e6, #08bfcf);
+  color: #04232f;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 8px 16px rgba(5, 208, 230, 0.3);
+    transform: translateY(-2px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+/* Mensaje de error */
+.error-message {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(255, 87, 87, 0.1);
+  border: 1px solid rgba(255, 87, 87, 0.3);
+  color: #ff5757;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+/* Pie del formulario */
+.auth-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.small-text {
+  font-size: 12px;
+  color: #9aa5b1;
+  margin: 4px 0;
+
+  code {
+    background: rgba(5, 208, 230, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #05d0e6;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 24px 12px;
+  }
+
+  .auth-card {
+    padding: 24px 16px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+}

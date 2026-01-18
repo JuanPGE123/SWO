@@ -1,0 +1,67 @@
+<!--
+  sidebar.component.html
+
+  Template para el componente sidebar/navegación lateral.
+  - Logo y branding
+  - Menú de navegación
+  - Información del usuario
+  - Botón de logout
+-->
+
+<aside class="sidebar">
+  <!-- Parte superior: logo y branding -->
+  <div class="sidebar-top">
+    <div class="logo-wrap">
+      <img 
+        src="assets/logoSWO_sinFondo.png" 
+        alt="Logo SWO"
+        class="logo-img"
+      />
+    </div>
+    <div class="brand">
+      ServiceDesk
+      <span class="badge">SWO</span>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="search-wrapper">
+    <input 
+      type="text" 
+      class="search" 
+      placeholder="Buscar..."
+    />
+  </div>
+
+  <!-- Menú de navegación principal -->
+  <nav class="nav">
+    <a 
+      *ngFor="let item of getNavItems()"
+      [routerLink]="item.route"
+      class="nav-item"
+      [class.active]="isActive(item.route)"
+      [title]="item.label"
+    >
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-label">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <!-- Pie del sidebar: información del usuario -->
+  <div class="sidebar-foot">
+    <div class="user-mini" *ngIf="usuarioActual">
+      <span class="avatar">{{ usuarioActual.nombre.charAt(0) }}</span>
+      <div class="user-info">
+        <div class="user-name">{{ usuarioActual.nombre }}</div>
+        <div class="user-role">{{ usuarioActual.role }}</div>
+      </div>
+    </div>
+    <button 
+      class="btn-logout"
+      (click)="logout()"
+      title="Cerrar sesión"
+    >
+      Cerrar sesión
+    </button>
+  </div>
+</aside>

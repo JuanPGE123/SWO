@@ -1,0 +1,272 @@
+/*
+ * reports.component.scss
+ */
+
+.reports-layout {
+  display: flex;
+  height: 100vh;
+}
+
+.main-area {
+  flex: 1;
+  margin-left: 260px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0b1116 0%, #071018 100%);
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+
+  h1 {
+    font-size: 20px;
+    margin: 0;
+    color: #e6eef6;
+  }
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-action {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: transparent;
+  color: #e6eef6;
+  cursor: pointer;
+  font-size: 12px;
+
+  &:hover {
+    background: rgba(5, 208, 230, 0.1);
+  }
+
+  &.primary {
+    background: #05d0e6;
+    color: #04232f;
+    border: none;
+
+    &:hover {
+      background: #08bfcf;
+    }
+  }
+}
+
+.content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.filters {
+  margin-bottom: 24px;
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    color: #9aa5b1;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(5, 208, 230, 0.1);
+      border-color: rgba(5, 208, 230, 0.3);
+      color: #05d0e6;
+    }
+  }
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px;
+
+  h4 {
+    color: #9aa5b1;
+    font-size: 12px;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+  }
+
+  .metric-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #05d0e6;
+    margin-bottom: 4px;
+  }
+
+  .metric-delta {
+    color: #19d38f;
+    font-size: 11px;
+    margin-bottom: 12px;
+
+    &.small {
+      color: #9aa5b1;
+    }
+  }
+
+  .metric-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 10px;
+    color: #9aa5b1;
+
+    &.blue {
+      background: rgba(5, 208, 230, 0.1);
+      color: #05d0e6;
+    }
+  }
+}
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px;
+
+  h4 {
+    margin: 0 0 12px;
+    color: #e6eef6;
+    font-size: 14px;
+  }
+}
+
+.left {
+  .top-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      font-size: 12px;
+      color: #9aa5b1;
+
+      .count {
+        font-weight: 600;
+        color: #05d0e6;
+      }
+    }
+  }
+}
+
+.center {
+  .reports-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+
+    thead {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    th {
+      text-align: left;
+      padding: 8px;
+      color: #dff0ff;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      color: #9aa5b1;
+    }
+
+    tbody tr:hover {
+      background: rgba(5, 208, 230, 0.05);
+    }
+  }
+}
+
+.right {
+  .quick-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.btn-small {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: transparent;
+  color: #05d0e6;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(5, 208, 230, 0.1);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+@media (max-width: 1024px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-area {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,173 @@
+<!--
+  dashboard.component.html
+
+  Template para el panel principal (dashboard).
+  - Bienvenida y resumen
+  - Incidentes recientes
+  - Canales y notificaciones
+  - Información del sistema
+-->
+
+<div class="dashboard-layout">
+  <!-- Sidebar de navegación -->
+  <app-sidebar></app-sidebar>
+
+  <!-- Área principal -->
+  <main class="main-area">
+    <!-- Cabecera superior -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Panel Principal</h1>
+        <span class="status-badge">
+          <span class="status-dot"></span>
+          Activo
+        </span>
+      </div>
+      <div class="topbar-right">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Buscar incidencias o usuarios"
+        />
+        <button 
+          class="btn-action"
+          (click)="probarAlerta()"
+          title="Probar alerta de notificación"
+        >
+          Probar alerta
+        </button>
+        <button 
+          class="btn-action btn-logout"
+          (click)="logout()"
+          title="Cerrar sesión"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <div class="dashboard-content">
+      <!-- Columna central -->
+      <section class="col-main">
+        <!-- Tarjeta de bienvenida -->
+        <div class="card welcome">
+          <h3>¡Bienvenido, {{ usuarioActual?.nombre }}!</h3>
+          <p class="subtitle">Resumen rápido de tu sesión y tareas importantes.</p>
+
+          <div class="welcome-grid">
+            <!-- Incidentes mayores pendientes -->
+            <div class="tile">
+              <h4>Incidentes mayores pendientes</h4>
+              <ul class="incident-list">
+                <li *ngIf="incidentesRecientes.length > 0">
+                  {{ incidentesRecientes[0].id }} — Prioridad {{ incidentesRecientes[0].priority }}
+                </li>
+                <li *ngIf="incidentesRecientes.length > 1">
+                  {{ incidentesRecientes[1].id }} — Requiere atención
+                </li>
+                <li *ngIf="incidentesRecientes.length === 0">
+                  No hay incidentes pendientes
+                </li>
+              </ul>
+            </div>
+
+            <!-- Mensajes -->
+            <div class="tile">
+              <h4>Mensajes</h4>
+              <p class="muted">No hay mensajes nuevos.</p>
+            </div>
+
+            <!-- Estado del sistema -->
+            <div class="tile">
+              <h4>Resumen de sistema</h4>
+              <p class="muted">✓ Estado del sistema: Operativo</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta de eventos recientes -->
+        <div class="card recent-events">
+          <div class="card-header">
+            <h3>Eventos recientes</h3>
+          </div>
+          <ul class="events-list">
+            <li *ngFor="let inc of incidentesRecientes">
+              <strong>{{ inc.id }} actualizado</strong>
+              <div class="event-detail">
+                Cambio de prioridad a {{ inc.priority }}
+                <span class="time">Hace poco</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Columna derecha -->
+      <aside class="col-right">
+        <!-- Canales -->
+        <div class="card channels">
+          <div class="card-header">
+            <h4>Canales</h4>
+            <button class="btn-small">+ Agregar</button>
+          </div>
+          <div class="channel-list">
+            <div 
+              *ngFor="let canal of ['email', 'sms', 'push']"
+              class="channel-item"
+              (click)="toggleCanal(canal)"
+            >
+              <label>{{ canal | uppercase }}</label>
+              <div 
+                class="toggle-switch"
+                [class.active]="canalesActivos[canal]"
+              >
+                {{ canalesActivos[canal] ? 'On' : 'Off' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reglas rápidas -->
+        <div class="card rules">
+          <div class="card-header">
+            <h4>Reglas rápidas</h4>
+          </div>
+          <div class="rule-list">
+            <div class="rule-item">
+              <div class="rule-title">Alta prioridad</div>
+              <button class="btn-small">Editar</button>
+            </div>
+            <div class="rule-item">
+              <div class="rule-title">Nueva asignación</div>
+              <button class="btn-small">Editar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista previa -->
+        <div class="card preview">
+          <div class="card-header">
+            <h4>Vista previa de notificaciones</h4>
+          </div>
+          <div class="preview-list">
+            <div class="preview-item success">✓ Incidente resuelto</div>
+            <div class="preview-item warning">🔔 Tiene nueva actividad</div>
+            <div class="preview-item error">❌ Error en envío</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Tarjeta de usuario flotante (opcional) -->
+  <div class="user-card" *ngIf="usuarioActual">
+    <div class="user-card-content">
+      <span class="user-avatar">{{ usuarioActual.nombre.charAt(0) }}</span>
+      <div class="user-details">
+        <div class="user-name">{{ usuarioActual.nombre }}</div>
+        <div class="user-role">{{ usuarioActual.role }}</div>
+      </div>
+    </div>
+  </div>
+</div>

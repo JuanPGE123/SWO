@@ -1,0 +1,108 @@
+<!--
+  chatbot.component.html
+  Componente ChatBot
+-->
+
+<div class="chatbot-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-area">
+    <header class="topbar">
+      <h1>ChatBot - Asistente para analistas</h1>
+      <div class="topbar-actions">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Buscar en chat"
+        />
+        <button class="btn-action" (click)="limpiarChat()">Limpiar</button>
+      </div>
+    </header>
+
+    <div class="chat-container">
+      <!-- Panel izquierdo: acciones rápidas -->
+      <aside class="left-panel">
+        <h4>Acciones rápidas</h4>
+        <div class="quick-actions">
+          <button 
+            *ngFor="let accion of accionesRapidas"
+            class="action-btn"
+            (click)="accionRapida(accion.action)"
+          >
+            {{ accion.label }}
+          </button>
+        </div>
+
+        <h4 style="margin-top: 16px">Analistas</h4>
+        <ul class="analyst-list">
+          <li *ngFor="let analyst of analistas">{{ analyst }}</li>
+        </ul>
+
+        <h4 style="margin-top: 16px">Sesión</h4>
+        <div class="session-info">Sesión activa</div>
+      </aside>
+
+      <!-- Área central: chat -->
+      <section class="chat-section">
+        <div class="messages-container">
+          <div 
+            *ngFor="let msg of mensajes"
+            class="message"
+            [class.user]="msg.autor === 'usuario'"
+            [class.bot]="msg.autor === 'bot'"
+          >
+            <div class="message-content">{{ msg.texto }}</div>
+            <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <input 
+            type="text"
+            class="chat-input"
+            [(ngModel)]="inputChat"
+            (keyup.enter)="enviarMensaje()"
+            placeholder="Escribe tu consulta..."
+          />
+          <button 
+            class="btn-send"
+            (click)="enviarMensaje()"
+          >
+            Enviar
+          </button>
+        </div>
+
+        <div class="suggestions">
+          <span class="sugg-label">Sugerencias:</span>
+          <button class="sugg">¿Cómo restauro un usuario?</button>
+          <button class="sugg">¿Qué significa estado Pendiente?</button>
+          <button class="sugg">Escalar a 2do nivel</button>
+        </div>
+      </section>
+
+      <!-- Panel derecho: registro de acciones -->
+      <aside class="right-panel">
+        <h4>Registro de acciones</h4>
+        <div class="log-area">
+          <div *ngFor="let accion of registroAcciones" class="log-entry">
+            {{ accion }}
+          </div>
+          <div *ngIf="registroAcciones.length === 0" class="empty-log">
+            Sin acciones recientes
+          </div>
+        </div>
+
+        <h4 style="margin-top: 16px">Opciones</h4>
+        <div class="options">
+          <label>
+            <input type="checkbox" [(ngModel)]="guardarHistorial" />
+            Guardar historial
+          </label>
+          <button class="btn-export" (click)="exportarChat()">
+            📥 Exportar chat
+          </button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>

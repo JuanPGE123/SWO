@@ -1,0 +1,90 @@
+<!--
+  users.component.html
+  Gestión de usuarios
+-->
+
+<div class="users-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-area">
+    <header class="topbar">
+      <h1>Gestión de Usuarios</h1>
+      <div class="topbar-actions">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Buscar usuarios"
+          [(ngModel)]="busqueda"
+          (change)="onBusquedaChange()"
+        />
+        <select [(ngModel)]="areaFiltro" (change)="onAreaChange()" class="filter-select">
+          <option value="all">Todas las áreas</option>
+          <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
+        </select>
+        <button class="btn-action" (click)="cargarUsuarios()">Actualizar</button>
+        <button class="btn-action primary" (click)="exportar()">Exportar</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Métricas -->
+      <section class="metrics">
+        <div class="metric-card">
+          <h4>Total Usuarios</h4>
+          <div class="metric-value">{{ obtenerConteos().total }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Área TI</h4>
+          <div class="metric-value">{{ obtenerConteos().ti }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Área Soporte</h4>
+          <div class="metric-value">{{ obtenerConteos().soporte }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Otros</h4>
+          <div class="metric-value">{{ obtenerConteos().otros }}</div>
+        </div>
+      </section>
+
+      <!-- Tabla de usuarios -->
+      <section class="users-section">
+        <div class="section-header">
+          <h3>Listado de Usuarios ({{ usuariosFiltrados.length }})</h3>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Correo</th>
+                <th>Celular</th>
+                <th>Área</th>
+                <th>Jefe Directo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let usr of usuariosFiltrados">
+                <td>{{ usr.id }}</td>
+                <td>{{ usr.nombre }}</td>
+                <td>{{ usr.apellido }}</td>
+                <td>{{ usr.correo }}</td>
+                <td>{{ usr.celular }}</td>
+                <td><span class="area-badge">{{ usr.area }}</span></td>
+                <td>{{ usr.jefeDirecto }}</td>
+                <td>
+                  <button class="btn-small" title="Editar">✏️</button>
+                  <button class="btn-small" title="Eliminar">🗑️</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

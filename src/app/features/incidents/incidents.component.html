@@ -1,0 +1,115 @@
+<!--
+  incidents.component.html
+  Template para la gestión de incidencias
+-->
+
+<div class="incidents-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-area">
+    <header class="topbar">
+      <h1>Panel de Incidentes</h1>
+      <div class="topbar-actions">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Filtrar incidentes"
+          [(ngModel)]="busqueda"
+          (change)="onBusquedaChange()"
+        />
+        <button class="btn-action" (click)="cargarIncidentes()">
+          🔄 Actualizar
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Métricas -->
+      <section class="metrics">
+        <div class="metric-card">
+          <h4>Abiertos</h4>
+          <div class="metric-value">{{ obtenerEstadisticas().abiertos }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>En proceso</h4>
+          <div class="metric-value">{{ obtenerEstadisticas().enProgreso }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Pendientes</h4>
+          <div class="metric-value">{{ obtenerEstadisticas().pendientes }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Resueltos</h4>
+          <div class="metric-value">{{ obtenerEstadisticas().resueltos }}</div>
+        </div>
+      </section>
+
+      <!-- Tabla de incidentes -->
+      <section class="incidents-section">
+        <div class="section-header">
+          <h3>Incidentes</h3>
+          <select [(ngModel)]="filtroEstado" (change)="onFiltroChange()" class="filter-select">
+            <option value="all">Todos</option>
+            <option value="open">Abierto</option>
+            <option value="inprogress">En proceso</option>
+            <option value="pending">Pendiente</option>
+            <option value="resolved">Resuelto</option>
+          </select>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="incidents-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Asignado</th>
+                <th>Proyecto</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let inc of incidentesFiltrados">
+                <td><strong>{{ inc.id }}</strong></td>
+                <td>{{ inc.title }}</td>
+                <td>
+                  <select 
+                    [value]="inc.state"
+                    (change)="cambiarEstado(inc, $event)"
+                    class="select-small"
+                  >
+                    <option value="open">Abierto</option>
+                    <option value="inprogress">En proceso</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="resolved">Resuelto</option>
+                  </select>
+                </td>
+                <td>
+                  <select 
+                    [value]="inc.priority"
+                    (change)="cambiarPrioridad(inc, $event)"
+                    class="select-small"
+                  >
+                    <option>Baja</option>
+                    <option>Media</option>
+                    <option>Alta</option>
+                    <option>Crítica</option>
+                  </select>
+                </td>
+                <td>{{ inc.assignee }}</td>
+                <td>{{ inc.project }}</td>
+                <td>{{ inc.date }}</td>
+                <td>
+                  <button class="btn-small" title="Ver detalle">Ver</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

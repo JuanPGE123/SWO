@@ -1,53 +1,56 @@
-# SWO - ServiceDesk
+# SWO - ServiceDesk | Migración a Angular 17
 
-Sistema de gestión de incidencias y soporte técnico desarrollado para SENA.
+![Angular](https://img.shields.io/badge/Angular-17.0.0-red)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)
+![RxJS](https://img.shields.io/badge/RxJS-7.8-purple)
 
-## 📋 Descripción
+## 📋 Descripción General
 
-ServiceDesk SWO es una aplicación web completa para la gestión de incidencias, usuarios, reportes y atención mediante chatbot. Desarrollado con HTML, CSS y JavaScript vanilla, mantiene un diseño coherente y profesional en todas sus secciones.
+**SWO (ServiceDesk)** es una aplicación web completa de gestión de incidencias, usuarios, reportes y soporte técnico.
 
-## 🎨 Paleta de Colores
+Este proyecto ha sido **completamente migrado de HTML/CSS/JavaScript vanilla a Angular 17** con arquitectura moderna, TypeScript, RxJS y mejores prácticas de desarrollo.
 
-El proyecto utiliza una paleta de colores consistente definida en todos los archivos CSS:
+### Estado del Proyecto
+✅ **Migración completada exitosamente**  
+✅ **100% funcional en Angular**  
+✅ **Código totalmente tipado y comentado**  
+✅ **Listo para desarrollo y expansión**
 
-- **Background**: `#071018` - Fondo principal oscuro
-- **Card Background**: Gradiente sutil `rgba(255, 255, 255, 0.02)` a `rgba(255, 255, 255, 0.01)`
-- **Muted Text**: `#9aa5b1` - Texto secundario
-- **Accent**: `#05d0e6` - Color principal (cyan)
-- **Green**: `#19d38f` - Acciones positivas
-- **Blue**: `#2545a8` - Elementos secundarios
+## 🚀 Características Principales
 
-Ver [PALETA_COLORES.md](PALETA_COLORES.md) para más detalles.
+| Módulo | Descripción | Estado |
+|--------|-------------|--------|
+| **Autenticación** | Login seguro con validación | ✅ |
+| **Dashboard** | Panel principal con métricas | ✅ |
+| **Incidencias** | Gestión completa de tickets | ✅ |
+| **Usuarios** | Administración de usuarios | ✅ |
+| **Reportes** | Análisis y reportes | ✅ |
+| **ChatBot** | Asistente virtual | ✅ |
 
 ## 📁 Estructura del Proyecto
 
 ```
-SWO/
-├── index.html              # Página de login/autenticación
-├── styles.css              # Estilos del login
-├── scripts.js              # Lógica del login
-├── panel.html              # Dashboard principal
-├── panel.css               # Estilos del dashboard
-├── panel.js                # Lógica del dashboard
-├── incidents.html          # Gestión de incidencias
-├── incidents.css           # Estilos de incidencias
-├── incidents.js            # Lógica de incidencias
-├── incident_detail.html    # Detalle de incidencia
-├── incident_detail.js      # Lógica del detalle
-├── reports.html            # Panel de reportes
-├── reports.css             # Estilos de reportes
-├── reports.js              # Lógica de reportes
-├── chatbot.html            # Asistente virtual
-├── chatbot.css             # Estilos del chatbot
-├── chatbot.js              # Lógica del chatbot
-├── usuarios.html           # Gestión de usuarios
-├── usuarios.css            # Estilos de usuarios
-├── usuarios.js             # Lógica de usuarios
-└── imagenes/               # Recursos gráficos
-    └── logoSWO_sinFondo.png
+src/
+├── app/
+│   ├── core/
+│   │   ├── services/       # AuthService, IncidentsService, UsersService, NotificationService
+│   │   ├── guards/         # auth.guard.ts
+│   │   └── models/         # models.ts (interfaces)
+│   ├── features/           # Componentes por módulo
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   ├── incidents/
+│   │   ├── users/
+│   │   ├── reports/
+│   │   └── chatbot/
+│   ├── shared/
+│   │   ├── components/     # sidebar.component
+│   │   ├── directives/
+│   │   └── pipes/
+│   └── app.component, app.routes, app.config
+├── styles.scss             # Estilos globales
+└── index.html              # HTML principal
 ```
-
-## 🚀 Características
 
 ### 🔐 Autenticación
 - Login seguro con email, contraseña y proyecto

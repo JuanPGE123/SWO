@@ -1,0 +1,111 @@
+<!--
+  reports.component.html
+  Panel de reportes
+-->
+
+<div class="reports-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-area">
+    <header class="topbar">
+      <h1>Panel de Control de Reportes</h1>
+      <div class="topbar-actions">
+        <button class="btn-action" (click)="actualizar()">Actualizar</button>
+        <button class="btn-action primary" (click)="exportar()">Exportar</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Filtros -->
+      <section class="filters">
+        <div class="chips">
+          <button class="chip">Últimos 30 días</button>
+          <button class="chip">Todas las categorías</button>
+          <button class="chip">Todos los estados</button>
+        </div>
+      </section>
+
+      <!-- Métricas principales -->
+      <section class="metrics">
+        <div class="metric-card large">
+          <h4>Incidencias totales</h4>
+          <div class="metric-value">324</div>
+          <div class="metric-delta">+12% vs período anterior</div>
+          <div class="metric-pills">
+            <span class="pill">Abiertas 98</span>
+            <span class="pill">En progreso 142</span>
+            <span class="pill">Resueltas 64</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <h4>Tiempo medio de resolución</h4>
+          <div class="metric-value">18.4 h</div>
+          <div class="metric-delta small">-9% mejora</div>
+          <div class="metric-pills">
+            <span class="pill blue">Objetivo: 16 h</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <h4>SLA cumplimiento</h4>
+          <div class="metric-value">92%</div>
+          <div class="metric-delta">+3 puntos</div>
+          <div class="metric-pills">
+            <span class="pill">Críticas 88%</span>
+            <span class="pill">Alta 90%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom row: categorías, reportes, accesos -->
+      <section class="bottom-row">
+        <!-- Top categorías -->
+        <aside class="card left">
+          <h4>Top categorías</h4>
+          <ul class="top-list">
+            <li *ngFor="let cat of topCategorias">
+              {{ cat.nombre }}
+              <span class="count">{{ cat.count }}</span>
+            </li>
+          </ul>
+        </aside>
+
+        <!-- Reportes recientes -->
+        <section class="card center">
+          <h4>Reportes recientes</h4>
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>Reporte</th>
+                <th>Fecha</th>
+                <th>Formato</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rep of reportes">
+                <td>{{ rep.nombre }}</td>
+                <td>{{ rep.fecha }}</td>
+                <td>{{ rep.formato }}</td>
+                <td>
+                  <button class="btn-small" (click)="descargar(rep)">Descargar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Accesos rápidos -->
+        <aside class="card right">
+          <h4>Accesos rápidos</h4>
+          <div class="quick-buttons">
+            <button class="btn-small">Nuevo reporte</button>
+            <button class="btn-small">Configurar filtros</button>
+            <button class="btn-small">Programar exportación</button>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </main>
+</div>
