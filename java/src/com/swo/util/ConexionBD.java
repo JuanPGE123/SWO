@@ -1,0 +1,24 @@
+package com.swo.util;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class ConexionBD {
+    // Constantes en UPPER_SNAKE_CASE
+    private static final String URL = "jdbc:mysql://localhost:3306/swo_db";
+    private static final String USUARIO = "root"; // Cambiar según tu entorno
+    private static final String CONTRASENA = ""; // Cambiar según tu entorno
+
+    // Método en camelCase
+    public static Connection obtenerConexion() {
+        Connection conexion = null;
+        try {
+            conexion = DriverManager.getConnection(URL, USUARIO, CONTRASENA);
+            System.out.println("Conexión exitosa a la base de datos swo_db.");
+        } catch (SQLException e) {
+            System.err.println("Error al conectar con la base de datos: " + e.getMessage());
+        }
+        return conexion;
+    }
+}
