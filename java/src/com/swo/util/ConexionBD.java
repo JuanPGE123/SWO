@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ConexionBD {
     // Constantes en UPPER_SNAKE_CASE
-    private static final String URL = "jdbc:mysql://localhost:3306/swo_db";
+    private static final String URL = "jdbc:mysql://localhost:3306/swo_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota&characterEncoding=UTF-8";
     private static final String USUARIO = "root"; // Cambiar según tu entorno
     private static final String CONTRASENA = ""; // Cambiar según tu entorno
 
