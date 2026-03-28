@@ -160,35 +160,49 @@
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">🔐</div>
-        <h1>Iniciar Sesión</h1>
+        <div class="logo">&#128274;</div>
+        <h1>Iniciar Sesi&oacute;n</h1>
         <p class="subtitle">Accede al Sistema SWO</p>
-        
+
+        <div id="errorBox" class="alert alert-error" style="display:none;"></div>
+
         <form action="UsuarioServlet" method="POST">
             <input type="hidden" name="action" value="login">
             
             <div class="form-group">
-                <label for="correo">Correo Electrónico</label>
+                <label for="correo">Correo Electr&oacute;nico</label>
                 <input type="email" id="correo" name="correo" required 
                        placeholder="usuario@ejemplo.com" autocomplete="email">
             </div>
             
             <div class="form-group">
-                <label for="password">Contraseña</label>
+                <label for="password">Contrase&ntilde;a</label>
                 <input type="password" id="password" name="password" required 
-                       placeholder="••••••••" autocomplete="current-password">
+                       placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
             </div>
             
-            <button type="submit" class="btn-login">Iniciar Sesión</button>
+            <button type="submit" class="btn-login">Iniciar Sesi&oacute;n</button>
         </form>
         
-        <div class="divider">— o —</div>
+        <div class="divider">&mdash; o &mdash;</div>
         
         <a href="registroUsuario.html" class="btn-register">Crear Cuenta Nueva</a>
         
         <div class="back-link">
-            <a href="index.html">← Volver al inicio</a>
+            <a href="index.html">&#8592; Volver al inicio</a>
         </div>
     </div>
+    <script>
+        // Mostrar error si viene en la URL (?error=...)
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var error = params.get('error');
+            if (error) {
+                var box = document.getElementById('errorBox');
+                box.textContent = decodeURIComponent(error);
+                box.style.display = 'block';
+            }
+        })();
+    </script>
 </body>
 </html>

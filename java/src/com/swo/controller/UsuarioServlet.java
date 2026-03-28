@@ -157,36 +157,36 @@ public class UsuarioServlet extends HttpServlet {
         try {
             String correo = request.getParameter("correo");
             String password = request.getParameter("password");
-            
+
+            if (correo == null || correo.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
+                response.sendRedirect("login.html?error=Correo+y+contrase%C3%B1a+son+obligatorios");
+                return;
+            }
+
             // Validar credenciales
-            Usuario usuario = usuarioDAO.obtenerUsuarioPorCorreo(correo);
-            
+            Usuario usuario = usuarioDAO.obtenerUsuarioPorCorreo(correo.trim());
+
             if (usuario != null && usuario.getPasswordHash().equals(password)) {
                 // Login exitoso - crear sesión
                 HttpSession session = request.getSession();
                 session.setAttribute("idUsuario", usuario.getIdUsuario());
                 session.setAttribute("nombreUsuario", usuario.getNombreCompleto());
                 session.setAttribute("rolUsuario", usuario.getRol());
-                
+
                 // Actualizar última conexión
                 usuarioDAO.actualizarUltimaConexion(usuario.getIdUsuario());
-                
+
                 // Redirigir al dashboard
                 response.sendRedirect("IncidenciaServlet");
             } else {
-                // Login fallido
-                request.setAttribute("mensaje", "Credenciales incorrectas");
-                request.setAttribute("tipoMensaje", "error");
-                RequestDispatcher rd = request.getRequestDispatcher("login.html");
-                rd.forward(request, response);
+                // Login fallido - redirigir con mensaje de error en URL
+                response.sendRedirect("login.html?error=Correo+o+contrase%C3%B1a+incorrectos");
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("mensaje", "Error del servidor: " + e.getMessage());
-            request.setAttribute("tipoMensaje", "error");
-            RequestDispatcher rd = request.getRequestDispatcher("login.html");
-            rd.forward(request, response);
+            response.sendRedirect("login.html?error=Error+del+servidor%3A+verifique+que+MySQL+est%C3%A9+activo");
         }
     }
 }

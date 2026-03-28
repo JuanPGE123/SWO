@@ -13,9 +13,18 @@
     
     <!-- Página de bienvenida -->
     <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
-        <welcome-file>IncidenciaServlet</welcome-file>
+        <welcome-file>login.html</welcome-file>
     </welcome-file-list>
+
+    <!-- Forzar UTF-8 en archivos HTML estáticos servidos por Tomcat -->
+    <mime-mapping>
+        <extension>html</extension>
+        <mime-type>text/html;charset=UTF-8</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>htm</extension>
+        <mime-type>text/html;charset=UTF-8</mime-type>
+    </mime-mapping>
     
     <!-- Configuración de sesión (30 minutos) -->
     <session-config>
