@@ -177,8 +177,8 @@ public class UsuarioServlet extends HttpServlet {
                 // Actualizar última conexión
                 usuarioDAO.actualizarUltimaConexion(usuario.getIdUsuario());
 
-                // Redirigir al dashboard
-                response.sendRedirect("IncidenciaServlet");
+                // Redirigir al menú principal
+                response.sendRedirect("index.html");
             } else {
                 // Login fallido - redirigir con mensaje de error en URL
                 response.sendRedirect("login.html?error=Correo+o+contrase%C3%B1a+incorrectos");
