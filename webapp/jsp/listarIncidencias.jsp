@@ -225,13 +225,13 @@
             List<Incidencia> listaIncidencias = (List<Incidencia>) request.getAttribute("listaIncidencias");
             
             if (listaIncidencias != null && !listaIncidencias.isEmpty()) {
-                // Calcular estadísticas
-                long abiertas = listaIncidencias.stream()
-                    .filter(i -> "Abierto".equals(i.getEstado())).count();
-                long enProgreso = listaIncidencias.stream()
-                    .filter(i -> "En Progreso".equals(i.getEstado())).count();
-                long cerradas = listaIncidencias.stream()
-                    .filter(i -> "Cerrado".equals(i.getEstado())).count();
+                // Calcular estadísticas con bucles (compatibilidad Tomcat 8.5)
+                long abiertas = 0, enProgreso = 0, cerradas = 0;
+                for (Incidencia _i : listaIncidencias) {
+                    if ("Abierto".equals(_i.getEstado())) abiertas++;
+                    else if ("En Progreso".equals(_i.getEstado())) enProgreso++;
+                    else if ("Cerrado".equals(_i.getEstado())) cerradas++;
+                }
         %>
         
         <div class="stats">
@@ -257,37 +257,37 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Título</th>
-                    <th>Descripción</th>
+                    <th>T&iacute;tulo</th>
+                    <th>Descripci&oacute;n</th>
                     <th>Estado</th>
-                    <th>Fecha Creación</th>
-                    <th>Usuario</th>
+                    <th>Impacto</th>
+                    <th>Ubicaci&oacute;n</th>
+                    <th>Fecha Creaci&oacute;n</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <%
-                    // Iterar sobre la lista de incidencias usando scriptlets JSP
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                     for (Incidencia inc : listaIncidencias) {
                         String estadoClass = "";
-                        switch (inc.getEstado()) {
-                            case "Abierto":
-                                estadoClass = "estado-abierto";
-                                break;
-                            case "En Progreso":
-                                estadoClass = "estado-progreso";
-                                break;
-                            case "Cerrado":
-                                estadoClass = "estado-cerrado";
-                                break;
-                        }
+                        if ("Abierto".equals(inc.getEstado())) estadoClass = "estado-abierto";
+                        else if ("En Progreso".equals(inc.getEstado())) estadoClass = "estado-progreso";
+                        else if ("Cerrado".equals(inc.getEstado())) estadoClass = "estado-cerrado";
+
+                        String impactoClass = "";
+                        String impacto = inc.getImpacto() != null ? inc.getImpacto() : "Medio";
+                        if ("Critico".equals(impacto)) impactoClass = "style=\"color:#c0392b;font-weight:bold\"";
+                        else if ("Alto".equals(impacto)) impactoClass = "style=\"color:#e67e22;font-weight:bold\"";
+                        else if ("Medio".equals(impacto)) impactoClass = "style=\"color:#2980b9\"";
+                        else impactoClass = "style=\"color:#27ae60\"";
                 %>
                 <tr>
                     <td><strong>#<%= inc.getIdIncidencia() %></strong></td>
                     <td><strong><%= inc.getTitulo() %></strong></td>
                     <td>
                         <div class="descripcion-corta" title="<%= inc.getDescripcion() %>">
-                            <%= inc.getDescripcion() %>
+                            <%= inc.getDescripcion().length() > 60 ? inc.getDescripcion().substring(0,60) + "..." : inc.getDescripcion() %>
                         </div>
                     </td>
                     <td>
@@ -295,11 +295,14 @@
                             <%= inc.getEstado() %>
                         </span>
                     </td>
+                    <td><span <%= impactoClass %>><%= impacto %></span></td>
+                    <td><%= inc.getUbicacion() != null && !inc.getUbicacion().isEmpty() ? inc.getUbicacion() : "-" %></td>
                     <td>
-                        <%= inc.getFechaCreacion() != null ? 
-                            sdf.format(inc.getFechaCreacion()) : "N/A" %>
+                        <%= inc.getFechaCreacion() != null ? sdf.format(inc.getFechaCreacion()) : "N/A" %>
                     </td>
-                    <td>Usuario #<%= inc.getIdUsuarioReporta() %></td>
+                    <td>
+                        <a href="registroIncidencia.html" style="color:#667eea;font-size:12px">Editar</a>
+                    </td>
                 </tr>
                 <%
                     }

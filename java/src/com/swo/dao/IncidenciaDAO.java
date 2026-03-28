@@ -10,14 +10,16 @@ public class IncidenciaDAO {
 
     // 1. INSERCIÓN (Create)
     public boolean insertarIncidencia(Incidencia incidencia) {
-        String sql = "INSERT INTO incidencias (titulo, descripcion, estado, id_usuario_reporta, fecha_creacion) VALUES (?, ?, ?, ?, NOW())";
+        String sql = "INSERT INTO incidencias (titulo, descripcion, estado, ubicacion, impacto, id_usuario_reporta, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, NOW())";
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement pst = con.prepareStatement(sql)) {
             
             pst.setString(1, incidencia.getTitulo());
             pst.setString(2, incidencia.getDescripcion());
             pst.setString(3, incidencia.getEstado());
-            pst.setInt(4, incidencia.getIdUsuarioReporta());
+            pst.setString(4, incidencia.getUbicacion());
+            pst.setString(5, incidencia.getImpacto() != null ? incidencia.getImpacto() : "Medio");
+            pst.setInt(6, incidencia.getIdUsuarioReporta());
             
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -41,6 +43,8 @@ public class IncidenciaDAO {
                 inc.setTitulo(rs.getString("titulo"));
                 inc.setDescripcion(rs.getString("descripcion"));
                 inc.setEstado(rs.getString("estado"));
+                inc.setUbicacion(rs.getString("ubicacion"));
+                inc.setImpacto(rs.getString("impacto"));
                 inc.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
                 inc.setIdUsuarioReporta(rs.getInt("id_usuario_reporta"));
                 listaIncidencias.add(inc);

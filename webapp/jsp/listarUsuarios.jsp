@@ -213,12 +213,12 @@
             List<Usuario> listaUsuarios = (List<Usuario>) request.getAttribute("listaUsuarios");
             
             if (listaUsuarios != null && !listaUsuarios.isEmpty()) {
-                long admins = listaUsuarios.stream()
-                    .filter(u -> "Administrador".equals(u.getRol())).count();
-                long tecnicos = listaUsuarios.stream()
-                    .filter(u -> "Técnico".equals(u.getRol())).count();
-                long usuarios = listaUsuarios.stream()
-                    .filter(u -> "Usuario".equals(u.getRol())).count();
+                long admins = 0, tecnicos = 0, usuarios = 0;
+                for (Usuario _u : listaUsuarios) {
+                    if ("Administrador".equals(_u.getRol())) admins++;
+                    else if ("Técnico".equals(_u.getRol())) tecnicos++;
+                    else if ("Usuario".equals(_u.getRol())) usuarios++;
+                }
         %>
         
         <div class="stats">

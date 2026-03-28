@@ -9,6 +9,9 @@ public class Incidencia {
     private String titulo;
     private String descripcion;
     private String estado;
+    private String ubicacion;
+    private String impacto;
+    private String prioridad;
     private Timestamp fechaCreacion;
     private int idUsuarioReporta;
 
@@ -23,7 +26,7 @@ public class Incidencia {
         this.idUsuarioReporta = idUsuarioReporta;
     }
 
-    // Getters y Setters (Estándar de encapsulamiento)
+    // Getters y Setters
     public int getIdIncidencia() { return idIncidencia; }
     public void setIdIncidencia(int idIncidencia) { this.idIncidencia = idIncidencia; }
 
@@ -35,6 +38,15 @@ public class Incidencia {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getUbicacion() { return ubicacion; }
+    public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
+
+    public String getImpacto() { return impacto; }
+    public void setImpacto(String impacto) { this.impacto = impacto; }
+
+    public String getPrioridad() { return prioridad; }
+    public void setPrioridad(String prioridad) { this.prioridad = prioridad; }
 
     public Timestamp getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(Timestamp fechaCreacion) { this.fechaCreacion = fechaCreacion; }

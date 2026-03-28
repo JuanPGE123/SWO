@@ -1,166 +1,136 @@
-/**
+﻿/**
  * incidents.service.ts
- * 
- * Servicio de incidencias: gestiona toda la lógica relacionada con incidentes.
- * - Almacena y manipula datos de incidentes
- * - Proporciona métodos para filtrado, actualización y búsqueda
- * - Emite cambios como Observables para reactividad
+ *
+ * Servicio de incidencias: gestiona toda la lÃ³gica relacionada con incidentes.
+ * Conecta con el backend Java REST API en /SWO/api/incidencias.
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Incidencia } from '../models/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IncidentsService {
-  // Datos de ejemplo inicial
-  private incidenciasData: Incidencia[] = [
-    {
-      id: 'INC-2314',
-      title: 'Fallo en la pasarela de pagos',
-      state: 'open',
-      priority: 'Alta',
-      assignee: 'Lucía',
-      project: 'Ecommerce',
-      date: '2025-08-25',
-      tags: ['pagos', 'producción'],
-      comments: [
-        {
-          author: 'Cliente A',
-          date: '2025-08-25 11:12',
-          text: 'La compra muestra error 500 al intentar pagar'
-        },
-        {
-          author: 'Soporte',
-          date: '2025-08-25 11:30',
-          text: 'Revisando logs, posible error en certificación del gateway'
-        }
-      ],
-      user: 'Cliente A',
-      userEmail: 'clientea@ejemplo.com',
-      userPhones: ['+34123456789'],
-      app: 'Pasarela',
-      reason: 'Error 500 al confirmar pago',
-      activity: 'Intentaba pagar con tarjeta'
-    },
-    {
-      id: 'INC-2298',
-      title: 'Error en el módulo de usuarios',
-      state: 'inprogress',
-      priority: 'Media',
-      assignee: 'Carlos',
-      project: 'Portal',
-      date: '2025-08-24',
-      tags: ['usuarios'],
-      comments: [
-        {
-          author: 'Cliente B',
-          date: '2025-08-24 10:05',
-          text: 'No puedo actualizar mi perfil'
-        }
-      ],
-      user: 'Cliente B',
-      userEmail: 'clienteb@ejemplo.com',
-      userPhones: ['+34987654321'],
-      app: 'Portal',
-      reason: 'Excepción en updateProfile',
-      activity: 'Editando perfil'
-    },
-    {
-      id: 'INC-2201',
-      title: 'Servidor con alta latencia',
-      state: 'pending',
-      priority: 'Crítica',
-      assignee: 'María',
-      project: 'Infra',
-      date: '2025-08-20',
-      tags: ['infra'],
-      comments: [
-        {
-          author: 'Monitor',
-          date: '2025-08-20 03:22',
-          text: 'Alertas de CPU al 95%'
-        }
-      ],
-      user: 'Cliente C',
-      userEmail: 'clienteC@ejemplo.com',
-      userPhones: ['+34111222333'],
-      app: 'Infra',
-      reason: 'Alto consumo CPU',
-      activity: 'Proceso batch nocturno'
-    },
-    {
-      id: 'INC-2202',
-      title: 'Nuevo incidente de prueba',
-      state: 'resolved',
-      priority: 'Baja',
-      assignee: 'Roberto',
-      project: 'Integraciones',
-      date: '2025-08-26',
-      tags: ['test'],
-      comments: [
-        {
-          author: 'QA',
-          date: '2025-08-26 09:00',
-          text: 'Prueba automatizada: OK'
-        }
-      ],
-      user: 'Cliente D',
-      userEmail: 'cliented@ejemplo.com',
-      userPhones: ['+34999888777'],
-      app: 'Integraciones',
-      reason: 'Prueba',
-      activity: 'Test'
-    }
-  ];
+  private apiUrl = environment.apiUrl;
 
-  // BehaviorSubject para emitir cambios en la lista de incidencias
-  private incidenciasSubject = new BehaviorSubject<Incidencia[]>(this.incidenciasData);
+  // Cache en memoria para bÃºsquedas por ID y estadÃ­sticas reactivas
+  private incidenciasData: Incidencia[] = [];
+  private incidenciasSubject = new BehaviorSubject<Incidencia[]>([]);
   public incidencias$: Observable<Incidencia[]> = this.incidenciasSubject.asObservable();
 
-  constructor() {}
+  constructor(private http: HttpClient) {
+    this.cargarDesdeBackend();
+  }
 
-  /**
-   * Método obtenerIncidencias: obtiene todas las incidencias
-   * 
-   * @returns Observable<Incidencia[]> - Stream de incidencias
-   */
+  /** Carga todas las incidencias desde el backend */
+  cargarDesdeBackend(): void {
+    this.http.get<any[]>(`${this.apiUrl}/incidencias`).subscribe({
+      next: (datos) => {
+        this.incidenciasData = datos.map(d => this.mapearDesdeDB(d));
+        this.incidenciasSubject.next([...this.incidenciasData]);
+      },
+      error: () => {
+        // Si falla la conexiÃ³n al backend, usar datos locales vacÃ­os
+        this.incidenciasSubject.next([]);
+      }
+    });
+  }
+
+  /** Mapea respuesta del backend al modelo Angular */
+  private mapearDesdeDB(db: any): Incidencia {
+    return {
+      id: 'INC-' + db.id,
+      title: db.titulo || '',
+      state: this.mapearEstado(db.estado),
+      priority: this.mapearImpacto(db.impacto),
+      assignee: 'Sin asignar',
+      project: db.ubicacion || 'SWO',
+      date: db.fechaCreacion || '',
+      tags: [],
+      comments: [],
+      user: 'Usuario ' + (db.idUsuarioReporta || 1),
+      userEmail: '',
+      userPhones: [],
+      app: 'SWO',
+      reason: db.descripcion || '',
+      activity: ''
+    };
+  }
+
+  private mapearEstado(estado: string): 'open' | 'inprogress' | 'pending' | 'resolved' {
+    switch (estado) {
+      case 'Abierto':     return 'open';
+      case 'En Progreso': return 'inprogress';
+      case 'Pendiente':   return 'pending';
+      case 'Cerrado':     return 'resolved';
+      default:            return 'open';
+    }
+  }
+
+  private mapearImpacto(impacto: string): 'Baja' | 'Media' | 'Alta' | 'CrÃ­tica' {
+    switch (impacto) {
+      case 'Bajo':    return 'Baja';
+      case 'Alto':    return 'Alta';
+      case 'Critico': return 'CrÃ­tica';
+      case 'Medio':   return 'Media';
+      default:        return 'Media';
+    }
+  }
+
+  /** Devuelve el Observable de la lista reactiva */
   obtenerIncidencias(): Observable<Incidencia[]> {
     return this.incidencias$;
   }
 
-  /**
-   * Método obtenerIncidenciaPorId: obtiene una incidencia específica
-   * 
-   * @param id - ID de la incidencia
-   * @returns Incidencia | undefined - Incidencia encontrada o undefined
-   */
+  /** Busca una incidencia por ID en el cache local */
   obtenerIncidenciaPorId(id: string): Incidencia | undefined {
     return this.incidenciasData.find(inc => inc.id === id);
   }
 
-  /**
-   * Método actualizarIncidencia: actualiza una incidencia existente
-   * 
-   * @param incidenciaActualizada - Incidencia con los datos actualizados
-   */
+  /** Crea una nueva incidencia en el backend */
+  crearIncidencia(datos: {
+    titulo: string;
+    descripcion: string;
+    estado: string;
+    impacto: string;
+    ubicacion: string;
+    idUsuarioReporta?: number;
+  }): Observable<any> {
+    const params = new HttpParams()
+      .set('titulo', datos.titulo)
+      .set('descripcion', datos.descripcion)
+      .set('estado', datos.estado)
+      .set('impacto', datos.impacto)
+      .set('ubicacion', datos.ubicacion)
+      .set('idUsuarioReporta', String(datos.idUsuarioReporta || 1));
+
+    return new Observable(observer => {
+      this.http.post<any>(`${this.apiUrl}/incidencias`, params.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }).subscribe({
+        next: (resp) => {
+          this.cargarDesdeBackend(); // refresca la lista
+          observer.next(resp);
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
+  /** Actualiza incidencia en memoria (cambios de estado/prioridad locales) */
   actualizarIncidencia(incidenciaActualizada: Incidencia): void {
     const index = this.incidenciasData.findIndex(inc => inc.id === incidenciaActualizada.id);
     if (index !== -1) {
       this.incidenciasData[index] = incidenciaActualizada;
-      // Emitimos el cambio a todos los observadores
       this.incidenciasSubject.next([...this.incidenciasData]);
     }
   }
 
-  /**
-   * Método cambiarEstado: actualiza el estado de una incidencia
-   * 
-   * @param id - ID de la incidencia
-   * @param nuevoEstado - Nuevo estado (open, inprogress, pending, resolved)
-   */
   cambiarEstado(id: string, nuevoEstado: 'open' | 'inprogress' | 'pending' | 'resolved'): void {
     const incidencia = this.incidenciasData.find(inc => inc.id === id);
     if (incidencia) {
@@ -169,13 +139,7 @@ export class IncidentsService {
     }
   }
 
-  /**
-   * Método cambiarPrioridad: actualiza la prioridad de una incidencia
-   * 
-   * @param id - ID de la incidencia
-   * @param nuevaPrioridad - Nueva prioridad
-   */
-  cambiarPrioridad(id: string, nuevaPrioridad: 'Baja' | 'Media' | 'Alta' | 'Crítica'): void {
+  cambiarPrioridad(id: string, nuevaPrioridad: 'Baja' | 'Media' | 'Alta' | 'CrÃ­tica'): void {
     const incidencia = this.incidenciasData.find(inc => inc.id === id);
     if (incidencia) {
       incidencia.priority = nuevaPrioridad;
@@ -183,12 +147,6 @@ export class IncidentsService {
     }
   }
 
-  /**
-   * Método asignarIncidencia: asigna una incidencia a un usuario
-   * 
-   * @param id - ID de la incidencia
-   * @param nuevoAsignado - Nombre del nuevo asignado
-   */
   asignarIncidencia(id: string, nuevoAsignado: string): void {
     const incidencia = this.incidenciasData.find(inc => inc.id === id);
     if (incidencia) {
@@ -197,13 +155,6 @@ export class IncidentsService {
     }
   }
 
-  /**
-   * Método agregarComentario: añade un comentario a una incidencia
-   * 
-   * @param id - ID de la incidencia
-   * @param autor - Autor del comentario
-   * @param texto - Contenido del comentario
-   */
   agregarComentario(id: string, autor: string, texto: string): void {
     const incidencia = this.incidenciasData.find(inc => inc.id === id);
     if (incidencia) {
@@ -216,17 +167,13 @@ export class IncidentsService {
     }
   }
 
-  /**
-   * Método obtenerEstadísticas: calcula estadísticas de las incidencias
-   * 
-   * @returns objeto con conteos por estado
-   */
   obtenerEstadísticas(): { abiertos: number; enProgreso: number; pendientes: number; resueltos: number } {
     return {
-      abiertos: this.incidenciasData.filter(i => i.state === 'open').length,
-      enProgreso: this.incidenciasData.filter(i => i.state === 'inprogress').length,
-      pendientes: this.incidenciasData.filter(i => i.state === 'pending').length,
-      resueltos: this.incidenciasData.filter(i => i.state === 'resolved').length
+      abiertos:    this.incidenciasData.filter(i => i.state === 'open').length,
+      enProgreso:  this.incidenciasData.filter(i => i.state === 'inprogress').length,
+      pendientes:  this.incidenciasData.filter(i => i.state === 'pending').length,
+      resueltos:   this.incidenciasData.filter(i => i.state === 'resolved').length
     };
   }
 }
+

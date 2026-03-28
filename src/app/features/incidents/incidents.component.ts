@@ -24,6 +24,17 @@ export class IncidentsComponent implements OnInit {
   filtroEstado: string = 'all';
   busqueda: string = '';
 
+  // Modal nueva incidencia
+  mostrarModal: boolean = false;
+  guardando: boolean = false;
+  nuevaIncidencia = {
+    titulo: '',
+    descripcion: '',
+    estado: 'Abierto',
+    impacto: 'Medio',
+    ubicacion: ''
+  };
+
   constructor(
     private incidentsService: IncidentsService,
     private notificationService: NotificationService
@@ -49,6 +60,35 @@ export class IncidentsComponent implements OnInit {
         inc.id.toLowerCase().includes(this.busqueda.toLowerCase()) ||
         inc.title.toLowerCase().includes(this.busqueda.toLowerCase());
       return cumpleFiltro && cumpleBusqueda;
+    });
+  }
+
+  abrirModal(): void {
+    this.nuevaIncidencia = { titulo: '', descripcion: '', estado: 'Abierto', impacto: 'Medio', ubicacion: '' };
+    this.mostrarModal = true;
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+  }
+
+  guardarIncidencia(): void {
+    if (!this.nuevaIncidencia.titulo.trim() || !this.nuevaIncidencia.descripcion.trim()) {
+      this.notificationService.toast('El título y la descripción son obligatorios', 3000, 'error');
+      return;
+    }
+    this.guardando = true;
+    this.incidentsService.crearIncidencia(this.nuevaIncidencia).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.mostrarModal = false;
+        this.notificationService.toast('Incidencia creada correctamente', 3000, 'success');
+        this.incidentsService.cargarDesdeBackend();
+      },
+      error: () => {
+        this.guardando = false;
+        this.notificationService.toast('Error al conectar con el servidor', 3000, 'error');
+      }
     });
   }
 

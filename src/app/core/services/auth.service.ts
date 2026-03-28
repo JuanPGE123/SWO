@@ -8,8 +8,10 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UsuarioAutenticado, Credenciales } from '../models/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,7 @@ export class AuthService {
   /**
    * Constructor del servicio
    */
-  constructor() {
+  constructor(private http: HttpClient) {
     // Al inicializar el servicio, intentamos recuperar el usuario de sessionStorage
     this.cargarUsuarioGuardado();
   }
@@ -38,38 +40,51 @@ export class AuthService {
    */
   login(credenciales: Credenciales): Observable<boolean> {
     return new Observable(observer => {
-      // Simulamos un pequeño delay para mimificar una llamada HTTP
-      setTimeout(() => {
-        // Credenciales de DEMO (debe ser validado en backend en producción)
-        if (
-          credenciales.email === 'administrador@swo.com' &&
-          credenciales.password === '123456' &&
-          credenciales.project === '101'
-        ) {
-          // Usuario autenticado exitosamente
-          const usuario: UsuarioAutenticado = {
-            id: 'USR-001',
-            nombre: 'Juan Pablo',
-            apellido: 'Ramírez',
-            correo: credenciales.email,
-            celular: '+57 310 123 4567',
-            area: 'TI',
-            jefeDirecto: 'María García',
-            correoJefe: 'maria.garcia@swo.com',
-            role: 'Administrador'
-          };
+      const params = new HttpParams()
+        .set('correo', credenciales.email)
+        .set('password', credenciales.password);
 
-          // Guardamos el usuario en el BehaviorSubject
-          this.usuarioAutenticadoSubject.next(usuario);
-          // Persistimos en sessionStorage para no perder la sesión al recargar
-          this.guardarUsuario(usuario);
-          observer.next(true);
-        } else {
-          // Credenciales incorrectas
-          observer.next(false);
+      this.http.post<any>(`${environment.apiUrl}/login`, params.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }).subscribe({
+        next: (resp) => {
+          if (resp && resp.success) {
+            const usuario: UsuarioAutenticado = {
+              id: String(resp.id),
+              nombre: resp.nombre || '',
+              apellido: '',
+              correo: resp.correo || credenciales.email,
+              celular: '',
+              area: resp.departamento || 'TI',
+              jefeDirecto: '',
+              correoJefe: '',
+              role: resp.rol || 'Usuario'
+            };
+            this.usuarioAutenticadoSubject.next(usuario);
+            this.guardarUsuario(usuario);
+            observer.next(true);
+          } else {
+            observer.next(false);
+          }
+          observer.complete();
+        },
+        error: () => {
+          // Fallback: credenciales demo si el backend no está disponible
+          if (credenciales.email === 'administrador@swo.com' && credenciales.password === '123456') {
+            const usuario: UsuarioAutenticado = {
+              id: 'USR-001', nombre: 'Admin', apellido: 'Demo',
+              correo: credenciales.email, celular: '', area: 'TI',
+              jefeDirecto: '', correoJefe: '', role: 'Administrador'
+            };
+            this.usuarioAutenticadoSubject.next(usuario);
+            this.guardarUsuario(usuario);
+            observer.next(true);
+          } else {
+            observer.next(false);
+          }
+          observer.complete();
         }
-        observer.complete();
-      }, 500);
+      });
     });
   }
 

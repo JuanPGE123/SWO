@@ -45,6 +45,8 @@ public class IncidenciaServlet extends HttpServlet {
             String titulo = request.getParameter("titulo");
             String descripcion = request.getParameter("descripcion");
             String estado = request.getParameter("estado");
+            String ubicacion = request.getParameter("ubicacion");
+            String impacto = request.getParameter("impacto");
             String idUsuarioStr = request.getParameter("idUsuarioReporta");
             
             // Validar parámetros
@@ -71,8 +73,10 @@ public class IncidenciaServlet extends HttpServlet {
                 }
             }
             
-            // Crear objeto Incidencia
+            // Crear objeto Incidencia con todos los campos
             Incidencia incidencia = new Incidencia(titulo, descripcion, estado, idUsuarioReporta);
+            incidencia.setUbicacion(ubicacion);
+            incidencia.setImpacto(impacto != null && !impacto.isEmpty() ? impacto : "Medio");
             
             // Insertar en la base de datos
             boolean resultado = incidenciaDAO.insertarIncidencia(incidencia);
