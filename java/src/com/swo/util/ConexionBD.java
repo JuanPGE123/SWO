@@ -14,8 +14,11 @@ public class ConexionBD {
     public static Connection obtenerConexion() {
         Connection conexion = null;
         try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
             conexion = DriverManager.getConnection(URL, USUARIO, CONTRASENA);
             System.out.println("Conexión exitosa a la base de datos swo_db.");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Driver MySQL no encontrado: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Error al conectar con la base de datos: " + e.getMessage());
         }
