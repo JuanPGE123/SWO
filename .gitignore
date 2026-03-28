@@ -6,3 +6,12 @@ dist/
 .env
 .DS_Store
 src/favicon.ico
+
+# Java compiled artifacts
+*.class
+*.war
+*.jar
+target/
+webapp/WEB-INF/classes/
+webapp/WEB-INF/lib/
+java/bin/

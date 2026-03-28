@@ -153,4 +153,21 @@ public class UsuarioDAO {
         }
         return usuarios;
     }
+
+    /**
+     * Actualiza la última conexión de un usuario
+     */
+    public boolean actualizarUltimaConexion(int idUsuario) {
+        String sql = "UPDATE usuarios SET ultima_conexion = NOW() WHERE id_usuario = ?";
+
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, idUsuario);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar última conexión: " + e.getMessage());
+            return false;
+        }
+    }
 }
