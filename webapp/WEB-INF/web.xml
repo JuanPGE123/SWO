@@ -11,6 +11,21 @@
         Sistema Web de Gestión de Incidencias desarrollado con Java Servlets, JSP y MySQL
     </description>
     
+    <!-- Configurar JSP compiler para Java 8 (permite lambdas en scriptlets) -->
+    <servlet>
+        <servlet-name>jsp</servlet-name>
+        <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+        <init-param>
+            <param-name>compilerSourceVM</param-name>
+            <param-value>1.8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>compilerTargetVM</param-name>
+            <param-value>1.8</param-value>
+        </init-param>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
     <!-- Página de bienvenida -->
     <welcome-file-list>
         <welcome-file>login.html</welcome-file>
