@@ -16,7 +16,7 @@ TRUNCATE TABLE incidencias;
 SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO usuarios (nombre_completo, correo, password_hash, rol, telefono, departamento) VALUES
-('Juan Pérez Administrador', 'admin@swo.com', 'admin123', 'Administrador', '3001234567', 'Sistemas'),
+('Administrador', 'admin@swo.com', 'admin123', 'Administrador', '3163385457', 'Sistemas'),
 ('María González Técnico', 'maria@swo.com', 'maria123', 'Técnico', '3009876543', 'Soporte Técnico'),
 ('Carlos Rodríguez', 'carlos@swo.com', 'carlos123', 'Usuario', '3005551234', 'Ventas'),
 ('Ana Martínez', 'ana@swo.com', 'ana123', 'Usuario', '3007778888', 'Recursos Humanos'),
