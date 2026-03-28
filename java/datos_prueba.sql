@@ -11,11 +11,11 @@ USE swo_db;
 
 -- Limpiar datos existentes
 SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE usuarios;
-TRUNCATE TABLE incidencias;
+DELETE FROM incidencias;
+DELETE FROM usuarios;
 SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO usuarios (nombre_completo, correo, password_hash, rol, telefono, departamento) VALUES
+INSERT IGNORE INTO usuarios (nombre_completo, correo, password_hash, rol, telefono, departamento) VALUES
 ('Administrador', 'admin@swo.com', 'admin123', 'Administrador', '3163385457', 'Sistemas'),
 ('María González Técnico', 'maria@swo.com', 'maria123', 'Técnico', '3009876543', 'Soporte Técnico'),
 ('Carlos Rodríguez', 'carlos@swo.com', 'carlos123', 'Usuario', '3005551234', 'Ventas'),
@@ -26,7 +26,7 @@ INSERT INTO usuarios (nombre_completo, correo, password_hash, rol, telefono, dep
 -- INSERTAR INCIDENCIAS DE PRUEBA
 -- ============================================
 
-INSERT INTO incidencias (titulo, descripcion, estado, id_usuario_reporta, fecha_creacion) VALUES
+INSERT IGNORE INTO incidencias (titulo, descripcion, estado, id_usuario_reporta, fecha_creacion) VALUES
 -- Incidencias Abiertas
 ('Error en sistema de login', 'Los usuarios no pueden acceder al sistema desde hace 2 horas. Se muestra mensaje de error 401', 'Abierto', 3, NOW()),
 ('Impresora no funciona', 'La impresora del segundo piso no imprime documentos. Se queda en cola', 'Abierto', 4, NOW()),
