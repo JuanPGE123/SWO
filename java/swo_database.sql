@@ -42,7 +42,7 @@ CREATE TABLE usuarios (
     foto_perfil VARCHAR(255),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     ultima_conexion DATETIME,
-    CONSTRAINT chk_rol CHECK (rol IN ('Soporte', 'Jefe', 'Usuario', 'Administrador'))
+    CONSTRAINT chk_rol CHECK (rol IN ('Soporte', 'Jefe', 'Usuario', 'Administrador', 'Técnico'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
