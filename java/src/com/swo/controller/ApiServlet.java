@@ -387,7 +387,7 @@ public class ApiServlet extends HttpServlet {
               .append("\"idUsuarioReporta\":").append(inc.getIdUsuarioReporta()).append(",")
               .append("\"fechaCreacion\":\"")
               .append(inc.getFechaCreacion() != null ? sdf.format(inc.getFechaCreacion()) : "")
-              .append("\"}");;
+              .append("\"}");
         }
         sb.append("]");
         return sb.toString();
