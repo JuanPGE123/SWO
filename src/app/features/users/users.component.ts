@@ -25,6 +25,14 @@ export class UsersComponent implements OnInit {
   areaFiltro: string = 'all';
   areas = ['TI', 'Soporte', 'Desarrollo', 'Infraestructura', 'RRHH', 'Administración'];
 
+  // Modal nuevo usuario
+  mostrarModal: boolean = false;
+  guardando: boolean = false;
+  nuevoUsuario = {
+    nombre: '', apellido: '', correo: '', celular: '',
+    area: 'TI', jefeDirecto: '', correoJefe: ''
+  };
+
   constructor(
     private usersService: UsersService,
     private notificationService: NotificationService
@@ -89,5 +97,42 @@ export class UsersComponent implements OnInit {
 
   onAreaChange(): void {
     this.aplicarFiltros();
+  }
+
+  abrirModal(): void {
+    this.nuevoUsuario = { nombre: '', apellido: '', correo: '', celular: '', area: 'TI', jefeDirecto: '', correoJefe: '' };
+    this.mostrarModal = true;
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+  }
+
+  guardarUsuario(): void {
+    if (!this.nuevoUsuario.nombre.trim() || !this.nuevoUsuario.correo.trim()) {
+      this.notificationService.toast('Nombre y correo son obligatorios', 3000, 'error');
+      return;
+    }
+    this.guardando = true;
+    const nuevo: Usuario = {
+      id: 'USR-' + Date.now(),
+      nombre: this.nuevoUsuario.nombre.trim(),
+      apellido: this.nuevoUsuario.apellido.trim(),
+      correo: this.nuevoUsuario.correo.trim(),
+      celular: this.nuevoUsuario.celular.trim(),
+      area: this.nuevoUsuario.area,
+      jefeDirecto: this.nuevoUsuario.jefeDirecto.trim(),
+      correoJefe: this.nuevoUsuario.correoJefe.trim()
+    };
+    this.usersService.agregarUsuario(nuevo);
+    this.guardando = false;
+    this.mostrarModal = false;
+    this.notificationService.toast(`Usuario ${nuevo.nombre} creado`, 3000, 'success');
+  }
+
+  eliminarUsuario(id: string, nombre: string): void {
+    if (!confirm(`¿Eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`)) return;
+    this.usersService.eliminarUsuario(id);
+    this.notificationService.toast(`Usuario ${nombre} eliminado`, 3000, 'success');
   }
 }

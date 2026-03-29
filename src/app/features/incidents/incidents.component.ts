@@ -79,15 +79,19 @@ export class IncidentsComponent implements OnInit {
     }
     this.guardando = true;
     this.incidentsService.crearIncidencia(this.nuevaIncidencia).subscribe({
-      next: () => {
+      next: (resp) => {
         this.guardando = false;
         this.mostrarModal = false;
-        this.notificationService.toast('Incidencia creada correctamente', 3000, 'success');
+        if (resp?.local) {
+          this.notificationService.toast('Guardado localmente (sin conexión al servidor)', 4000, 'warning');
+        } else {
+          this.notificationService.toast('Incidencia creada correctamente', 3000, 'success');
+        }
         this.incidentsService.cargarDesdeBackend();
       },
       error: () => {
         this.guardando = false;
-        this.notificationService.toast('Error al conectar con el servidor', 3000, 'error');
+        this.notificationService.toast('Error inesperado al guardar', 3000, 'error');
       }
     });
   }

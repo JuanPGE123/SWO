@@ -22,7 +22,8 @@
           <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
         </select>
         <button class="btn-action" (click)="cargarUsuarios()">Actualizar</button>
-        <button class="btn-action primary" (click)="exportar()">Exportar</button>
+        <button class="btn-action" (click)="exportar()">Exportar</button>
+        <button class="btn-action primary" (click)="abrirModal()">+ Nuevo Usuario</button>
       </div>
     </header>
 
@@ -77,8 +78,7 @@
                 <td><span class="area-badge">{{ usr.area }}</span></td>
                 <td>{{ usr.jefeDirecto }}</td>
                 <td>
-                  <button class="btn-small" title="Editar">✏️</button>
-                  <button class="btn-small" title="Eliminar">🗑️</button>
+                  <button class="btn-small danger" title="Eliminar" (click)="eliminarUsuario(usr.id, usr.nombre)">🗑️ Eliminar</button>
                 </td>
               </tr>
             </tbody>

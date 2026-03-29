@@ -91,7 +91,7 @@ export class IncidentsService {
     return this.incidenciasData.find(inc => inc.id === id);
   }
 
-  /** Crea una nueva incidencia en el backend */
+  /** Crea una nueva incidencia en el backend; si falla, guarda localmente */
   crearIncidencia(datos: {
     titulo: string;
     descripcion: string;
@@ -113,11 +113,25 @@ export class IncidentsService {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       }).subscribe({
         next: (resp) => {
-          this.cargarDesdeBackend(); // refresca la lista
-          observer.next(resp);
+          this.cargarDesdeBackend();
+          observer.next({ local: false, ...resp });
           observer.complete();
         },
-        error: (err) => observer.error(err)
+        error: () => {
+          // Backend no disponible (ej: GitHub Pages) — guardar en memoria
+          const tmpId = 'TMP-' + Date.now();
+          const nueva: any = {
+            id: tmpId, titulo: datos.titulo, descripcion: datos.descripcion,
+            estado: datos.estado, impacto: datos.impacto, ubicacion: datos.ubicacion,
+            fechaCreacion: new Date().toISOString().split('T')[0],
+            idUsuarioReporta: datos.idUsuarioReporta || 1
+          };
+          const incidencia = this.mapearDesdeDB(nueva);
+          this.incidenciasData = [incidencia, ...this.incidenciasData];
+          this.incidenciasSubject.next([...this.incidenciasData]);
+          observer.next({ local: true });
+          observer.complete();
+        }
       });
     });
   }
