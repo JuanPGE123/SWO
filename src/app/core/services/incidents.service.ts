@@ -71,11 +71,11 @@ export class IncidentsService {
     }
   }
 
-  private mapearImpacto(impacto: string): 'Baja' | 'Media' | 'Alta' | 'CrÃ­tica' {
+  private mapearImpacto(impacto: string): 'Baja' | 'Media' | 'Alta' | 'Crítica' {
     switch (impacto) {
       case 'Bajo':    return 'Baja';
       case 'Alto':    return 'Alta';
-      case 'Critico': return 'CrÃ­tica';
+      case 'Critico': return 'Crítica';
       case 'Medio':   return 'Media';
       default:        return 'Media';
     }
@@ -139,7 +139,7 @@ export class IncidentsService {
     }
   }
 
-  cambiarPrioridad(id: string, nuevaPrioridad: 'Baja' | 'Media' | 'Alta' | 'CrÃ­tica'): void {
+  cambiarPrioridad(id: string, nuevaPrioridad: 'Baja' | 'Media' | 'Alta' | 'Crítica'): void {
     const incidencia = this.incidenciasData.find(inc => inc.id === id);
     if (incidencia) {
       incidencia.priority = nuevaPrioridad;
