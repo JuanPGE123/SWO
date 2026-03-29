@@ -1,0 +1,246 @@
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[6].rules[0].oneOf[0].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[6].rules[0].oneOf[0].use[2]!./node_modules/resolve-url-loader/index.js??ruleSet[1].rules[6].rules[1].use[0]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[6].rules[1].use[1]!./src/styles.scss?ngGlobalStyle ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+@charset "UTF-8";
+/*
+ * styles.scss
+ * 
+ * Estilos globales de la aplicación SWO.
+ * Incluye:
+ * - Variables de tema
+ * - Reset de estilos
+ * - Estilos base para componentes comunes
+ * - Tema oscuro consistente
+ */
+/* ========================================
+   VARIABLES Y TOKENS DE DISEÑO
+   ======================================== */
+:root {
+  /* Colores de fondo */
+  --bg: #0f1720;
+  --card: rgba(15, 23, 32, 0.2);
+  --panel: #0b1116;
+  /* Colores de texto */
+  --text-primary: #e6eef6;
+  --text-secondary: #9aa5b1;
+  --muted: #9aa5b1;
+  /* Colores de acento */
+  --accent: #05d0e6;
+  --accent-dark: #08bfcf;
+  --success: #19d38f;
+  --warning: #ffc107;
+  --error: #ff5757;
+  /* Otros colores */
+  --pill: #0f1720;
+  --glass: rgba(255, 255, 255, 0.03);
+  /* Espaciado */
+  --card-radius: 12px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  /* Tipografía */
+  --font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* ========================================
+   RESET Y ESTILOS BASE
+   ======================================== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(7, 20, 30, 0.6), transparent), linear-gradient(180deg, #0b1116 0%, #071018 100%), var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   COMPONENTES COMUNES
+   ======================================== */
+/* Botones */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--glass);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn.primary {
+  background: var(--accent);
+  color: #04232f;
+}
+.btn.primary:hover {
+  background: var(--accent-dark);
+}
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--glass);
+}
+.btn.ghost:hover {
+  background: var(--glass);
+}
+.btn.small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* Inputs */
+.input,
+input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--glass);
+  background: var(--panel);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+.input::placeholder,
+input::placeholder {
+  color: var(--muted);
+}
+.input:focus,
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(5, 208, 230, 0.1);
+}
+
+/* Tarjetas */
+.card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid var(--glass);
+  border-radius: var(--card-radius);
+  padding: var(--spacing-lg);
+}
+
+/* Selects */
+select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--glass);
+  background: var(--panel);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  cursor: pointer;
+}
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ========================================
+   LAYOUT Y DISPOSICIÓN
+   ======================================== */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+.flex {
+  display: flex;
+}
+.flex.row {
+  flex-direction: row;
+}
+.flex.col {
+  flex-direction: column;
+}
+.flex.center {
+  align-items: center;
+  justify-content: center;
+}
+.flex.between {
+  justify-content: space-between;
+}
+.flex.gap-sm {
+  gap: var(--spacing-sm);
+}
+.flex.gap-md {
+  gap: var(--spacing-md);
+}
+.flex.gap-lg {
+  gap: var(--spacing-lg);
+}
+
+/* ========================================
+   UTILIDADES
+   ======================================== */
+.muted {
+  color: var(--muted);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt {
+  margin-top: var(--spacing-md);
+}
+
+.mb {
+  margin-bottom: var(--spacing-md);
+}
+
+.p {
+  padding: var(--spacing-md);
+}
+
+/* Scroll smooth */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--panel);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/*# sourceMappingURL=styles.css.map*/
