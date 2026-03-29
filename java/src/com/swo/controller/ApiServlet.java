@@ -1,9 +1,11 @@
 package com.swo.controller;
 
+import com.swo.dao.ConocimientoDAO;
 import com.swo.dao.IncidenciaDAO;
 import com.swo.dao.ProyectoDAO;
 import com.swo.dao.ReporteDAO;
 import com.swo.dao.UsuarioDAO;
+import com.swo.model.Conocimiento;
 import com.swo.model.Incidencia;
 import com.swo.model.Proyecto;
 import com.swo.model.Reporte;
@@ -43,6 +45,7 @@ public class ApiServlet extends HttpServlet {
     private UsuarioDAO usuarioDAO;
     private ProyectoDAO proyectoDAO;
     private ReporteDAO reporteDAO;
+    private ConocimientoDAO conocimientoDAO;
 
     @Override
     public void init() throws ServletException {
@@ -51,6 +54,7 @@ public class ApiServlet extends HttpServlet {
         usuarioDAO = new UsuarioDAO();
         proyectoDAO = new ProyectoDAO();
         reporteDAO = new ReporteDAO();
+        conocimientoDAO = new ConocimientoDAO();
     }
 
     @Override
@@ -75,6 +79,17 @@ public class ApiServlet extends HttpServlet {
 
         } else if ("/reportes".equals(path)) {
             out.print(reportesToJson(reporteDAO.obtenerReportes()));
+
+        } else if ("/chatbot".equals(path)) {
+            String q = req.getParameter("q");
+            if (q == null || q.trim().isEmpty()) {
+                out.print("{\"resultados\":[],\"categorias\":[]}");
+            } else {
+                List<Conocimiento> resultados = conocimientoDAO.buscarPorTexto(q);
+                List<String> categorias = conocimientoDAO.obtenerCategorias();
+                out.print("{\"resultados\":" + conocimientoToJson(resultados)
+                    + ",\"categorias\":" + categoriasToJson(categorias) + "}");
+            }
 
         } else if ("/estadisticas".equals(path)) {
             List<Incidencia> inc = incidenciaDAO.obtenerIncidencias();
@@ -411,6 +426,34 @@ public class ApiServlet extends HttpServlet {
               .append("\"estado\":\"").append(escJson(p.getEstado())).append("\",")
               .append("\"fechaCreacion\":\"").append(p.getFechaCreacion() != null ? sdf.format(p.getFechaCreacion()) : "").append("\"")
               .append("}");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String conocimientoToJson(List<Conocimiento> lista) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lista.size(); i++) {
+            Conocimiento c = lista.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("{")
+              .append("\"id\":").append(c.getId()).append(",")
+              .append("\"categoria\":\"").append(escJson(c.getCategoria())).append("\",")
+              .append("\"pregunta\":\"").append(escJson(c.getPregunta())).append("\",")
+              .append("\"respuesta\":\"").append(escJson(c.getRespuesta())).append("\",")
+              .append("\"pasos\":\"").append(escJson(c.getPasos() != null ? c.getPasos() : "")).append("\",")
+              .append("\"nivel\":").append(c.getNivelSoporte())
+              .append("}");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String categoriasToJson(List<String> lista) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lista.size(); i++) {
+            if (i > 0) sb.append(",");
+            sb.append("\"").append(escJson(lista.get(i))).append("\"");
         }
         sb.append("]");
         return sb.toString();

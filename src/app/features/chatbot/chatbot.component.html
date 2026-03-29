@@ -1,6 +1,6 @@
 <!--
   chatbot.component.html
-  Componente ChatBot
+  Componente ChatBot SWO
 -->
 
 <div class="chatbot-layout">
@@ -8,65 +8,83 @@
 
   <main class="main-area">
     <header class="topbar">
-      <h1>ChatBot - Asistente para analistas</h1>
+      <h1>ChatBot — Asistente de soporte IT</h1>
       <div class="topbar-actions">
-        <input 
-          type="text" 
-          class="search-input" 
-          placeholder="Buscar en chat"
-        />
-        <button class="btn-action" (click)="limpiarChat()">Limpiar</button>
+        <button class="btn-action secondary" (click)="limpiarChat()">🗑️ Limpiar</button>
+        <button class="btn-action" (click)="exportarChat()">📥 Exportar</button>
       </div>
     </header>
 
     <div class="chat-container">
       <!-- Panel izquierdo: acciones rápidas -->
       <aside class="left-panel">
-        <h4>Acciones rápidas</h4>
+        <h4>Acceso rápido</h4>
         <div class="quick-actions">
-          <button 
+          <button
             *ngFor="let accion of accionesRapidas"
             class="action-btn"
-            (click)="accionRapida(accion.action)"
+            (click)="accionRapida(accion.query)"
           >
             {{ accion.label }}
           </button>
         </div>
 
-        <h4 style="margin-top: 16px">Analistas</h4>
-        <ul class="analyst-list">
-          <li *ngFor="let analyst of analistas">{{ analyst }}</li>
-        </ul>
-
-        <h4 style="margin-top: 16px">Sesión</h4>
-        <div class="session-info">Sesión activa</div>
+        <h4 style="margin-top: 16px">Categorías</h4>
+        <div class="categorias-list">
+          <span *ngFor="let cat of categorias" class="cat-pill">{{ cat }}</span>
+          <span *ngIf="categorias.length === 0" class="cat-empty">Cargando...</span>
+        </div>
       </aside>
 
       <!-- Área central: chat -->
       <section class="chat-section">
-        <div class="messages-container">
-          <div 
+        <div class="messages-container" #messagesContainer>
+          <div
             *ngFor="let msg of mensajes"
             class="message"
             [class.user]="msg.autor === 'usuario'"
             [class.bot]="msg.autor === 'bot'"
           >
-            <div class="message-content">{{ msg.texto }}</div>
+            <!-- Badge de categoría para respuestas bot -->
+            <div *ngIf="msg.autor === 'bot' && msg.categoria" class="msg-category">
+              {{ msg.categoria }}
+              <span *ngIf="msg.nivel" class="nivel-badge nivel-{{ msg.nivel }}">
+                {{ nivelLabel(msg.nivel) }}
+              </span>
+            </div>
+
+            <!-- Texto principal -->
+            <div class="message-content" [style.white-space]="'pre-line'">{{ msg.texto }}</div>
+
+            <!-- Pasos numerados -->
+            <ol *ngIf="msg.pasos && msg.pasos.length > 0" class="pasos-list">
+              <li *ngFor="let paso of msg.pasos">{{ paso }}</li>
+            </ol>
+
             <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+          </div>
+
+          <!-- Indicador de escritura -->
+          <div *ngIf="escribiendo" class="message bot typing-message">
+            <div class="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
           </div>
         </div>
 
         <div class="composer">
-          <input 
+          <input
             type="text"
             class="chat-input"
             [(ngModel)]="inputChat"
             (keyup.enter)="enviarMensaje()"
-            placeholder="Escribe tu consulta..."
+            placeholder="Escribe tu problema o consulta de TI..."
+            [disabled]="escribiendo"
           />
-          <button 
+          <button
             class="btn-send"
             (click)="enviarMensaje()"
+            [disabled]="escribiendo || !inputChat.trim()"
           >
             Enviar
           </button>
@@ -74,21 +92,22 @@
 
         <div class="suggestions">
           <span class="sugg-label">Sugerencias:</span>
-          <button class="sugg">¿Cómo restauro un usuario?</button>
-          <button class="sugg">¿Qué significa estado Pendiente?</button>
-          <button class="sugg">Escalar a 2do nivel</button>
+          <button class="sugg" (click)="sugerencia('¿Cómo restablezco una contraseña?')">Restablecer contraseña</button>
+          <button class="sugg" (click)="sugerencia('El VPN no conecta')">VPN no conecta</button>
+          <button class="sugg" (click)="sugerencia('¿Cómo creo una nueva incidencia?')">Crear incidencia</button>
+          <button class="sugg" (click)="sugerencia('¿Cuáles son los niveles de prioridad y los SLA?')">Prioridades y SLA</button>
         </div>
       </section>
 
       <!-- Panel derecho: registro de acciones -->
       <aside class="right-panel">
-        <h4>Registro de acciones</h4>
+        <h4>Registro de actividad</h4>
         <div class="log-area">
           <div *ngFor="let accion of registroAcciones" class="log-entry">
             {{ accion }}
           </div>
           <div *ngIf="registroAcciones.length === 0" class="empty-log">
-            Sin acciones recientes
+            Sin actividad reciente
           </div>
         </div>
 
@@ -96,11 +115,8 @@
         <div class="options">
           <label>
             <input type="checkbox" [(ngModel)]="guardarHistorial" />
-            Guardar historial
+            Guardar historial local
           </label>
-          <button class="btn-export" (click)="exportarChat()">
-            📥 Exportar chat
-          </button>
         </div>
       </aside>
     </div>
