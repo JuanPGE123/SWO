@@ -52,20 +52,22 @@ export class SidebarComponent implements OnInit {
   }
 
   /**
-   * Método getNavItems: retorna los elementos del menú de navegación
-   * 
-   * @returns array con los items del navegación incluyendo iconos
+   * Método getNavItems: retorna los elementos del menú de navegación.
+   * Usuarios y Proyectos solo visibles para Administrador.
    */
   getNavItems() {
-    return [
-      { label: 'Inicio', route: '/dashboard', icon: '🏠' },
+    const isAdmin = this.usuarioActual?.role === 'Administrador';
+    const items: { label: string; route: string; icon: string }[] = [
       { label: 'Panel', route: '/dashboard', icon: '📊' },
       { label: 'Incidencias', route: '/incidents', icon: '🎫' },
-      { label: 'Usuarios', route: '/users', icon: '👥' },
-      { label: 'Proyectos', route: '/projects', icon: '🗂️' },
-      { label: 'Reportes', route: '/reports', icon: '📈' },
-      { label: 'ChatBot', route: '/chatbot', icon: '🤖' }
     ];
+    if (isAdmin) {
+      items.push({ label: 'Usuarios', route: '/users', icon: '👥' });
+      items.push({ label: 'Proyectos', route: '/projects', icon: '🗂️' });
+    }
+    items.push({ label: 'Reportes', route: '/reports', icon: '📈' });
+    items.push({ label: 'ChatBot', route: '/chatbot', icon: '🤖' });
+    return items;
   }
 
   /**

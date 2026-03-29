@@ -104,14 +104,18 @@ export class AuthComponent implements OnInit {
           this.router.navigate(['/dashboard']);
         } else {
           // Autenticación fallida
-          this.errorMessage = 'Credenciales incorrectas o proyecto no válido.';
+          this.errorMessage = 'Credenciales incorrectas. Verifica tu correo y contraseña.';
           this.notificationService.toast(this.errorMessage, 3000, 'error');
         }
       },
       (error: any) => {
         this.isLoading = false;
-        this.errorMessage = 'Error en la autenticación. Intenta de nuevo.';
-        this.notificationService.toast(this.errorMessage, 3000, 'error');
+        if (error?.deleted) {
+          this.errorMessage = 'Este usuario no existe en la plataforma. Valida con tu jefe encargado.';
+        } else {
+          this.errorMessage = 'Credenciales incorrectas. Verifica tu correo y contraseña.';
+        }
+        this.notificationService.toast(this.errorMessage, 4000, 'error');
       }
     );
   }

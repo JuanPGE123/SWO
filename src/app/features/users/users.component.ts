@@ -32,7 +32,7 @@ export class UsersComponent implements OnInit {
   guardando: boolean = false;
   nuevoUsuario = {
     nombre: '', correo: '', password: '123456',
-    rol: 'Usuario', telefono: '', departamento: '', idProyecto: 0
+    rol: 'Analista', telefono: '', departamento: '', idProyecto: 0
   };
 
   proyectos: { id: number; nombre: string }[] = [];

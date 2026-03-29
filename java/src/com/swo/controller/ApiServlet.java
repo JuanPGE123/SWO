@@ -164,6 +164,12 @@ public class ApiServlet extends HttpServlet {
             String password = req.getParameter("password");
             try {
                 Usuario usuario = usuarioDAO.obtenerUsuarioPorCorreo(correo);
+                if (usuario != null && !usuario.isEstado()) {
+                    res.setStatus(403);
+                    out.print("{\"success\":false,\"deleted\":true,\"error\":\"Este usuario ha sido eliminado. Valide con su jefe encargado.\"}");
+                    out.flush();
+                    return;
+                }
                 if (usuario != null && usuario.getPasswordHash().equals(password)) {
                     HttpSession session = req.getSession();
                     session.setAttribute("idUsuario", usuario.getIdUsuario());

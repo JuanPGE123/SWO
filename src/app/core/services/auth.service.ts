@@ -58,7 +58,7 @@ export class AuthService {
               area: resp.departamento || 'TI',
               jefeDirecto: '',
               correoJefe: '',
-              role: resp.rol || 'Usuario',
+              role: resp.rol || 'Analista',
               idProyecto: resp.idProyecto || undefined,
               proyecto: resp.proyecto || ''
             };
@@ -66,15 +66,17 @@ export class AuthService {
             this.guardarUsuario(usuario);
             observer.next(true);
           } else {
-            observer.next(false);
+            observer.error({ deleted: resp?.deleted, message: resp?.error });
           }
           observer.complete();
         },
-        error: () => {
-          // Fallback: credenciales demo si el backend no está disponible
-          if (credenciales.email === 'administrador@swo.com' && credenciales.password === '123456') {
+        error: (httpErr) => {
+          const body = httpErr?.error;
+          if (body?.deleted) {
+            observer.error({ deleted: true, message: body.error });
+          } else if (credenciales.email === 'master@swo.com' && credenciales.password === '123456') {
             const usuario: UsuarioAutenticado = {
-              id: 'USR-001', nombre: 'Admin', apellido: 'Demo',
+              id: 'USR-001', nombre: 'Master', apellido: '',
               correo: credenciales.email, celular: '', area: 'TI',
               jefeDirecto: '', correoJefe: '', role: 'Administrador'
             };
