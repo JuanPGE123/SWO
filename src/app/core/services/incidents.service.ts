@@ -10,6 +10,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Incidencia } from '../models/models';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class IncidentsService {
   private incidenciasSubject = new BehaviorSubject<Incidencia[]>([]);
   public incidencias$: Observable<Incidencia[]> = this.incidenciasSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private authService: AuthService) {
     this.cargarDesdeBackend();
   }
 
@@ -100,13 +101,17 @@ export class IncidentsService {
     ubicacion: string;
     idUsuarioReporta?: number;
   }): Observable<any> {
+    // Usar el ID real del usuario autenticado
+    const usuario = this.authService.getUsuarioActual();
+    const idUsuario = datos.idUsuarioReporta || parseInt(usuario?.id || '0', 10) || 1;
+
     const params = new HttpParams()
       .set('titulo', datos.titulo)
       .set('descripcion', datos.descripcion)
       .set('estado', datos.estado)
       .set('impacto', datos.impacto)
       .set('ubicacion', datos.ubicacion)
-      .set('idUsuarioReporta', String(datos.idUsuarioReporta || 1));
+      .set('idUsuarioReporta', String(idUsuario));
 
     return new Observable(observer => {
       this.http.post<any>(`${this.apiUrl}/incidencias`, params.toString(), {

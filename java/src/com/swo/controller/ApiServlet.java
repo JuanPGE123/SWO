@@ -2,9 +2,11 @@ package com.swo.controller;
 
 import com.swo.dao.IncidenciaDAO;
 import com.swo.dao.ProyectoDAO;
+import com.swo.dao.ReporteDAO;
 import com.swo.dao.UsuarioDAO;
 import com.swo.model.Incidencia;
 import com.swo.model.Proyecto;
+import com.swo.model.Reporte;
 import com.swo.model.Usuario;
 
 import javax.servlet.ServletException;
@@ -40,6 +42,7 @@ public class ApiServlet extends HttpServlet {
     private IncidenciaDAO incidenciaDAO;
     private UsuarioDAO usuarioDAO;
     private ProyectoDAO proyectoDAO;
+    private ReporteDAO reporteDAO;
 
     @Override
     public void init() throws ServletException {
@@ -47,6 +50,7 @@ public class ApiServlet extends HttpServlet {
         incidenciaDAO = new IncidenciaDAO();
         usuarioDAO = new UsuarioDAO();
         proyectoDAO = new ProyectoDAO();
+        reporteDAO = new ReporteDAO();
     }
 
     @Override
@@ -68,6 +72,9 @@ public class ApiServlet extends HttpServlet {
 
         } else if ("/proyectos".equals(path)) {
             out.print(proyectosToJson(proyectoDAO.obtenerProyectos()));
+
+        } else if ("/reportes".equals(path)) {
+            out.print(reportesToJson(reporteDAO.obtenerReportes()));
 
         } else if ("/estadisticas".equals(path)) {
             List<Incidencia> inc = incidenciaDAO.obtenerIncidencias();
@@ -158,6 +165,39 @@ public class ApiServlet extends HttpServlet {
 
         } else if ("/proyectos".equals(path)) {
             handleCrearProyecto(req, res, out);
+
+        } else if ("/reportes".equals(path)) {
+            try {
+                String nombre = req.getParameter("nombre");
+                String totalStr = req.getParameter("total");
+                String abiertasStr = req.getParameter("abiertas");
+                String enProgresoStr = req.getParameter("enProgreso");
+                String cerradasStr = req.getParameter("cerradas");
+                String usuarioStr = req.getParameter("generadoPor");
+
+                if (nombre == null || nombre.isEmpty()) {
+                    res.setStatus(400);
+                    out.print("{\"error\":\"nombre es obligatorio\"}");
+                    out.flush(); return;
+                }
+                Reporte rep = new Reporte(
+                    nombre,
+                    totalStr != null ? Integer.parseInt(totalStr) : 0,
+                    abiertasStr != null ? Integer.parseInt(abiertasStr) : 0,
+                    enProgresoStr != null ? Integer.parseInt(enProgresoStr) : 0,
+                    cerradasStr != null ? Integer.parseInt(cerradasStr) : 0,
+                    usuarioStr != null && !usuarioStr.isEmpty() ? Integer.parseInt(usuarioStr) : null
+                );
+                HttpSession session = req.getSession(false);
+                if (rep.getGeneradoPor() == null && session != null && session.getAttribute("idUsuario") != null) {
+                    rep.setGeneradoPor((Integer) session.getAttribute("idUsuario"));
+                }
+                boolean ok = reporteDAO.insertarReporte(rep);
+                out.print(ok ? "{\"success\":true}" : "{\"error\":\"No se pudo guardar el reporte\"}");
+            } catch (Exception e) {
+                res.setStatus(500);
+                out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+            }
 
         } else if ("/login".equals(path)) {
             String correo = req.getParameter("correo");
@@ -370,6 +410,26 @@ public class ApiServlet extends HttpServlet {
               .append("\"descripcion\":\"").append(escJson(p.getDescripcion())).append("\",")
               .append("\"estado\":\"").append(escJson(p.getEstado())).append("\",")
               .append("\"fechaCreacion\":\"").append(p.getFechaCreacion() != null ? sdf.format(p.getFechaCreacion()) : "").append("\"")
+              .append("}");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String reportesToJson(List<Reporte> lista) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lista.size(); i++) {
+            Reporte r = lista.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("{")
+              .append("\"id\":").append(r.getIdReporte()).append(",")
+              .append("\"nombre\":\"").append(escJson(r.getNombre())).append("\",")
+              .append("\"total\":").append(r.getTotalIncidencias()).append(",")
+              .append("\"abiertas\":").append(r.getAbiertas()).append(",")
+              .append("\"enProgreso\":").append(r.getEnProgreso()).append(",")
+              .append("\"cerradas\":").append(r.getCerradas()).append(",")
+              .append("\"fecha\":\"").append(r.getFechaGeneracion() != null ? sdf.format(r.getFechaGeneracion()) : "").append("\"")
               .append("}");
         }
         sb.append("]");

@@ -5,9 +5,10 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { NotificationService } from '../../core/services/notification.service';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
+import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -20,12 +21,10 @@ import { environment } from '../../../environments/environment';
 export class ReportsComponent implements OnInit {
   estadisticas: any = null;
   cargandoStats: boolean = false;
+  descargando: boolean = false;
 
-  reportes = [
-    { nombre: 'Incidencias Semana 34', fecha: '25/08/2025', formato: 'PDF' },
-    { nombre: 'Backlog por categoría', fecha: '22/08/2025', formato: 'CSV' },
-    { nombre: 'SLA Mensual', fecha: '20/08/2025', formato: 'Excel' }
-  ];
+  reportes: any[] = [];
+  cargandoReportes: boolean = false;
 
   topCategorias = [
     { nombre: 'Red y conectividad', count: 0 },
@@ -36,11 +35,13 @@ export class ReportsComponent implements OnInit {
 
   constructor(
     private notificationService: NotificationService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.cargarEstadisticas();
+    this.cargarReportes();
   }
 
   cargarEstadisticas(): void {
@@ -51,16 +52,86 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  cargarReportes(): void {
+    this.cargandoReportes = true;
+    this.http.get<any[]>(`${environment.apiUrl}/reportes`).subscribe({
+      next: (data) => { this.reportes = data; this.cargandoReportes = false; },
+      error: () => { this.cargandoReportes = false; }
+    });
+  }
+
   actualizar(): void {
     this.notificationService.toast('Actualizando datos...', 2000, 'info');
     this.cargarEstadisticas();
+    this.cargarReportes();
+  }
+
+  /** Descarga todas las incidencias como CSV compatible con Excel */
+  descargarExcel(): void {
+    this.descargando = true;
+    this.notificationService.toast('Generando reporte...', 2000, 'info');
+
+    this.http.get<any[]>(`${environment.apiUrl}/incidencias`).subscribe({
+      next: (incidencias) => {
+        // UTF-8 BOM para que Excel reconozca tildes y especiales
+        const bom = '\uFEFF';
+        const headers = ['ID', 'Titulo', 'Descripcion', 'Estado', 'Impacto', 'Ubicacion', 'ID_Usuario', 'Fecha'];
+
+        const rows = incidencias.map(inc => [
+          inc.id,
+          `"${(inc.titulo || '').replace(/"/g, '""')}"`,
+          `"${(inc.descripcion || '').replace(/"/g, '""')}"`,
+          inc.estado || '',
+          inc.impacto || '',
+          `"${(inc.ubicacion || '').replace(/"/g, '""')}"`,
+          inc.idUsuarioReporta || '',
+          inc.fechaCreacion || ''
+        ].join(';')); // punto y coma para compatibilidad con Excel en español
+
+        const csv = bom + headers.join(';') + '\n' + rows.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `incidencias_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // Registrar el reporte en la BD
+        const usuario = this.authService.getUsuarioActual();
+        const abiertas = incidencias.filter(i => i.estado === 'Abierto').length;
+        const enProgreso = incidencias.filter(i => i.estado === 'En Progreso').length;
+        const cerradas = incidencias.filter(i => i.estado === 'Cerrado' || i.estado === 'Resuelto').length;
+
+        const params = new HttpParams()
+          .set('nombre', `Reporte Incidencias ${new Date().toLocaleDateString('es-CO')}`)
+          .set('total', String(incidencias.length))
+          .set('abiertas', String(abiertas))
+          .set('enProgreso', String(enProgreso))
+          .set('cerradas', String(cerradas))
+          .set('generadoPor', String(parseInt(usuario?.id || '0', 10) || ''));
+
+        this.http.post(`${environment.apiUrl}/reportes`, params.toString(), {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }).subscribe({ next: () => this.cargarReportes() });
+
+        this.descargando = false;
+        this.notificationService.toast(`Excel generado: ${incidencias.length} incidencias`, 3000, 'success');
+      },
+      error: () => {
+        this.descargando = false;
+        this.notificationService.toast('Error al obtener datos. Verifica la conexión al servidor.', 3000, 'error');
+      }
+    });
   }
 
   exportar(): void {
-    this.notificationService.toast('Exportando reportes...', 2000, 'success');
+    this.descargarExcel();
   }
 
   descargar(reporte: any): void {
-    this.notificationService.toast(`Descargando ${reporte.nombre}...`, 2000, 'success');
+    this.notificationService.toast(`Reporte del ${reporte.fecha} — ${reporte.total} incidencias`, 3000, 'info');
   }
 }

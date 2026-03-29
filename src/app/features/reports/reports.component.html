@@ -11,7 +11,9 @@
       <h1>Panel de Control de Reportes</h1>
       <div class="topbar-actions">
         <button class="btn-action" (click)="actualizar()">Actualizar</button>
-        <button class="btn-action primary" (click)="exportar()">Exportar</button>
+        <button class="btn-action primary" (click)="descargarExcel()" [disabled]="descargando">
+          {{ descargando ? 'Generando...' : '⬇️ Exportar Excel' }}
+        </button>
       </div>
     </header>
 
@@ -73,27 +75,40 @@
 
         <!-- Reportes recientes -->
         <section class="card center">
-          <h4>Reportes recientes</h4>
-          <table class="reports-table">
+          <div class="card-header-row">
+            <h4>Reportes generados</h4>
+            <button class="btn-action primary" (click)="descargarExcel()" [disabled]="descargando">
+              {{ descargando ? 'Generando...' : '⬇️ Descargar Excel' }}
+            </button>
+          </div>
+          <div *ngIf="cargandoReportes" class="loading-text">Cargando historial...</div>
+          <table class="reports-table" *ngIf="reportes.length > 0">
             <thead>
               <tr>
                 <th>Reporte</th>
+                <th>Total</th>
+                <th>Abiertas</th>
+                <th>Cerradas</th>
                 <th>Fecha</th>
-                <th>Formato</th>
                 <th>Acción</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let rep of reportes">
                 <td>{{ rep.nombre }}</td>
+                <td><span class="badge-num">{{ rep.total }}</span></td>
+                <td><span class="badge-open">{{ rep.abiertas }}</span></td>
+                <td><span class="badge-closed">{{ rep.cerradas }}</span></td>
                 <td>{{ rep.fecha }}</td>
-                <td>{{ rep.formato }}</td>
                 <td>
-                  <button class="btn-small" (click)="descargar(rep)">Descargar</button>
+                  <button class="btn-small" (click)="descargar(rep)">Ver</button>
                 </td>
               </tr>
             </tbody>
           </table>
+          <div *ngIf="!cargandoReportes && reportes.length === 0" class="empty-state">
+            No hay reportes generados. Usa el botón "Descargar Excel" para crear uno.
+          </div>
         </section>
 
         <!-- Accesos rápidos -->
