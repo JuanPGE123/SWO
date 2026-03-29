@@ -6,6 +6,7 @@ dist/
 .env
 .DS_Store
 src/favicon.ico
+build_*.txt
 
 # Java compiled artifacts
 *.class
