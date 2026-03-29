@@ -1,8 +1,10 @@
 package com.swo.controller;
 
 import com.swo.dao.IncidenciaDAO;
+import com.swo.dao.ProyectoDAO;
 import com.swo.dao.UsuarioDAO;
 import com.swo.model.Incidencia;
+import com.swo.model.Proyecto;
 import com.swo.model.Usuario;
 
 import javax.servlet.ServletException;
@@ -19,23 +21,32 @@ import java.util.List;
 /**
  * API REST JSON para consumir desde Angular
  * Rutas:
- *   GET  /api/incidencias         -> lista de incidencias
- *   POST /api/incidencias         -> crear incidencia
- *   GET  /api/usuarios            -> lista de usuarios
- *   POST /api/login               -> autenticar usuario
- *   POST /api/logout              -> cerrar sesión
+ *   GET    /api/incidencias          -> lista de incidencias
+ *   POST   /api/incidencias          -> crear incidencia
+ *   GET    /api/usuarios             -> lista usuarios
+ *   POST   /api/usuarios             -> crear usuario
+ *   DELETE /api/usuarios/{id}        -> eliminar usuario (lógico)
+ *   GET    /api/proyectos            -> lista proyectos
+ *   POST   /api/proyectos            -> crear proyecto
+ *   DELETE /api/proyectos/{id}       -> eliminar proyecto
+ *   POST   /api/proyectos/asignar    -> asignar usuario a proyecto
+ *   GET    /api/estadisticas         -> estadísticas dashboard
+ *   POST   /api/login               -> autenticar usuario
+ *   POST   /api/logout              -> cerrar sesión
  */
 @WebServlet("/api/*")
 public class ApiServlet extends HttpServlet {
 
     private IncidenciaDAO incidenciaDAO;
     private UsuarioDAO usuarioDAO;
+    private ProyectoDAO proyectoDAO;
 
     @Override
     public void init() throws ServletException {
         super.init();
         incidenciaDAO = new IncidenciaDAO();
         usuarioDAO = new UsuarioDAO();
+        proyectoDAO = new ProyectoDAO();
     }
 
     @Override
@@ -46,27 +57,33 @@ public class ApiServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
 
         String path = req.getPathInfo();
+        if (path == null) path = "/";
         PrintWriter out = res.getWriter();
 
         if ("/incidencias".equals(path)) {
-            List<Incidencia> lista = incidenciaDAO.obtenerIncidencias();
-            out.print(incidenciasToJson(lista));
+            out.print(incidenciasToJson(incidenciaDAO.obtenerIncidencias()));
 
         } else if ("/usuarios".equals(path)) {
-            List<Usuario> lista = usuarioDAO.obtenerUsuarios();
-            out.print(usuariosToJson(lista));
+            out.print(usuariosToJson(usuarioDAO.obtenerUsuarios()));
+
+        } else if ("/proyectos".equals(path)) {
+            out.print(proyectosToJson(proyectoDAO.obtenerProyectos()));
 
         } else if ("/estadisticas".equals(path)) {
             List<Incidencia> inc = incidenciaDAO.obtenerIncidencias();
-            long abiertas = 0, enProgreso = 0, cerradas = 0;
+            long abiertas = 0, enProgreso = 0, pendientes = 0, cerradas = 0;
             for (Incidencia i : inc) {
-                if ("Abierto".equals(i.getEstado())) abiertas++;
-                else if ("En Progreso".equals(i.getEstado())) enProgreso++;
-                else if ("Cerrado".equals(i.getEstado())) cerradas++;
+                switch (i.getEstado()) {
+                    case "Abierto": abiertas++; break;
+                    case "En Progreso": enProgreso++; break;
+                    case "Pendiente": pendientes++; break;
+                    case "Cerrado": case "Resuelto": cerradas++; break;
+                }
             }
             out.print("{\"total\":" + inc.size()
                 + ",\"abiertas\":" + abiertas
                 + ",\"enProgreso\":" + enProgreso
+                + ",\"pendientes\":" + pendientes
                 + ",\"cerradas\":" + cerradas + "}");
 
         } else {
@@ -84,6 +101,7 @@ public class ApiServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
 
         String path = req.getPathInfo();
+        if (path == null) path = "/";
         PrintWriter out = res.getWriter();
 
         if ("/incidencias".equals(path)) {
@@ -124,6 +142,23 @@ public class ApiServlet extends HttpServlet {
                 out.print("{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}");
             }
 
+        } else if ("/usuarios".equals(path)) {
+            handleCrearUsuario(req, res, out);
+
+        } else if ("/proyectos/asignar".equals(path)) {
+            try {
+                int idUsr = Integer.parseInt(req.getParameter("idUsuario"));
+                int idPrj = Integer.parseInt(req.getParameter("idProyecto"));
+                boolean ok = proyectoDAO.asignarUsuarioAProyecto(idUsr, idPrj);
+                out.print(ok ? "{\"success\":true}" : "{\"error\":\"No se pudo asignar\"}");
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"Parametros invalidos\"}");
+            }
+
+        } else if ("/proyectos".equals(path)) {
+            handleCrearProyecto(req, res, out);
+
         } else if ("/login".equals(path)) {
             String correo = req.getParameter("correo");
             String password = req.getParameter("password");
@@ -140,14 +175,16 @@ public class ApiServlet extends HttpServlet {
                         + ",\"nombre\":\"" + escJson(usuario.getNombreCompleto()) + "\""
                         + ",\"correo\":\"" + escJson(usuario.getCorreo()) + "\""
                         + ",\"rol\":\"" + escJson(usuario.getRol()) + "\""
-                        + ",\"departamento\":\"" + escJson(usuario.getDepartamento()) + "\"}");
+                        + ",\"departamento\":\"" + escJson(usuario.getDepartamento()) + "\""
+                        + ",\"idProyecto\":" + (usuario.getIdProyecto() != null ? usuario.getIdProyecto() : "null")
+                        + ",\"proyecto\":\"" + escJson(usuario.getNombreProyecto()) + "\"}");
                 } else {
                     res.setStatus(401);
                     out.print("{\"success\":false,\"error\":\"Credenciales incorrectas\"}");
                 }
             } catch (Exception e) {
                 res.setStatus(500);
-                out.print("{\"success\":false,\"error\":\"Error del servidor: " + e.getMessage().replace("\"", "'") + "\"}");
+                out.print("{\"success\":false,\"error\":\"Error del servidor: " + escJson(e.getMessage()) + "\"}");
             }
 
         } else if ("/logout".equals(path)) {
@@ -162,17 +199,109 @@ public class ApiServlet extends HttpServlet {
         out.flush();
     }
 
-    // Preflight CORS para Angular en GitHub Pages o localhost:4200
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = res.getWriter();
+        String path = req.getPathInfo();
+        if (path == null) path = "/";
+
+        if (path.startsWith("/usuarios/")) {
+            try {
+                int id = Integer.parseInt(path.substring("/usuarios/".length()));
+                boolean ok = usuarioDAO.eliminarUsuario(id);
+                out.print(ok ? "{\"success\":true}" : "{\"error\":\"No encontrado\"}");
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"ID invalido\"}");
+            }
+        } else if (path.startsWith("/proyectos/")) {
+            try {
+                int id = Integer.parseInt(path.substring("/proyectos/".length()));
+                boolean ok = proyectoDAO.eliminarProyecto(id);
+                out.print(ok ? "{\"success\":true}" : "{\"error\":\"No encontrado\"}");
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"ID invalido\"}");
+            }
+        } else {
+            res.setStatus(404);
+            out.print("{\"error\":\"Ruta no encontrada\"}");
+        }
+        out.flush();
+    }
+
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         setCorsHeaders(res);
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
         res.setStatus(200);
+    }
+
+    private void handleCrearUsuario(HttpServletRequest req, HttpServletResponse res, PrintWriter out)
+            throws IOException {
+        try {
+            String nombre = req.getParameter("nombre");
+            String correo = req.getParameter("correo");
+            String password = req.getParameter("password");
+            String rol = req.getParameter("rol");
+            String telefono = req.getParameter("telefono");
+            String departamento = req.getParameter("departamento");
+            String idPrStr = req.getParameter("idProyecto");
+
+            if (nombre == null || nombre.isEmpty() || correo == null || correo.isEmpty()) {
+                res.setStatus(400);
+                out.print("{\"error\":\"nombre y correo son obligatorios\"}");
+                return;
+            }
+            Usuario u = new Usuario();
+            u.setNombreCompleto(nombre);
+            u.setCorreo(correo);
+            u.setPasswordHash(password != null && !password.isEmpty() ? password : "123456");
+            u.setRol(rol != null && !rol.isEmpty() ? rol : "Usuario");
+            u.setTelefono(telefono != null ? telefono : "");
+            u.setDepartamento(departamento != null ? departamento : "");
+            if (idPrStr != null && !idPrStr.isEmpty()) u.setIdProyecto(Integer.parseInt(idPrStr));
+
+            boolean ok = usuarioDAO.insertarUsuario(u);
+            if (ok) out.print("{\"success\":true,\"mensaje\":\"Usuario creado\"}");
+            else { res.setStatus(500); out.print("{\"error\":\"No se pudo crear el usuario\"}"); }
+        } catch (Exception e) {
+            res.setStatus(500);
+            out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+        }
+    }
+
+    private void handleCrearProyecto(HttpServletRequest req, HttpServletResponse res, PrintWriter out)
+            throws IOException {
+        try {
+            String nombre = req.getParameter("nombre");
+            String descripcion = req.getParameter("descripcion");
+            String estado = req.getParameter("estado");
+
+            if (nombre == null || nombre.isEmpty()) {
+                res.setStatus(400);
+                out.print("{\"error\":\"nombre es obligatorio\"}");
+                return;
+            }
+            Proyecto p = new Proyecto(nombre,
+                    descripcion != null ? descripcion : "",
+                    estado != null && !estado.isEmpty() ? estado : "Activo");
+            boolean ok = proyectoDAO.insertarProyecto(p);
+            if (ok) out.print("{\"success\":true,\"id\":" + p.getIdProyecto() + ",\"mensaje\":\"Proyecto creado\"}");
+            else { res.setStatus(500); out.print("{\"error\":\"No se pudo crear el proyecto\"}"); }
+        } catch (Exception e) {
+            res.setStatus(500);
+            out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+        }
     }
 
     private void setCorsHeaders(HttpServletResponse res) {
         res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     }
 
@@ -213,7 +342,28 @@ public class ApiServlet extends HttpServlet {
               .append("\"nombre\":\"").append(escJson(u.getNombreCompleto())).append("\",")
               .append("\"correo\":\"").append(escJson(u.getCorreo())).append("\",")
               .append("\"rol\":\"").append(escJson(u.getRol())).append("\",")
-              .append("\"departamento\":\"").append(escJson(u.getDepartamento())).append("\"")
+              .append("\"telefono\":\"").append(escJson(u.getTelefono())).append("\",")
+              .append("\"departamento\":\"").append(escJson(u.getDepartamento())).append("\",")
+              .append("\"idProyecto\":").append(u.getIdProyecto() != null ? u.getIdProyecto() : "null").append(",")
+              .append("\"proyecto\":\"").append(escJson(u.getNombreProyecto())).append("\"")
+              .append("}");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String proyectosToJson(List<Proyecto> lista) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lista.size(); i++) {
+            Proyecto p = lista.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("{")
+              .append("\"id\":").append(p.getIdProyecto()).append(",")
+              .append("\"nombre\":\"").append(escJson(p.getNombre())).append("\",")
+              .append("\"descripcion\":\"").append(escJson(p.getDescripcion())).append("\",")
+              .append("\"estado\":\"").append(escJson(p.getEstado())).append("\",")
+              .append("\"fechaCreacion\":\"").append(p.getFechaCreacion() != null ? sdf.format(p.getFechaCreacion()) : "").append("\"")
               .append("}");
         }
         sb.append("]");

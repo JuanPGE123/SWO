@@ -58,7 +58,9 @@ export class AuthService {
               area: resp.departamento || 'TI',
               jefeDirecto: '',
               correoJefe: '',
-              role: resp.rol || 'Usuario'
+              role: resp.rol || 'Usuario',
+              idProyecto: resp.idProyecto || undefined,
+              proyecto: resp.proyecto || ''
             };
             this.usuarioAutenticadoSubject.next(usuario);
             this.guardarUsuario(usuario);

@@ -6,10 +6,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { UsersService } from '../../core/services/users.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { Usuario } from '../../core/models/models';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-users',
@@ -29,13 +31,17 @@ export class UsersComponent implements OnInit {
   mostrarModal: boolean = false;
   guardando: boolean = false;
   nuevoUsuario = {
-    nombre: '', apellido: '', correo: '', celular: '',
-    area: 'TI', jefeDirecto: '', correoJefe: ''
+    nombre: '', correo: '', password: '123456',
+    rol: 'Usuario', telefono: '', departamento: '', idProyecto: 0
   };
+
+  proyectos: { id: number; nombre: string }[] = [];
+  cargandoProyectos: boolean = false;
 
   constructor(
     private usersService: UsersService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -100,8 +106,14 @@ export class UsersComponent implements OnInit {
   }
 
   abrirModal(): void {
-    this.nuevoUsuario = { nombre: '', apellido: '', correo: '', celular: '', area: 'TI', jefeDirecto: '', correoJefe: '' };
+    this.nuevoUsuario = { nombre: '', correo: '', password: '123456', rol: 'Usuario', telefono: '', departamento: '', idProyecto: 0 };
     this.mostrarModal = true;
+    // Cargar proyectos disponibles
+    this.cargandoProyectos = true;
+    this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
+      next: (data) => { this.proyectos = data.map(p => ({ id: p.id, nombre: p.nombre })); this.cargandoProyectos = false; },
+      error: () => { this.proyectos = []; this.cargandoProyectos = false; }
+    });
   }
 
   cerrarModal(): void {
@@ -114,25 +126,32 @@ export class UsersComponent implements OnInit {
       return;
     }
     this.guardando = true;
-    const nuevo: Usuario = {
-      id: 'USR-' + Date.now(),
+    this.usersService.agregarUsuarioBackend({
       nombre: this.nuevoUsuario.nombre.trim(),
-      apellido: this.nuevoUsuario.apellido.trim(),
       correo: this.nuevoUsuario.correo.trim(),
-      celular: this.nuevoUsuario.celular.trim(),
-      area: this.nuevoUsuario.area,
-      jefeDirecto: this.nuevoUsuario.jefeDirecto.trim(),
-      correoJefe: this.nuevoUsuario.correoJefe.trim()
-    };
-    this.usersService.agregarUsuario(nuevo);
-    this.guardando = false;
-    this.mostrarModal = false;
-    this.notificationService.toast(`Usuario ${nuevo.nombre} creado`, 3000, 'success');
+      password: this.nuevoUsuario.password || '123456',
+      rol: this.nuevoUsuario.rol,
+      telefono: this.nuevoUsuario.telefono.trim(),
+      departamento: this.nuevoUsuario.departamento.trim(),
+      idProyecto: this.nuevoUsuario.idProyecto || undefined
+    }).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.mostrarModal = false;
+        this.notificationService.toast(`Usuario ${this.nuevoUsuario.nombre} creado`, 3000, 'success');
+      },
+      error: (err: any) => {
+        this.guardando = false;
+        this.notificationService.toast('Error al guardar: ' + (err?.message || err), 4000, 'error');
+      }
+    });
   }
 
   eliminarUsuario(id: string, nombre: string): void {
     if (!confirm(`¿Eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`)) return;
-    this.usersService.eliminarUsuario(id);
-    this.notificationService.toast(`Usuario ${nombre} eliminado`, 3000, 'success');
+    this.usersService.eliminarUsuarioBackend(id).subscribe({
+      next: () => this.notificationService.toast(`Usuario ${nombre} eliminado`, 3000, 'success'),
+      error: (err: any) => this.notificationService.toast('Error al eliminar: ' + (err?.message || err), 4000, 'error')
+    });
   }
 }

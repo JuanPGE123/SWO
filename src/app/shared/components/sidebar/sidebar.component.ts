@@ -62,6 +62,7 @@ export class SidebarComponent implements OnInit {
       { label: 'Panel', route: '/dashboard', icon: '📊' },
       { label: 'Incidencias', route: '/incidents', icon: '🎫' },
       { label: 'Usuarios', route: '/users', icon: '👥' },
+      { label: 'Proyectos', route: '/projects', icon: '🗂️' },
       { label: 'Reportes', route: '/reports', icon: '📈' },
       { label: 'ChatBot', route: '/chatbot', icon: '🤖' }
     ];

@@ -30,8 +30,7 @@ export class AuthComponent implements OnInit {
   // Estado del formulario
   email: string = '';
   password: string = '';
-  project: string = '101';
-  
+
   // Estado de UI
   showPassword: boolean = false;
   isLoading: boolean = false;
@@ -78,7 +77,7 @@ export class AuthComponent implements OnInit {
     event.preventDefault();
 
     // Validaciones básicas
-    if (!this.email || !this.password || !this.project) {
+    if (!this.email || !this.password) {
       this.errorMessage = 'Por favor rellena todos los campos.';
       this.notificationService.toast('Por favor rellena todos los campos.', 3000, 'warning');
       return;
@@ -91,8 +90,7 @@ export class AuthComponent implements OnInit {
     // Preparar credenciales
     const credenciales: Credenciales = {
       email: this.email.trim(),
-      password: this.password,
-      project: this.project
+      password: this.password
     };
 
     // Llamar al servicio de autenticación

@@ -19,6 +19,7 @@ import { UsersComponent } from './features/users/users.component';
 import { ReportsComponent } from './features/reports/reports.component';
 import { ChatbotComponent } from './features/chatbot/chatbot.component';
 import { IncidentDetailComponent } from './features/incidents/incident-detail/incident-detail.component';
+import { ProjectsComponent } from './features/projects/projects.component';
 
 /**
  * Rutas principales de la aplicación
@@ -52,6 +53,11 @@ export const routes: Routes = [
   {
     path: 'users',
     component: UsersComponent,
+    // canActivate: [authGuard]
+  },
+  {
+    path: 'projects',
+    component: ProjectsComponent,
     // canActivate: [authGuard]
   },
   {

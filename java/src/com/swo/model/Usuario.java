@@ -17,6 +17,8 @@ public class Usuario {
     private String fotoPerfil;
     private Timestamp fechaRegistro;
     private Timestamp ultimaConexion;
+    private Integer idProyecto;
+    private String nombreProyecto;
 
     // Constructor vacío
     public Usuario() {
@@ -121,6 +123,11 @@ public class Usuario {
     public void setUltimaConexion(Timestamp ultimaConexion) {
         this.ultimaConexion = ultimaConexion;
     }
+
+    public Integer getIdProyecto() { return idProyecto; }
+    public void setIdProyecto(Integer idProyecto) { this.idProyecto = idProyecto; }
+    public String getNombreProyecto() { return nombreProyecto; }
+    public void setNombreProyecto(String nombreProyecto) { this.nombreProyecto = nombreProyecto; }
 
     @Override
     public String toString() {

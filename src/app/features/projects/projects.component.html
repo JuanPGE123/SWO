@@ -1,0 +1,131 @@
+<!-- projects.component.html - Gestión de proyectos -->
+
+<div class="projects-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-area">
+    <header class="topbar">
+      <h1>Gestión de Proyectos</h1>
+      <div class="topbar-actions">
+        <button class="btn-action" (click)="cargarProyectos()">Actualizar</button>
+        <button class="btn-action primary" (click)="abrirModal()">+ Nuevo Proyecto</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Métricas -->
+      <section class="metrics">
+        <div class="metric-card">
+          <h4>Total Proyectos</h4>
+          <div class="metric-value">{{ proyectos.length }}</div>
+        </div>
+        <div class="metric-card">
+          <h4>Activos</h4>
+          <div class="metric-value">{{ proyectos.length }}</div>
+        </div>
+      </section>
+
+      <!-- Tabla de proyectos -->
+      <section class="projects-section">
+        <div class="section-header">
+          <h3>Listado de Proyectos ({{ proyectos.length }})</h3>
+        </div>
+
+        <div *ngIf="cargando" class="loading-msg">Cargando proyectos...</div>
+
+        <div class="table-wrapper" *ngIf="!cargando">
+          <table class="projects-table" *ngIf="proyectos.length > 0; else noProyectos">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Fecha Creación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of proyectos">
+                <td>{{ p.id }}</td>
+                <td><strong>{{ p.nombre }}</strong></td>
+                <td>{{ p.descripcion }}</td>
+                <td><span class="badge" [class.active]="p.estado === 'Activo'" [class.archived]="p.estado !== 'Activo'">{{ p.estado }}</span></td>
+                <td>{{ p.fechaCreacion }}</td>
+                <td class="actions-cell">
+                  <button class="btn-small info" (click)="abrirAsignar(p.id)">👤 Asignar</button>
+                  <button class="btn-small danger" (click)="eliminarProyecto(p.id, p.nombre)">🗑️ Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noProyectos>
+            <div class="empty-state">
+              <p>No hay proyectos. Crea el primero con "+ Nuevo Proyecto".</p>
+            </div>
+          </ng-template>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Nuevo Proyecto -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nuevo Proyecto</h3>
+      <button class="btn-close" (click)="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" class="form-input" [(ngModel)]="nuevoProyecto.nombre" placeholder="Plataforma SWO" />
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea class="form-input" [(ngModel)]="nuevoProyecto.descripcion" rows="3" placeholder="Descripción del proyecto"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select class="form-input" [(ngModel)]="nuevoProyecto.estado">
+          <option value="Activo">Activo</option>
+          <option value="Archivado">Archivado</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-action primary" (click)="guardarProyecto()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar Proyecto' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Asignar Usuario -->
+<div class="modal-overlay" *ngIf="mostrarAsignar" (click)="cerrarAsignar()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Asignar Usuario al Proyecto</h3>
+      <button class="btn-close" (click)="cerrarAsignar()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Selecciona un usuario</label>
+        <select class="form-input" [(ngModel)]="idUsuarioSeleccionado">
+          <option [value]="0">-- Seleccionar --</option>
+          <option *ngFor="let u of usuarios" [value]="u.id">
+            {{ u.nombre }} {{ u.proyecto ? '(Proyecto: ' + u.proyecto + ')' : '' }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action" (click)="cerrarAsignar()">Cancelar</button>
+      <button class="btn-action primary" (click)="confirmarAsignacion()" [disabled]="asignando">
+        {{ asignando ? 'Asignando...' : 'Confirmar Asignación' }}
+      </button>
+    </div>
+  </div>
+</div>

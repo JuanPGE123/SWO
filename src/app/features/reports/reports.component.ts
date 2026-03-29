@@ -5,8 +5,10 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../core/services/notification.service';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reports',
@@ -16,6 +18,9 @@ import { SidebarComponent } from '../../shared/components/sidebar/sidebar.compon
   styleUrls: ['./reports.component.scss']
 })
 export class ReportsComponent implements OnInit {
+  estadisticas: any = null;
+  cargandoStats: boolean = false;
+
   reportes = [
     { nombre: 'Incidencias Semana 34', fecha: '25/08/2025', formato: 'PDF' },
     { nombre: 'Backlog por categoría', fecha: '22/08/2025', formato: 'CSV' },
@@ -23,18 +28,32 @@ export class ReportsComponent implements OnInit {
   ];
 
   topCategorias = [
-    { nombre: 'Red y conectividad', count: 86 },
-    { nombre: 'Aplicaciones', count: 74 },
-    { nombre: 'Hardware', count: 61 },
-    { nombre: 'Seguridad', count: 44 }
+    { nombre: 'Red y conectividad', count: 0 },
+    { nombre: 'Aplicaciones', count: 0 },
+    { nombre: 'Hardware', count: 0 },
+    { nombre: 'Seguridad', count: 0 }
   ];
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private http: HttpClient
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.cargarEstadisticas();
+  }
+
+  cargarEstadisticas(): void {
+    this.cargandoStats = true;
+    this.http.get<any>(`${environment.apiUrl}/estadisticas`).subscribe({
+      next: (data) => { this.estadisticas = data; this.cargandoStats = false; },
+      error: () => { this.cargandoStats = false; }
+    });
+  }
 
   actualizar(): void {
     this.notificationService.toast('Actualizando datos...', 2000, 'info');
+    this.cargarEstadisticas();
   }
 
   exportar(): void {

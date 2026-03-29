@@ -29,12 +29,12 @@
       <section class="metrics">
         <div class="metric-card large">
           <h4>Incidencias totales</h4>
-          <div class="metric-value">324</div>
-          <div class="metric-delta">+12% vs período anterior</div>
-          <div class="metric-pills">
-            <span class="pill">Abiertas 98</span>
-            <span class="pill">En progreso 142</span>
-            <span class="pill">Resueltas 64</span>
+          <div class="metric-value">{{ estadisticas ? estadisticas.total : '—' }}</div>
+          <div class="metric-delta" *ngIf="cargandoStats">Cargando desde BD...</div>
+          <div class="metric-pills" *ngIf="estadisticas">
+            <span class="pill">Abiertas {{ estadisticas.abiertas }}</span>
+            <span class="pill">En progreso {{ estadisticas.enProgreso }}</span>
+            <span class="pill">Cerradas {{ estadisticas.cerradas }}</span>
           </div>
         </div>
 

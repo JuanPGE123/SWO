@@ -1,129 +1,82 @@
 /**
  * users.service.ts
- * 
- * Servicio de usuarios: gestiona la información y operaciones de usuarios.
- * - Almacena lista de usuarios
- * - Proporciona búsqueda y filtrado
- * - Emite cambios como Observables
+ *
+ * Servicio de usuarios: gestiona usuarios conectando al backend Java REST API.
+ * Endpoints: GET/POST /api/usuarios, DELETE /api/usuarios/{id}
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Usuario } from '../models/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsersService {
-  // Datos de ejemplo de usuarios
-  private usuariosData: Usuario[] = [
-    {
-      id: 'USR-001',
-      nombre: 'Juan Pablo',
-      apellido: 'Ramírez',
-      correo: 'juan.ramirez@swo.com',
-      celular: '+57 310 123 4567',
-      area: 'TI',
-      jefeDirecto: 'María García',
-      correoJefe: 'maria.garcia@swo.com'
-    },
-    {
-      id: 'USR-002',
-      nombre: 'Ana María',
-      apellido: 'López',
-      correo: 'ana.lopez@swo.com',
-      celular: '+57 320 234 5678',
-      area: 'Soporte',
-      jefeDirecto: 'Carlos Mendoza',
-      correoJefe: 'carlos.mendoza@swo.com'
-    },
-    {
-      id: 'USR-003',
-      nombre: 'Carlos',
-      apellido: 'Mendoza',
-      correo: 'carlos.mendoza@swo.com',
-      celular: '+57 315 345 6789',
-      area: 'Soporte',
-      jefeDirecto: 'María García',
-      correoJefe: 'maria.garcia@swo.com'
-    },
-    {
-      id: 'USR-004',
-      nombre: 'María',
-      apellido: 'García',
-      correo: 'maria.garcia@swo.com',
-      celular: '+57 318 456 7890',
-      area: 'TI',
-      jefeDirecto: 'Director General',
-      correoJefe: 'director@swo.com'
-    },
-    {
-      id: 'USR-005',
-      nombre: 'Luis',
-      apellido: 'Hernández',
-      correo: 'luis.hernandez@swo.com',
-      celular: '+57 311 567 8901',
-      area: 'Desarrollo',
-      jefeDirecto: 'María García',
-      correoJefe: 'maria.garcia@swo.com'
-    }
-  ];
+  private apiUrl = environment.apiUrl;
 
-  // BehaviorSubject para emitir cambios en la lista de usuarios
-  private usuariosSubject = new BehaviorSubject<Usuario[]>(this.usuariosData);
+  private usuariosData: Usuario[] = [];
+  private usuariosSubject = new BehaviorSubject<Usuario[]>([]);
   public usuarios$: Observable<Usuario[]> = this.usuariosSubject.asObservable();
 
-  constructor() {}
+  constructor(private http: HttpClient) {
+    this.cargarDesdeBackend();
+  }
 
-  /**
-   * Método obtenerUsuarios: obtiene todos los usuarios
-   * 
-   * @returns Observable<Usuario[]> - Stream de usuarios
-   */
+  /** Carga usuarios desde el backend y actualiza el Subject */
+  cargarDesdeBackend(): void {
+    this.http.get<any[]>(`${this.apiUrl}/usuarios`).subscribe({
+      next: (data) => {
+        this.usuariosData = data.map(u => this.mapearUsuario(u));
+        this.usuariosSubject.next([...this.usuariosData]);
+      },
+      error: () => {
+        // Backend no disponible: mantener datos vacíos
+        this.usuariosSubject.next([]);
+      }
+    });
+  }
+
+  private mapearUsuario(u: any): Usuario {
+    const nombreCompleto: string = u.nombre || '';
+    const espacio = nombreCompleto.indexOf(' ');
+    const nombre = espacio > 0 ? nombreCompleto.substring(0, espacio) : nombreCompleto;
+    const apellido = espacio > 0 ? nombreCompleto.substring(espacio + 1) : '';
+    return {
+      id: String(u.id),
+      nombre,
+      apellido,
+      correo: u.correo || '',
+      celular: u.telefono || '',
+      area: u.departamento || '',
+      jefeDirecto: '',
+      correoJefe: ''
+    };
+  }
+
   obtenerUsuarios(): Observable<Usuario[]> {
     return this.usuarios$;
   }
 
-  /**
-   * Método obtenerUsuarioPorId: obtiene un usuario específico
-   * 
-   * @param id - ID del usuario
-   * @returns Usuario | undefined - Usuario encontrado o undefined
-   */
   obtenerUsuarioPorId(id: string): Usuario | undefined {
     return this.usuariosData.find(usr => usr.id === id);
   }
 
-  /**
-   * Método obtenerUsuariosPorArea: filtra usuarios por área
-   * 
-   * @param area - Nombre del área
-   * @returns Usuario[] - Usuarios que pertenecen al área
-   */
   obtenerUsuariosPorArea(area: string): Usuario[] {
     return this.usuariosData.filter(usr => usr.area === area);
   }
 
-  /**
-   * Método buscarUsuarios: búsqueda por nombre o correo
-   * 
-   * @param termino - Término de búsqueda
-   * @returns Usuario[] - Usuarios que coinciden
-   */
   buscarUsuarios(termino: string): Usuario[] {
-    const terminoLower = termino.toLowerCase();
+    const t = termino.toLowerCase();
     return this.usuariosData.filter(usr =>
-      usr.nombre.toLowerCase().includes(terminoLower) ||
-      usr.apellido.toLowerCase().includes(terminoLower) ||
-      usr.correo.toLowerCase().includes(terminoLower)
+      usr.nombre.toLowerCase().includes(t) ||
+      usr.apellido.toLowerCase().includes(t) ||
+      usr.correo.toLowerCase().includes(t)
     );
   }
 
-  /**
-   * Método obtenerConteosPorArea: obtiene estadísticas de usuarios por área
-   * 
-   * @returns objeto con conteos por área
-   */
   obtenerConteosPorArea(): { [area: string]: number } {
     const conteos: { [area: string]: number } = {};
     this.usuariosData.forEach(usr => {
@@ -132,11 +85,68 @@ export class UsersService {
     return conteos;
   }
 
-  /**
-   * Método actualizarUsuario: actualiza datos de un usuario
-   * 
-   * @param usuarioActualizado - Usuario con datos actualizados
-   */
+  /** Crea un usuario en el backend. nuevoUsuario incluye campos del backend */
+  agregarUsuarioBackend(datos: {
+    nombre: string; correo: string; password: string;
+    rol: string; telefono: string; departamento: string; idProyecto?: number;
+  }): Observable<any> {
+    let params = new HttpParams()
+      .set('nombre', datos.nombre)
+      .set('correo', datos.correo)
+      .set('password', datos.password)
+      .set('rol', datos.rol)
+      .set('telefono', datos.telefono)
+      .set('departamento', datos.departamento);
+    if (datos.idProyecto) params = params.set('idProyecto', String(datos.idProyecto));
+
+    return new Observable(observer => {
+      this.http.post<any>(`${this.apiUrl}/usuarios`, params.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }).subscribe({
+        next: (resp) => {
+          if (resp?.success) {
+            this.cargarDesdeBackend();
+            observer.next(resp);
+          } else {
+            observer.error(resp?.error || 'Error al guardar');
+          }
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
+  /** Elimina usuario por lógica en el backend */
+  eliminarUsuarioBackend(id: string): Observable<any> {
+    return new Observable(observer => {
+      this.http.delete<any>(`${this.apiUrl}/usuarios/${id}`).subscribe({
+        next: (resp) => {
+          if (resp?.success) {
+            this.usuariosData = this.usuariosData.filter(u => u.id !== id);
+            this.usuariosSubject.next([...this.usuariosData]);
+            observer.next(resp);
+          } else {
+            observer.error(resp?.error || 'Error al eliminar');
+          }
+          observer.complete();
+        },
+        error: (err) => observer.error(err)
+      });
+    });
+  }
+
+  /** Mantiene compatibilidad con código legacy que llama agregarUsuario/eliminarUsuario */
+  agregarUsuario(usuario: Usuario): void {
+    this.usuariosData.push(usuario);
+    this.usuariosSubject.next([...this.usuariosData]);
+  }
+
+  eliminarUsuario(id: string): void {
+    this.usuariosData = this.usuariosData.filter(usr => usr.id !== id);
+    this.usuariosSubject.next([...this.usuariosData]);
+  }
+
   actualizarUsuario(usuarioActualizado: Usuario): void {
     const index = this.usuariosData.findIndex(usr => usr.id === usuarioActualizado.id);
     if (index !== -1) {
@@ -144,24 +154,5 @@ export class UsersService {
       this.usuariosSubject.next([...this.usuariosData]);
     }
   }
-
-  /**
-   * Método agregarUsuario: añade un nuevo usuario
-   * 
-   * @param usuario - Nuevo usuario a agregar
-   */
-  agregarUsuario(usuario: Usuario): void {
-    this.usuariosData.push(usuario);
-    this.usuariosSubject.next([...this.usuariosData]);
-  }
-
-  /**
-   * Método eliminarUsuario: elimina un usuario
-   * 
-   * @param id - ID del usuario a eliminar
-   */
-  eliminarUsuario(id: string): void {
-    this.usuariosData = this.usuariosData.filter(usr => usr.id !== id);
-    this.usuariosSubject.next([...this.usuariosData]);
-  }
 }
+

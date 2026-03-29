@@ -71,7 +71,18 @@ export interface Reporte {
 export interface Credenciales {
   email: string;         // Correo del usuario
   password: string;      // Contraseña
-  project: string;       // ID del proyecto
+  project?: string;      // ID del proyecto (opcional, se carga desde backend)
+}
+
+/**
+ * Proyecto: proyecto del sistema al que se pueden asignar usuarios
+ */
+export interface Proyecto {
+  id: number;            // ID único
+  nombre: string;        // Nombre del proyecto
+  descripcion: string;   // Descripción
+  estado: string;        // Activo | Archivado
+  fechaCreacion?: string; // Fecha de creación
 }
 
 /**
@@ -81,6 +92,8 @@ export interface Credenciales {
 export interface UsuarioAutenticado extends Usuario {
   role: string;          // Rol del usuario (Administrador, Analista, etc)
   token?: string;        // Token de autenticación (si aplica)
+  idProyecto?: number;   // ID del proyecto asignado
+  proyecto?: string;     // Nombre del proyecto asignado
 }
 
 /**
