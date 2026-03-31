@@ -21,6 +21,10 @@ export class AuthService {
   private usuarioAutenticadoSubject = new BehaviorSubject<UsuarioAutenticado | null>(null);
   public usuarioAutenticado$: Observable<UsuarioAutenticado | null> = this.usuarioAutenticadoSubject.asObservable();
 
+  // ─── Credenciales del usuario master (hardcoded, sin base de datos) ───────
+  private readonly MASTER_EMAIL    = 'master@swo.com';
+  private readonly MASTER_PASSWORD = '123456';
+
   /**
    * Constructor del servicio
    */
@@ -30,16 +34,41 @@ export class AuthService {
   }
 
   /**
-   * Método login: valida credenciales y autentica al usuario
-   * 
-   * @param credenciales - Objeto con email, password y project
+   * Método login: valida credenciales y autentica al usuario.
+   *
+   * 1. Si son las credenciales master → acceso inmediato sin tocar el backend.
+   * 2. En caso contrario → llama al backend REST.
+   *
+   * @param credenciales - Objeto con email y password
    * @returns Observable<boolean> - true si la autenticación fue exitosa
-   * 
-   * Nota: Esta es una validación DEMO en frontend.
-   * En producción, siempre validar en backend con conexión segura HTTPS.
    */
   login(credenciales: Credenciales): Observable<boolean> {
     return new Observable(observer => {
+
+      // ── 1. Chequeo master (bypasa el backend completamente) ──────────────
+      if (
+        credenciales.email.trim().toLowerCase() === this.MASTER_EMAIL &&
+        credenciales.password === this.MASTER_PASSWORD
+      ) {
+        const master: UsuarioAutenticado = {
+          id: 'USR-MASTER',
+          nombre: 'Master',
+          apellido: 'SWO',
+          correo: this.MASTER_EMAIL,
+          celular: '',
+          area: 'TI',
+          jefeDirecto: '',
+          correoJefe: '',
+          role: 'Administrador'
+        };
+        this.usuarioAutenticadoSubject.next(master);
+        this.guardarUsuario(master);
+        observer.next(true);
+        observer.complete();
+        return;
+      }
+
+      // ── 2. Login normal contra el backend ────────────────────────────────
       const params = new HttpParams()
         .set('correo', credenciales.email)
         .set('password', credenciales.password);
@@ -74,15 +103,6 @@ export class AuthService {
           const body = httpErr?.error;
           if (body?.deleted) {
             observer.error({ deleted: true, message: body.error });
-          } else if (credenciales.email === 'master@swo.com' && credenciales.password === '123456') {
-            const usuario: UsuarioAutenticado = {
-              id: 'USR-001', nombre: 'Master', apellido: '',
-              correo: credenciales.email, celular: '', area: 'TI',
-              jefeDirecto: '', correoJefe: '', role: 'Administrador'
-            };
-            this.usuarioAutenticadoSubject.next(usuario);
-            this.guardarUsuario(usuario);
-            observer.next(true);
           } else {
             observer.next(false);
           }
