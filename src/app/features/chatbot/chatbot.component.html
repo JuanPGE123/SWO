@@ -111,14 +111,119 @@
           </div>
         </div>
 
-        <h4 style="margin-top: 16px">Opciones</h4>
-        <div class="options">
-          <label>
-            <input type="checkbox" [(ngModel)]="guardarHistorial" />
-            Guardar historial local
-          </label>
+        <h4 style="margin-top: 16px">Acciones</h4>
+        <div class="panel-actions">
+          <button class="btn-panel-action" (click)="abrirModalIncidencia()" title="Crear incidencia desde chat">
+            🎫 Crear Incidencia
+          </button>
+          <button class="btn-panel-action" (click)="abrirModalEscalar()" title="Escalar a agente especializado">
+            🔺 Escalar a Agente
+          </button>
         </div>
       </aside>
     </div>
   </main>
+</div>
+
+<!-- Modal: Crear Incidencia -->
+<div class="modal-overlay" *ngIf="mostrarModalIncidencia" (click)="cerrarModalIncidencia()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🎫 Crear Incidencia desde Chatbot</h3>
+      <button class="btn-close" (click)="cerrarModalIncidencia()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título *</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="nuevaIncidencia.titulo"
+          placeholder="Breve descripción del problema"
+          [disabled]="creandoIncidencia"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Descripción detallada</label>
+        <textarea
+          class="form-input"
+          [(ngModel)]="nuevaIncidencia.descripcion"
+          rows="4"
+          placeholder="Describe el problema con más detalle..."
+          [disabled]="creandoIncidencia"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select class="form-input" [(ngModel)]="nuevaIncidencia.prioridad" [disabled]="creandoIncidencia">
+          <option value="Baja">Baja</option>
+          <option value="Media">Media</option>
+          <option value="Alta">Alta</option>
+          <option value="Crítica">Crítica</option>
+        </select>
+      </div>
+
+      <p class="info-text">
+        ℹ️ Se incluirá el contexto de tu conversación con el chatbot para ayudar al técnico.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalIncidencia()" [disabled]="creandoIncidencia">
+        Cancelar
+      </button>
+      <button class="btn-primary" (click)="crearIncidencia()" [disabled]="creandoIncidencia || !nuevaIncidencia.titulo.trim()">
+        {{ creandoIncidencia ? 'Creando...' : 'Crear Incidencia' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Escalar a Agente -->
+<div class="modal-overlay" *ngIf="mostrarModalEscalar" (click)="cerrarModalEscalar()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🔺 Escalar a Agente Especializado</h3>
+      <button class="btn-close" (click)="cerrarModalEscalar()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Motivo del escalamiento *</label>
+        <textarea
+          class="form-input"
+          [(ngModel)]="motivoEscalamiento"
+          rows="4"
+          placeholder="Explica por qué necesitas ayuda especializada..."
+          [disabled]="escalando"
+        ></textarea>
+      </div>
+
+      <p class="info-text">
+        ℹ️ Tu consulta será escalada a un agente de nivel superior con el historial completo de la conversación.
+      </p>
+
+      <div class="alert-info">
+        <strong>¿Cuándo escalar?</strong>
+        <ul>
+          <li>El chatbot no pudo resolver tu problema</li>
+          <li>Necesitas ayuda técnica especializada</li>
+          <li>Es una situación urgente o crítica</li>
+          <li>Requieres cambios en sistemas o permisos</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalEscalar()" [disabled]="escalando">
+        Cancelar
+      </button>
+      <button class="btn-primary" (click)="escalarAAgente()" [disabled]="escalando || !motivoEscalamiento.trim()">
+        {{ escalando ? 'Escalando...' : 'Escalar Ahora' }}
+      </button>
+    </div>
+  </div>
 </div>

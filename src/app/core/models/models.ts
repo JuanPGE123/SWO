@@ -51,6 +51,8 @@ export interface Incidencia {
   app: string;                 // Aplicación afectada
   reason: string;              // Motivo/causa del incidente
   activity: string;            // Actividad que estaba realizando
+  resolucion?: string;         // Descripción de cómo se resolvió
+  fechaResolucion?: string;    // Fecha de resolución
 }
 
 /**

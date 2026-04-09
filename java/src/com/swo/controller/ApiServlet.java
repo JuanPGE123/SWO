@@ -295,10 +295,76 @@ public class ApiServlet extends HttpServlet {
     }
 
     @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setContentType("application/json;charset=UTF-8");
+        req.setCharacterEncoding("UTF-8");
+        PrintWriter out = res.getWriter();
+        String path = req.getPathInfo();
+        if (path == null) path = "/";
+
+        if (path.startsWith("/incidencias/")) {
+            try {
+                int id = Integer.parseInt(path.substring("/incidencias/".length()));
+                // Tomcat 7 no parsea body de PUT — leer manualmente
+                java.util.Map<String, String> params = new java.util.HashMap<>();
+                java.io.BufferedReader reader = req.getReader();
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) sb.append(line);
+                String body = sb.toString();
+                if (body != null && !body.isEmpty()) {
+                    for (String pair : body.split("&")) {
+                        int eq = pair.indexOf('=');
+                        if (eq > 0) {
+                            String k = java.net.URLDecoder.decode(pair.substring(0, eq), "UTF-8");
+                            String v = java.net.URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+                            params.put(k, v);
+                        }
+                    }
+                }
+                String titulo = params.get("titulo");
+                String descripcion = params.get("descripcion");
+                String estado = params.get("estado");
+                String impacto = params.get("impacto");
+                String ubicacion = params.get("ubicacion");
+                String resolucion = params.get("resolucion");
+                String resolverStr = params.get("resolver");
+                boolean resolver = "true".equals(resolverStr);
+
+                if (titulo == null || titulo.isEmpty()) {
+                    res.setStatus(400);
+                    out.print("{\"error\":\"titulo es obligatorio\"}");
+                    return;
+                }
+
+                boolean ok = incidenciaDAO.actualizarIncidencia(id, titulo,
+                    descripcion != null ? descripcion : "",
+                    estado != null ? estado : "Abierto",
+                    impacto, ubicacion, resolucion, resolver);
+
+                if (ok) out.print("{\"success\":true,\"mensaje\":\"Incidencia actualizada\"}");
+                else { res.setStatus(500); out.print("{\"error\":\"No se pudo actualizar\"}"); }
+            } catch (NumberFormatException e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"ID invalido\"}");
+            } catch (Exception e) {
+                res.setStatus(500);
+                out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+            }
+        } else {
+            res.setStatus(404);
+            out.print("{\"error\":\"Ruta no encontrada\"}");
+        }
+        out.flush();
+    }
+
+    @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         setCorsHeaders(res);
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.setStatus(200);
     }
 
@@ -362,7 +428,7 @@ public class ApiServlet extends HttpServlet {
 
     private void setCorsHeaders(HttpServletResponse res) {
         res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     }
 
@@ -385,6 +451,8 @@ public class ApiServlet extends HttpServlet {
               .append("\"impacto\":\"").append(escJson(inc.getImpacto())).append("\",")
               .append("\"ubicacion\":\"").append(escJson(inc.getUbicacion())).append("\",")
               .append("\"idUsuarioReporta\":").append(inc.getIdUsuarioReporta()).append(",")
+              .append("\"resolucion\":\"").append(inc.getResolucion() != null ? escJson(inc.getResolucion()) : "").append("\",")
+              .append("\"fechaResolucion\":\"").append(inc.getFechaResolucion() != null ? sdf.format(inc.getFechaResolucion()) : "").append("\",")
               .append("\"fechaCreacion\":\"")
               .append(inc.getFechaCreacion() != null ? sdf.format(inc.getFechaCreacion()) : "")
               .append("\"}");

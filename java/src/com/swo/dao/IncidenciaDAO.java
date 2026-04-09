@@ -47,6 +47,8 @@ public class IncidenciaDAO {
                 inc.setImpacto(rs.getString("impacto"));
                 inc.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
                 inc.setIdUsuarioReporta(rs.getInt("id_usuario_reporta"));
+                inc.setResolucion(rs.getString("resolucion"));
+                inc.setFechaResolucion(rs.getTimestamp("fecha_resolucion"));
                 listaIncidencias.add(inc);
             }
         } catch (SQLException e) {
@@ -67,6 +69,33 @@ public class IncidenciaDAO {
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al actualizar: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 3b. ACTUALIZACIÓN COMPLETA - Editar campos y/o resolver incidencia
+    public boolean actualizarIncidencia(int id, String titulo, String descripcion,
+            String estado, String impacto, String ubicacion, String resolucion, boolean resolver) {
+        String sql;
+        if (resolver) {
+            sql = "UPDATE incidencias SET titulo=?, descripcion=?, estado=?, impacto=?, ubicacion=?, " +
+                  "resolucion=?, fecha_resolucion=NOW() WHERE id_incidencia=?";
+        } else {
+            sql = "UPDATE incidencias SET titulo=?, descripcion=?, estado=?, impacto=?, ubicacion=?, " +
+                  "resolucion=? WHERE id_incidencia=?";
+        }
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, titulo);
+            pst.setString(2, descripcion);
+            pst.setString(3, estado);
+            pst.setString(4, impacto != null ? impacto : "Medio");
+            pst.setString(5, ubicacion);
+            pst.setString(6, resolucion);
+            pst.setInt(7, id);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar incidencia: " + e.getMessage());
             return false;
         }
     }
