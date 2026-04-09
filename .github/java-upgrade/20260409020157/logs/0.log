@@ -876,3 +876,31 @@
 [INFO] ------------------------------------------------------------------------
 2026-04-09T02:16:38.738Z [INFO] [MavenBuildTool] Found pom.xml files: d:\OneDrive\SENA\PROYECTOS\SWO\pom.xml
 2026-04-09T02:16:38.742Z [INFO] [MavenBuildTool] Java version found in d:\OneDrive\SENA\PROYECTOS\SWO\pom.xml: 21
+2026-04-09T02:18:46.021Z [INFO] ---------------------prepare appmod-report-event----------------------
+2026-04-09T02:18:46.021Z [INFO] [Tool.prepareInvocation]({name: appmod-report-event, input: {
+  "event": "summaryGenerated",
+  "message": "Successfully upgraded SWO project from Java 8 to Java 21 LTS. Only pom.xml required changes (4 compiler version strings); codebase was clean of removed APIs. Build and tests pass with Java 21.0.8 at parity with baseline.",
+  "phase": "summarize",
+  "projectPath": "d:\\OneDrive\\SENA\\PROYECTOS\\SWO",
+  "sessionId": "20260409020157",
+  "status": "succeeded"
+}}).
+2026-04-09T02:18:46.021Z [INFO] [Tool.prepareInvocation] do prepare invocation.
+2026-04-09T02:18:46.021Z [INFO] [Tool.prepareInvocation]({result: {
+  "invocationMessage": "Report upgrade event"
+}}).
+2026-04-09T02:18:46.021Z [INFO] ----------------------prepared appmod-report-event----------------------
+2026-04-09T02:18:46.042Z [INFO] ----------------------invoke appmod-report-event----------------------
+2026-04-09T02:18:46.042Z [INFO] [Tool.invoke]({name: appmod-report-event, input: {
+  "event": "summaryGenerated",
+  "message": "Successfully upgraded SWO project from Java 8 to Java 21 LTS. Only pom.xml required changes (4 compiler version strings); codebase was clean of removed APIs. Build and tests pass with Java 21.0.8 at parity with baseline.",
+  "phase": "summarize",
+  "projectPath": "d:\\OneDrive\\SENA\\PROYECTOS\\SWO",
+  "sessionId": "20260409020157",
+  "status": "succeeded"
+}}).
+2026-04-09T02:18:46.043Z [INFO] [Tool.invoke] do invoke.
+2026-04-09T02:18:46.043Z [INFO] [Tool.invoke]({result: {
+  "message": "Event 'summaryGenerated' reported!\nSession ID: 20260409020157,\nSession Dir: d:\\OneDrive\\SENA\\PROYECTOS\\SWO\\.github\\java-upgrade\\20260409020157"
+}}).
+2026-04-09T02:18:46.044Z [INFO] ----------------------invoked appmod-report-event----------------------

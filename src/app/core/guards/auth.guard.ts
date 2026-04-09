@@ -6,7 +6,7 @@
  * - Redirige a login si no está autenticado
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -38,8 +38,8 @@ export class AuthGuard {
  * Se usa directamente en la configuración de rutas
  */
 export const authGuard: CanActivateFn = (route, state) => {
-  const authService = new AuthService();
-  const router = new Router();
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
   if (authService.isAutenticado()) {
     return true;

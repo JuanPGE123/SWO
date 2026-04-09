@@ -1,38 +1,21 @@
+/**
+ * chatbot.component.ts
+ * 
+ * Componente de interfaz del chatbot SWO.
+ * Utiliza ChatbotService para toda la lógica de negocio.
+ */
+
 import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NotificationService } from '../../core/services/notification.service';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
-import { environment } from '../../../environments/environment';
-
-interface Mensaje {
-  texto: string;
-  autor: 'usuario' | 'bot';
-  timestamp: Date;
-  pasos?: string[];
-  categoria?: string;
-  nivel?: number;
-}
-
-interface KnowledgeItem {
-  id: number;
-  categoria: string;
-  pregunta: string;
-  respuesta: string;
-  pasos: string;
-  nivel: number;
-}
-
-interface ChatbotResponse {
-  resultados: KnowledgeItem[];
-  categorias: string[];
-}
+import { ChatbotService, Mensaje } from '../../core/services/chatbot.service';
 
 @Component({
   selector: 'app-chatbot',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './chatbot.component.html',
   styleUrls: ['./chatbot.component.scss']
 })
@@ -41,37 +24,52 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   mensajes: Mensaje[] = [];
   inputChat: string = '';
-  guardarHistorial: boolean = true;
   escribiendo: boolean = false;
   categorias: string[] = [];
+  accionesRapidas: { label: string; query: string }[] = [];
 
-  private readonly apiUrl = environment.apiUrl;
+  // Modal para crear incidencia
+  mostrarModalIncidencia: boolean = false;
+  nuevaIncidencia = {
+    titulo: '',
+    descripcion: '',
+    prioridad: 'Media' as 'Baja' | 'Media' | 'Alta' | 'Crítica'
+  };
+  creandoIncidencia: boolean = false;
 
-  accionesRapidas = [
-    { label: '🔑 Contraseñas', query: '¿Cómo restablezco una contraseña?' },
-    { label: '🌐 Red / Conectividad', query: 'No tengo acceso a internet ni a la red' },
-    { label: '🖨️ Impresoras', query: 'La impresora no imprime o tiene atasco de papel' },
-    { label: '🎫 Crear incidencia', query: '¿Cómo creo una nueva incidencia?' },
-    { label: '🔺 Escalar ticket', query: '¿Cómo escalo una incidencia a nivel superior?' },
-    { label: '🛡️ Seguridad', query: 'Creo que mi equipo tiene un virus o malware' }
-  ];
+  // Modal para escalar
+  mostrarModalEscalar: boolean = false;
+  motivoEscalamiento: string = '';
+  escalando: boolean = false;
 
   registroAcciones: string[] = [];
 
   constructor(
-    private http: HttpClient,
+    private chatbotService: ChatbotService,
     private notificationService: NotificationService
   ) {}
 
+
   ngOnInit(): void {
-    this.cargarHistorial();
-    if (this.mensajes.length === 0) {
-      this.agregarMensajeBot(
-        '¡Hola! Soy el asistente SWO 🤖\n\nPuedo ayudarte con problemas de TI como contraseñas, red, hardware, aplicaciones, seguridad y más. Usa los botones de acceso rápido o escribe tu consulta.',
-        []
-      );
-    }
-    this.cargarCategorias();
+    // Suscribirse a los mensajes del servicio
+    this.chatbotService.mensajes$.subscribe(mensajes => {
+      this.mensajes = mensajes;
+    });
+
+    // Suscribirse al estado de escritura
+    this.chatbotService.escribiendo$.subscribe(escribiendo => {
+      this.escribiendo = escribiendo;
+    });
+
+    // Obtener categorías
+    this.chatbotService.categorias$.subscribe(categorias => {
+      this.categorias = categorias;
+    });
+
+    // Obtener acciones rápidas
+    this.accionesRapidas = this.chatbotService.obtenerAccionesRapidas();
+
+    // Si no hay mensajes, se agregará el de bienvenida automáticamente
   }
 
   ngAfterViewChecked(): void {
@@ -87,15 +85,69 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     } catch {}
   }
 
+
   enviarMensaje(): void {
     const texto = this.inputChat.trim();
     if (!texto || this.escribiendo) return;
 
-    this.agregarMensaje(texto, 'usuario');
+    // Agregar mensaje del usuario
+    this.chatbotService.agregarMensajeUsuario(texto);
     this.registrarAccion(`Consulta: ${texto}`);
     this.inputChat = '';
-    this.buscarRespuesta(texto);
+
+    // Detectar intenciones especiales
+    if (this.esIntencionCrearIncidencia(texto)) {
+      this.abrirModalIncidencia(texto);
+      return;
+    }
+
+    if (this.esIntencionEscalar(texto)) {
+      this.abrirModalEscalar(texto);
+      return;
+    }
+
+    // Enviar consulta normal
+    this.chatbotService.enviarConsulta(texto).subscribe({
+      next: (mensaje) => {
+        if (mensaje.accion === 'crear_incidencia') {
+          this.registrarAccion('Bot sugiere crear incidencia');
+        } else {
+          this.registrarAccion(`Respuesta: ${mensaje.categoria || 'general'}`);
+        }
+      }
+    });
   }
+
+  /**
+   * Detecta si el usuario quiere crear una incidencia
+   */
+  private esIntencionCrearIncidencia(texto: string): boolean {
+    const palabrasClave = [
+      'crear incidencia',
+      'crear ticket',
+      'abrir ticket',
+      'reportar problema',
+      'necesito ayuda técnica'
+    ];
+    const textoLower = texto.toLowerCase();
+    return palabrasClave.some(p => textoLower.includes(p));
+  }
+
+  /**
+   * Detecta si el usuario quiere escalar
+   */
+  private esIntencionEscalar(texto: string): boolean {
+    const palabrasClave = [
+      'escalar',
+      'hablar con agente',
+      'necesito un técnico',
+      'ayuda especializada',
+      'nivel superior'
+    ];
+    const textoLower = texto.toLowerCase();
+    return palabrasClave.some(p => textoLower.includes(p));
+  }
+
 
   accionRapida(query: string): void {
     this.inputChat = query;
@@ -107,68 +159,125 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     this.enviarMensaje();
   }
 
-  private buscarRespuesta(consulta: string): void {
-    this.escribiendo = true;
-    const url = `${this.apiUrl}/chatbot?q=${encodeURIComponent(consulta)}`;
+  /**
+   * Abre modal para crear incidencia
+   */
+  abrirModalIncidencia(contexto?: string): void {
+    this.nuevaIncidencia = {
+      titulo: '',
+      descripcion: contexto || '',
+      prioridad: 'Media'
+    };
+    this.mostrarModalIncidencia = true;
+  }
 
-    this.http.get<ChatbotResponse>(url).subscribe({
-      next: (response) => {
-        this.escribiendo = false;
-        if (response.categorias.length > 0 && this.categorias.length === 0) {
-          this.categorias = response.categorias;
-        }
+  /**
+   * Cierra modal de incidencia
+   */
+  cerrarModalIncidencia(): void {
+    this.mostrarModalIncidencia = false;
+  }
 
-        if (!response.resultados || response.resultados.length === 0) {
-          this.agregarMensajeBot(
-            'No encontré información específica sobre esa consulta en mi base de conocimiento. Te recomiendo:\n\n• Crear una incidencia en el módulo de Incidentes.\n• Contactar al área de TI directamente.\n• Reformular tu pregunta con otras palabras.',
-            []
-          );
-          this.registrarAccion('Sin resultados para la consulta');
-          return;
-        }
+  /**
+   * Crea incidencia desde el chatbot
+   */
+  crearIncidencia(): void {
+    if (!this.nuevaIncidencia.titulo.trim()) {
+      this.notificationService.toast('El título es obligatorio', 3000, 'error');
+      return;
+    }
 
-        const item = response.resultados[0];
-        const pasos = item.pasos
-          ? item.pasos.split('||').map(p => p.trim()).filter(p => p.length > 0)
-          : [];
+    this.creandoIncidencia = true;
+    this.registrarAccion('Creando incidencia desde chatbot');
 
-        this.agregarMensajeBot(item.respuesta, pasos, item.categoria, item.nivel);
-        this.registrarAccion(`Respuesta encontrada: ${item.categoria}`);
+    const contexto = {
+      mensajes: this.mensajes,
+      prioridad: this.nuevaIncidencia.prioridad
+    };
 
-        if (response.resultados.length > 1) {
-          const otros = response.resultados
-            .slice(1, 3)
-            .map(r => `• ${r.pregunta}`)
-            .join('\n');
-          setTimeout(() => {
-            this.agregarMensajeBot(`También puede interesarte:\n${otros}`, []);
-          }, 600);
-        }
+    this.chatbotService.crearIncidenciaDesdeChat(
+      this.nuevaIncidencia.titulo,
+      this.nuevaIncidencia.descripcion,
+      contexto
+    ).subscribe({
+      next: () => {
+        this.creandoIncidencia = false;
+        this.mostrarModalIncidencia = false;
+        this.notificationService.toast('Incidencia creada exitosamente', 3000, 'success');
+        this.registrarAccion('Incidencia creada con éxito');
       },
       error: () => {
-        this.escribiendo = false;
-        this.agregarMensajeBot(
-          'No pude conectarme a la base de conocimiento en este momento. Por favor intenta de nuevo o contacta soporte.',
-          []
-        );
+        this.creandoIncidencia = false;
+        this.notificationService.toast('Error al crear incidencia', 3000, 'error');
       }
     });
   }
 
-  private cargarCategorias(): void {
-    this.http.get<ChatbotResponse>(`${this.apiUrl}/chatbot?q=sistema`).subscribe({
-      next: (res) => { if (res.categorias) this.categorias = res.categorias; },
-      error: () => {}
+  /**
+   * Abre modal para escalar
+   */
+  abrirModalEscalar(contexto?: string): void {
+    this.motivoEscalamiento = contexto || '';
+    this.mostrarModalEscalar = true;
+  }
+
+  /**
+   * Cierra modal de escalamiento
+   */
+  cerrarModalEscalar(): void {
+    this.mostrarModalEscalar = false;
+  }
+
+  /**
+   * Escala a un agente humano
+   */
+  escalarAAgente(): void {
+    if (!this.motivoEscalamiento.trim()) {
+      this.notificationService.toast('Indica el motivo del escalamiento', 3000, 'error');
+      return;
+    }
+
+    this.escalando = true;
+    this.registrarAccion('Escalando a agente especializado');
+
+    const contexto = {
+      mensajes: this.mensajes,
+      prioridad: 'Alta' as 'Alta'
+    };
+
+    this.chatbotService.escalarAAgente(this.motivoEscalamiento, contexto).subscribe({
+      next: () => {
+        this.escalando = false;
+        this.mostrarModalEscalar = false;
+        this.notificationService.toast('Escalado exitosamente. Un agente te contactará pronto.', 4000, 'success');
+        this.registrarAccion('Escalamiento exitoso');
+      },
+      error: () => {
+        this.escalando = false;
+        this.notificationService.toast('Error al escalar', 3000, 'error');
+      }
     });
   }
 
-  agregarMensaje(texto: string, autor: 'usuario' | 'bot', pasos: string[] = [], categoria?: string, nivel?: number): void {
-    this.mensajes.push({ texto, autor, timestamp: new Date(), pasos, categoria, nivel });
-    this.guardarHistorialLocal();
+
+  limpiarChat(): void {
+    if (confirm('¿Limpiar el historial del chat?')) {
+      this.chatbotService.limpiarHistorial();
+      this.registrarAccion('Historial limpiado');
+    }
   }
 
-  agregarMensajeBot(texto: string, pasos: string[] = [], categoria?: string, nivel?: number): void {
-    this.agregarMensaje(texto, 'bot', pasos, categoria, nivel);
+  exportarChat(): void {
+    const contenido = this.chatbotService.exportarHistorial();
+    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat-swo-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    this.notificationService.toast('Chat exportado', 2000, 'success');
+    this.registrarAccion('Chat exportado');
   }
 
   registrarAccion(texto: string): void {
@@ -177,58 +286,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     if (this.registroAcciones.length > 15) this.registroAcciones.pop();
   }
 
-  limpiarChat(): void {
-    if (confirm('¿Limpiar el historial del chat?')) {
-      this.mensajes = [];
-      localStorage.removeItem('chatbot_historial');
-      this.agregarMensajeBot('Chat limpiado. ¿En qué puedo ayudarte?', []);
-    }
-  }
-
-  exportarChat(): void {
-    const lineas = this.mensajes.map(m => {
-      const hora = new Date(m.timestamp).toLocaleTimeString();
-      let linea = `[${hora}] ${m.autor.toUpperCase()}: ${m.texto}`;
-      if (m.pasos && m.pasos.length > 0) {
-        linea += '\nPasos:\n' + m.pasos.map((p, i) => `  ${i + 1}. ${p}`).join('\n');
-      }
-      return linea;
-    });
-    const blob = new Blob([lineas.join('\n---\n')], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `chat-swo-${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    this.notificationService.toast('Chat exportado', 2000, 'success');
-  }
-
-  guardarHistorialLocal(): void {
-    if (this.guardarHistorial) {
-      localStorage.setItem('chatbot_historial', JSON.stringify(this.mensajes));
-    }
-  }
-
-  cargarHistorial(): void {
-    const historial = localStorage.getItem('chatbot_historial');
-    if (historial) {
-      try {
-        const parsed = JSON.parse(historial);
-        this.mensajes = parsed.map((m: Mensaje) => ({
-          ...m,
-          timestamp: new Date(m.timestamp)
-        }));
-      } catch { this.mensajes = []; }
-    }
-  }
-
   nivelLabel(nivel?: number): string {
-    switch (nivel) {
-      case 1: return '1er nivel';
-      case 2: return '2do nivel';
-      case 3: return 'Especialista';
-      default: return '';
-    }
+    return this.chatbotService.obtenerEtiquetaNivel(nivel);
   }
 }
