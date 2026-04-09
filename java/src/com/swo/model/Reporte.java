@@ -2,6 +2,10 @@ package com.swo.model;
 
 import java.sql.Timestamp;
 
+/**
+ * Clase que representa un reporte generado en el sistema SWO.
+ * Almacena un resumen estadístico de incidencias en un momento dado.
+ */
 public class Reporte {
     private int idReporte;
     private String nombre;
@@ -12,8 +16,18 @@ public class Reporte {
     private Timestamp fechaGeneracion;
     private Integer generadoPor;
 
+    /** Constructor vacío requerido para instanciación desde ResultSet. */
     public Reporte() {}
 
+    /**
+     * Constructor con todos los campos estadísticos.
+     * @param nombre            Nombre descriptivo del reporte
+     * @param totalIncidencias  Total de incidencias incluidas
+     * @param abiertas          Cantidad de incidencias abiertas
+     * @param enProgreso        Cantidad en progreso
+     * @param cerradas          Cantidad cerradas/resueltas
+     * @param generadoPor       ID del usuario que generó el reporte (nullable)
+     */
     public Reporte(String nombre, int totalIncidencias, int abiertas, int enProgreso, int cerradas, Integer generadoPor) {
         this.nombre = nombre;
         this.totalIncidencias = totalIncidencias;

@@ -7,8 +7,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para gestionar operaciones de lectura y escritura de Reportes.
+ * Los reportes almacenan un resumen histórico de estadísticas de incidencias.
+ */
 public class ReporteDAO {
 
+    /**
+     * Obtiene los últimos 20 reportes generados, ordenados por fecha descendente.
+     *
+     * @return Lista de reportes (máximo 20)
+     */
     public List<Reporte> obtenerReportes() {
         List<Reporte> lista = new ArrayList<>();
         String sql = "SELECT * FROM reportes ORDER BY fecha_generacion DESC LIMIT 20";
@@ -34,6 +43,12 @@ public class ReporteDAO {
         return lista;
     }
 
+    /**
+     * Inserta un nuevo reporte con las estadísticas actuales.
+     *
+     * @param reporte Objeto Reporte con los datos a persistir
+     * @return {@code true} si la inserción fue exitosa
+     */
     public boolean insertarReporte(Reporte reporte) {
         String sql = "INSERT INTO reportes (nombre, total_incidencias, abiertas, en_progreso, cerradas, generado_por) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.obtenerConexion();

@@ -2,6 +2,10 @@ package com.swo.model;
 
 import java.sql.Timestamp;
 
+/**
+ * Clase que representa un proyecto del sistema SWO.
+ * Un proyecto agrupa usuarios e incidencias relacionadas.
+ */
 public class Proyecto {
     private int idProyecto;
     private String nombre;
@@ -9,8 +13,15 @@ public class Proyecto {
     private String estado;
     private Timestamp fechaCreacion;
 
+    /** Constructor vacío requerido para instanciación desde ResultSet. */
     public Proyecto() {}
 
+    /**
+     * Constructor principal para crear un proyecto nuevo.
+     * @param nombre      Nombre identificador del proyecto
+     * @param descripcion Descripción general del proyecto
+     * @param estado      Estado inicial (Activo, Archivado)
+     */
     public Proyecto(String nombre, String descripcion, String estado) {
         this.nombre = nombre;
         this.descripcion = descripcion;

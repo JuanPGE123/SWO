@@ -44,6 +44,7 @@ export class ReportsComponent implements OnInit {
     this.cargarReportes();
   }
 
+  /** Obtiene el resumen de estadísticas de incidencias desde el endpoint /estadisticas. */
   cargarEstadisticas(): void {
     this.cargandoStats = true;
     this.http.get<any>(`${environment.apiUrl}/estadisticas`).subscribe({
@@ -52,6 +53,7 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  /** Obtiene los últimos reportes guardados en la BD desde el endpoint /reportes. */
   cargarReportes(): void {
     this.cargandoReportes = true;
     this.http.get<any[]>(`${environment.apiUrl}/reportes`).subscribe({
@@ -60,6 +62,7 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  /** Fuerza la recarga de estadísticas y reportes mostrando un toast informativo. */
   actualizar(): void {
     this.notificationService.toast('Actualizando datos...', 2000, 'info');
     this.cargarEstadisticas();
@@ -127,10 +130,15 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  /** Alias público para {@code descargarExcel}; llamado desde el botón Exportar del template. */
   exportar(): void {
     this.descargarExcel();
   }
 
+  /**
+   * Muestra un toast con el resumen del reporte histórico seleccionado.
+   * @param reporte Objeto de reporte con fecha y total de incidencias
+   */
   descargar(reporte: any): void {
     this.notificationService.toast(`Reporte del ${reporte.fecha} — ${reporte.total} incidencias`, 3000, 'info');
   }

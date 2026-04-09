@@ -7,8 +7,18 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para gestionar operaciones CRUD de Proyectos.
+ * Maneja la persistencia en la tabla {@code proyectos} y la asignación
+ * de usuarios a proyectos mediante la columna {@code id_proyecto} en usuarios.
+ */
 public class ProyectoDAO {
 
+    /**
+     * Obtiene todos los proyectos que no estén archivados, ordenados por nombre.
+     *
+     * @return Lista de proyectos activos
+     */
     public List<Proyecto> obtenerProyectos() {
         List<Proyecto> lista = new ArrayList<>();
         String sql = "SELECT * FROM proyectos WHERE estado != 'Archivado' ORDER BY nombre";
@@ -30,6 +40,12 @@ public class ProyectoDAO {
         return lista;
     }
 
+    /**
+     * Inserta un nuevo proyecto y recupera el ID generado por la BD.
+     *
+     * @param proyecto Objeto Proyecto a insertar (sin ID previo)
+     * @return {@code true} si la inserción fue exitosa
+     */
     public boolean insertarProyecto(Proyecto proyecto) {
         String sql = "INSERT INTO proyectos (nombre, descripcion, estado) VALUES (?, ?, ?)";
         try (Connection conn = ConexionBD.obtenerConexion();
@@ -49,6 +65,12 @@ public class ProyectoDAO {
         return false;
     }
 
+    /**
+     * Elimina un proyecto de la BD y desasigna a todos sus usuarios antes de borrar.
+     *
+     * @param idProyecto ID del proyecto a eliminar
+     * @return {@code true} si la eliminación fue exitosa
+     */
     public boolean eliminarProyecto(int idProyecto) {
         // Desasignar usuarios antes de eliminar
         String desasignar = "UPDATE usuarios SET id_proyecto = NULL WHERE id_proyecto = ?";
@@ -67,6 +89,13 @@ public class ProyectoDAO {
         return false;
     }
 
+    /**
+     * Asigna un usuario a un proyecto actualizando la columna {@code id_proyecto} del usuario.
+     *
+     * @param idUsuario  ID del usuario a asignar
+     * @param idProyecto ID del proyecto destino
+     * @return {@code true} si la actualización fue exitosa
+     */
     public boolean asignarUsuarioAProyecto(int idUsuario, int idProyecto) {
         String sql = "UPDATE usuarios SET id_proyecto = ? WHERE id_usuario = ?";
         try (Connection conn = ConexionBD.obtenerConexion();

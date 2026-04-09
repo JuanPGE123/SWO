@@ -47,6 +47,14 @@ public class ApiServlet extends HttpServlet {
     private ReporteDAO reporteDAO;
     private ConocimientoDAO conocimientoDAO;
 
+    /**
+     * Inicializa los DAOs al arrancar el servlet.
+     * Se llama automáticamente por el contenedor al desplegar la aplicación.
+     */
+    /**
+     * Inicializa los DAOs al arrancar el servlet.
+     * Se llama automáticamente por el contenedor al desplegar la aplicación.
+     */
     @Override
     public void init() throws ServletException {
         super.init();
@@ -57,6 +65,30 @@ public class ApiServlet extends HttpServlet {
         conocimientoDAO = new ConocimientoDAO();
     }
 
+    /**
+     * Maneja peticiones HTTP GET.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /incidencias}    - Lista todas las incidencias</li>
+     *   <li>{@code /usuarios}       - Lista todos los usuarios activos</li>
+     *   <li>{@code /proyectos}      - Lista todos los proyectos</li>
+     *   <li>{@code /reportes}       - Lista los últimos reportes</li>
+     *   <li>{@code /chatbot?q=...}  - Consulta la base de conocimiento</li>
+     *   <li>{@code /estadisticas}   - Conteo de incidencias por estado</li>
+     * </ul>
+     */
+    /**
+     * Maneja peticiones HTTP GET.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /incidencias}    - Lista todas las incidencias</li>
+     *   <li>{@code /usuarios}       - Lista todos los usuarios activos</li>
+     *   <li>{@code /proyectos}      - Lista todos los proyectos</li>
+     *   <li>{@code /reportes}       - Lista los últimos reportes</li>
+     *   <li>{@code /chatbot?q=...}  - Consulta la base de conocimiento</li>
+     *   <li>{@code /estadisticas}   - Conteo de incidencias por estado</li>
+     * </ul>
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -115,6 +147,32 @@ public class ApiServlet extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * Maneja peticiones HTTP POST.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /incidencias}         - Crea una nueva incidencia</li>
+     *   <li>{@code /usuarios}            - Crea un nuevo usuario</li>
+     *   <li>{@code /proyectos}           - Crea un nuevo proyecto</li>
+     *   <li>{@code /proyectos/asignar}   - Asigna un usuario a un proyecto</li>
+     *   <li>{@code /reportes}            - Guarda un reporte de estadísticas</li>
+     *   <li>{@code /login}              - Autentica al usuario</li>
+     *   <li>{@code /logout}             - Cierra la sesión del usuario</li>
+     * </ul>
+     */
+    /**
+     * Maneja peticiones HTTP POST.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /incidencias}         - Crea una nueva incidencia</li>
+     *   <li>{@code /usuarios}            - Crea un nuevo usuario</li>
+     *   <li>{@code /proyectos}           - Crea un nuevo proyecto</li>
+     *   <li>{@code /proyectos/asignar}   - Asigna un usuario a un proyecto</li>
+     *   <li>{@code /reportes}            - Guarda un reporte de estadísticas</li>
+     *   <li>{@code /login}              - Autentica al usuario</li>
+     *   <li>{@code /logout}             - Cierra la sesión del usuario</li>
+     * </ul>
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -260,6 +318,22 @@ public class ApiServlet extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * Maneja peticiones HTTP DELETE.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /usuarios/{id}}   - Eliminación lógica del usuario (estado=false)</li>
+     *   <li>{@code /proyectos/{id}}  - Elimina el proyecto y desasigna sus usuarios</li>
+     * </ul>
+     */
+    /**
+     * Maneja peticiones HTTP DELETE.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /usuarios/{id}}   - Eliminación lógica del usuario (estado=false)</li>
+     *   <li>{@code /proyectos/{id}}  - Elimina el proyecto y desasigna sus usuarios</li>
+     * </ul>
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -294,6 +368,24 @@ public class ApiServlet extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * Maneja peticiones HTTP PUT.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /incidencias/{id}} - Actualiza o resuelve una incidencia existente</li>
+     * </ul>
+     * Nota: Tomcat 7 no parsea el body en PUT con {@code getParameter()},
+     * por lo que se lee y decodifica el body manualmente.
+     */
+    /**
+     * Maneja peticiones HTTP PUT.
+     * Rutas soportadas:
+     * <ul>
+     *   <li>{@code /incidencias/{id}} - Actualiza o resuelve una incidencia existente</li>
+     * </ul>
+     * Nota: Tomcat 7 no parsea el body en PUT con {@code getParameter()},
+     * por lo que se lee y decodifica el body manualmente.
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -360,6 +452,14 @@ public class ApiServlet extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * Responde las peticiones HTTP OPTIONS para CORS preflight.
+     * Permite que el navegador valide los métodos y cabeceras permitidos.
+     */
+    /**
+     * Responde las peticiones HTTP OPTIONS para CORS preflight.
+     * Permite que el navegador valide los métodos y cabeceras permitidos.
+     */
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -368,6 +468,22 @@ public class ApiServlet extends HttpServlet {
         res.setStatus(200);
     }
 
+    /**
+     * Maneja la creación de un nuevo usuario a partir de los parámetros POST.
+     * Requiere los campos {@code nombre} y {@code correo}; el resto son opcionales.
+     *
+     * @param req Petición HTTP
+     * @param res Respuesta HTTP
+     * @param out PrintWriter para escribir JSON de respuesta
+     */
+    /**
+     * Maneja la creación de un nuevo usuario a partir de los parámetros POST.
+     * Requiere los campos {@code nombre} y {@code correo}; el resto son opcionales.
+     *
+     * @param req Petición HTTP
+     * @param res Respuesta HTTP
+     * @param out PrintWriter para escribir JSON de respuesta
+     */
     private void handleCrearUsuario(HttpServletRequest req, HttpServletResponse res, PrintWriter out)
             throws IOException {
         try {
@@ -402,6 +518,22 @@ public class ApiServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Maneja la creación de un nuevo proyecto a partir de los parámetros POST.
+     * Requiere el campo {@code nombre}; {@code descripcion} y {@code estado} son opcionales.
+     *
+     * @param req Petición HTTP
+     * @param res Respuesta HTTP
+     * @param out PrintWriter para escribir JSON de respuesta
+     */
+    /**
+     * Maneja la creación de un nuevo proyecto a partir de los parámetros POST.
+     * Requiere el campo {@code nombre}; {@code descripcion} y {@code estado} son opcionales.
+     *
+     * @param req Petición HTTP
+     * @param res Respuesta HTTP
+     * @param out PrintWriter para escribir JSON de respuesta
+     */
     private void handleCrearProyecto(HttpServletRequest req, HttpServletResponse res, PrintWriter out)
             throws IOException {
         try {
@@ -426,17 +558,57 @@ public class ApiServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Establece los encabezados CORS en la respuesta para permitir llamadas cross-origin
+     * desde el frontend Angular (localhost:4200).
+     *
+     * @param res Respuesta HTTP donde se agregan los encabezados
+     */
+    /**
+     * Establece los encabezados CORS en la respuesta para permitir llamadas cross-origin
+     * desde el frontend Angular (localhost:4200).
+     *
+     * @param res Respuesta HTTP donde se agregan los encabezados
+     */
     private void setCorsHeaders(HttpServletResponse res) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     }
 
+    /**
+     * Escapa caracteres especiales JSON en una cadena de texto.
+     * Reemplaza {@code \} por {@code \\} y {@code "} por {@code \"}.
+     *
+     * @param s Cadena a escapar
+     * @return Cadena escapada, o cadena vacía si {@code s} es null
+     */
+    /**
+     * Escapa caracteres especiales JSON en una cadena de texto.
+     * Reemplaza {@code \} por {@code \\} y {@code "} por {@code \"}.
+     *
+     * @param s Cadena a escapar
+     * @return Cadena escapada, o cadena vacía si {@code s} es null
+     */
     private String escJson(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
+    /**
+     * Serializa una lista de incidencias a formato JSON.
+     * Incluye todos los campos del modelo incluidos {@code resolucion} y {@code fechaResolucion}.
+     *
+     * @param lista Lista de objetos Incidencia
+     * @return String JSON con el array de incidencias
+     */
+    /**
+     * Serializa una lista de incidencias a formato JSON.
+     * Incluye todos los campos del modelo incluidos {@code resolucion} y {@code fechaResolucion}.
+     *
+     * @param lista Lista de objetos Incidencia
+     * @return String JSON con el array de incidencias
+     */
     private String incidenciasToJson(List<Incidencia> lista) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         StringBuilder sb = new StringBuilder("[");
@@ -461,6 +633,18 @@ public class ApiServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Serializa una lista de usuarios a formato JSON.
+     *
+     * @param lista Lista de objetos Usuario
+     * @return String JSON con el array de usuarios
+     */
+    /**
+     * Serializa una lista de usuarios a formato JSON.
+     *
+     * @param lista Lista de objetos Usuario
+     * @return String JSON con el array de usuarios
+     */
     private String usuariosToJson(List<Usuario> lista) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < lista.size(); i++) {
@@ -481,6 +665,18 @@ public class ApiServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Serializa una lista de proyectos a formato JSON.
+     *
+     * @param lista Lista de objetos Proyecto
+     * @return String JSON con el array de proyectos
+     */
+    /**
+     * Serializa una lista de proyectos a formato JSON.
+     *
+     * @param lista Lista de objetos Proyecto
+     * @return String JSON con el array de proyectos
+     */
     private String proyectosToJson(List<Proyecto> lista) {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
         StringBuilder sb = new StringBuilder("[");
@@ -499,6 +695,18 @@ public class ApiServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Serializa una lista de entradas de conocimiento a formato JSON.
+     *
+     * @param lista Lista de objetos Conocimiento
+     * @return String JSON con el array de conocimientos
+     */
+    /**
+     * Serializa una lista de entradas de conocimiento a formato JSON.
+     *
+     * @param lista Lista de objetos Conocimiento
+     * @return String JSON con el array de conocimientos
+     */
     private String conocimientoToJson(List<Conocimiento> lista) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < lista.size(); i++) {
@@ -517,6 +725,18 @@ public class ApiServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Serializa una lista de categorías a formato JSON como array de strings.
+     *
+     * @param lista Lista de nombres de categorías
+     * @return String JSON con el array de categorías
+     */
+    /**
+     * Serializa una lista de categorías a formato JSON como array de strings.
+     *
+     * @param lista Lista de nombres de categorías
+     * @return String JSON con el array de categorías
+     */
     private String categoriasToJson(List<String> lista) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < lista.size(); i++) {
@@ -527,6 +747,18 @@ public class ApiServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Serializa una lista de reportes a formato JSON.
+     *
+     * @param lista Lista de objetos Reporte
+     * @return String JSON con el array de reportes
+     */
+    /**
+     * Serializa una lista de reportes a formato JSON.
+     *
+     * @param lista Lista de objetos Reporte
+     * @return String JSON con el array de reportes
+     */
     private String reportesToJson(List<Reporte> lista) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         StringBuilder sb = new StringBuilder("[");

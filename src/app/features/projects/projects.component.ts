@@ -46,6 +46,7 @@ export class ProjectsComponent implements OnInit {
     this.cargarProyectos();
   }
 
+  /** Carga la lista de proyectos desde el backend y actualiza el componente. */
   cargarProyectos(): void {
     this.cargando = true;
     this.projectsService.cargarDesdeBackend();
@@ -55,15 +56,21 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  /** Abre el modal de nuevo proyecto y reinicia el formulario. */
   abrirModal(): void {
     this.nuevoProyecto = { nombre: '', descripcion: '', estado: 'Activo' };
     this.mostrarModal = true;
   }
 
+  /** Cierra el modal de nuevo proyecto sin guardar. */
   cerrarModal(): void {
     this.mostrarModal = false;
   }
 
+  /**
+   * Valida el nombre y envía la creación del proyecto al backend.
+   * Recarga la lista al completarse correctamente.
+   */
   guardarProyecto(): void {
     if (!this.nuevoProyecto.nombre.trim()) {
       this.notificationService.toast('El nombre es obligatorio', 3000, 'error');
@@ -88,6 +95,11 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  /**
+   * Solicita confirmación y elimina el proyecto del backend.
+   * @param id     ID del proyecto a eliminar
+   * @param nombre Nombre del proyecto para el mensaje de confirmación
+   */
   eliminarProyecto(id: number, nombre: string): void {
     if (!confirm(`¿Eliminar proyecto "${nombre}"?`)) return;
     this.projectsService.eliminarProyecto(id).subscribe({
@@ -96,6 +108,10 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  /**
+   * Abre el panel de asignación para un proyecto y carga la lista de usuarios disponibles.
+   * @param idProyecto ID del proyecto al que se asignará el usuario
+   */
   abrirAsignar(idProyecto: number): void {
     this.idProyectoSeleccionado = idProyecto;
     this.idUsuarioSeleccionado = 0;
@@ -108,10 +124,15 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  /** Cierra el panel de asignación sin realizar cambios. */
   cerrarAsignar(): void {
     this.mostrarAsignar = false;
   }
 
+  /**
+   * Valida la selección y confirma la asignación del usuario al proyecto en el backend.
+   * Cierra el panel y recarga proyectos al completarse correctamente.
+   */
   confirmarAsignacion(): void {
     if (!this.idUsuarioSeleccionado) {
       this.notificationService.toast('Selecciona un usuario', 3000, 'warning');

@@ -48,6 +48,7 @@ export class UsersComponent implements OnInit {
     this.cargarUsuarios();
   }
 
+  /** Suscribe el componente al Observable de usuarios y aplica filtros iniciales. */
   cargarUsuarios(): void {
     this.usersService.obtenerUsuarios().subscribe(
       (usuarios: Usuario[]) => {
@@ -57,6 +58,10 @@ export class UsersComponent implements OnInit {
     );
   }
 
+  /**
+   * Filtra usuarios por área y texto libre (nombre, apellido o correo).
+   * Actualiza {@code usuariosFiltrados} para el render de la tabla.
+   */
   aplicarFiltros(): void {
     this.usuariosFiltrados = this.usuarios.filter(usr => {
       const cumpleArea = this.areaFiltro === 'all' || usr.area === this.areaFiltro;
@@ -68,6 +73,7 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  /** Genera y descarga un archivo CSV con los usuarios actualmente filtrados. */
   exportar(): void {
     const csv = this.generarCSV();
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -79,6 +85,10 @@ export class UsersComponent implements OnInit {
     this.notificationService.toast('Usuarios exportados', 2000, 'success');
   }
 
+  /**
+   * Construye el contenido CSV de los usuarios filtrados.
+   * @returns String con encabezados y filas separadas por coma
+   */
   generarCSV(): string {
     const headers = ['ID', 'Nombre', 'Apellido', 'Correo', 'Celular', 'Área', 'Jefe Directo'];
     const rows = this.usuariosFiltrados.map(usr =>
@@ -87,6 +97,10 @@ export class UsersComponent implements OnInit {
     return [headers.join(','), ...rows].join('\n');
   }
 
+  /**
+   * Devuelve los conteos de usuarios por área para mostrar en las tarjetas del header.
+   * @returns Objeto con total, ti, soporte y otros
+   */
   obtenerConteos() {
     const conteos = this.usersService.obtenerConteosPorArea();
     return {
@@ -97,14 +111,17 @@ export class UsersComponent implements OnInit {
     };
   }
 
+  /** Se ejecuta al cambiar el texto del campo de búsqueda; delega a aplicarFiltros(). */
   onBusquedaChange(): void {
     this.aplicarFiltros();
   }
 
+  /** Se ejecuta al cambiar el filtro de área; delega a aplicarFiltros(). */
   onAreaChange(): void {
     this.aplicarFiltros();
   }
 
+  /** Abre el modal de nuevo usuario, reinicia el formulario y carga la lista de proyectos disponibles. */
   abrirModal(): void {
     this.nuevoUsuario = { nombre: '', correo: '', password: '123456', rol: 'Usuario', telefono: '', departamento: '', idProyecto: 0 };
     this.mostrarModal = true;
@@ -116,10 +133,15 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  /** Cierra el modal de nuevo usuario sin guardar. */
   cerrarModal(): void {
     this.mostrarModal = false;
   }
 
+  /**
+   * Valida los campos obligatorios y envía la creación del usuario al backend.
+   * Muestra toast de éxito o error según la respuesta.
+   */
   guardarUsuario(): void {
     if (!this.nuevoUsuario.nombre.trim() || !this.nuevoUsuario.correo.trim()) {
       this.notificationService.toast('Nombre y correo son obligatorios', 3000, 'error');
@@ -147,6 +169,11 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  /**
+   * Solicita confirmación y realiza la eliminación lógica del usuario en el backend.
+   * @param id     ID del usuario a eliminar
+   * @param nombre Nombre del usuario para el mensaje de confirmación
+   */
   eliminarUsuario(id: string, nombre: string): void {
     if (!confirm(`¿Eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`)) return;
     this.usersService.eliminarUsuarioBackend(id).subscribe({

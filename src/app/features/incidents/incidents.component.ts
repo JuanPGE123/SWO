@@ -64,6 +64,7 @@ export class IncidentsComponent implements OnInit {
     this.cargarIncidentes();
   }
 
+  /** Suscribe el componente al Observable de incidencias y aplica filtros iniciales. */
   cargarIncidentes(): void {
     this.incidentsService.obtenerIncidencias().subscribe(
       (incidentes: Incidencia[]) => {
@@ -73,6 +74,10 @@ export class IncidentsComponent implements OnInit {
     );
   }
 
+  /**
+   * Aplica el filtro de estado y la búsqueda de texto sobre la lista completa.
+   * Actualiza {@code incidentesFiltrados} para reflejar el resultado.
+   */
   aplicarFiltros(): void {
     const termino = this.busqueda.toLowerCase().trim();
     this.incidentesFiltrados = this.incidentes.filter(inc => {
@@ -86,6 +91,7 @@ export class IncidentsComponent implements OnInit {
     });
   }
 
+  /** Abre el modal de nueva incidencia y reinicia el formulario. */
   abrirModal(): void {
     this.nuevaIncidencia = {
       titulo: '',
@@ -101,10 +107,15 @@ export class IncidentsComponent implements OnInit {
     this.mostrarModal = true;
   }
 
+  /** Cierra el modal de nueva incidencia sin guardar. */
   cerrarModal(): void {
     this.mostrarModal = false;
   }
 
+  /**
+   * Valida y envía la nueva incidencia al backend.
+   * Muestra toast de éxito o error según la respuesta.
+   */
   guardarIncidencia(): void {
     if (!this.nuevaIncidencia.titulo.trim() || !this.nuevaIncidencia.descripcion.trim()) {
       this.notificationService.toast('El título y la descripción son obligatorios', 3000, 'error');
@@ -129,6 +140,11 @@ export class IncidentsComponent implements OnInit {
     });
   }
 
+  /**
+   * Cambia el estado de una incidencia seleccionada desde el select de la tabla.
+   * @param incidente Incidencia a modificar
+   * @param event     Evento change del select con el nuevo estado
+   */
   cambiarEstado(incidente: Incidencia, event: Event): void {
     const nuevoEstado = (event.target as HTMLSelectElement).value;
     this.incidentsService.cambiarEstado(
@@ -138,6 +154,11 @@ export class IncidentsComponent implements OnInit {
     this.notificationService.toast(`Estado de ${incidente.id} actualizado`, 2000, 'success');
   }
 
+  /**
+   * Cambia la prioridad de una incidencia seleccionada desde el select de la tabla.
+   * @param incidente    Incidencia a modificar
+   * @param event        Evento change del select con la nueva prioridad
+   */
   cambiarPrioridad(incidente: Incidencia, event: Event): void {
     const nuevaPrioridad = (event.target as HTMLSelectElement).value;
     this.incidentsService.cambiarPrioridad(
@@ -147,23 +168,35 @@ export class IncidentsComponent implements OnInit {
     this.notificationService.toast(`Prioridad actualizada`, 2000, 'success');
   }
 
+  /**
+   * Asigna una incidencia a un responsable.
+   * @param incidente      Incidencia a asignar
+   * @param nuevoAsignado  Nombre del responsable
+   */
   asignar(incidente: Incidencia, nuevoAsignado: string): void {
     this.incidentsService.asignarIncidencia(incidente.id, nuevoAsignado);
     this.notificationService.toast(`Asignado a ${nuevoAsignado}`, 2000, 'success');
   }
 
+  /** Devuelve las estadísticas actuales (total, abiertos, resueltos, etc.) desde el servicio. */
   obtenerEstadisticas() {
     return this.incidentsService.obtenerEstadísticas();
   }
 
+  /** Alias para aplicarFiltros(); mantenido por compatibilidad con bindings existentes. */
   onFiltroChange(): void {
     this.aplicarFiltros();
   }
 
+  /** Alias para aplicarFiltros(); mantenido por compatibilidad con bindings existentes. */
   onBusquedaChange(): void {
     this.aplicarFiltros();
   }
 
+  /**
+   * Abre el modal de detalle para la incidencia seleccionada y resetea los modos edición/resolución.
+   * @param incidente Incidencia cuyo detalle se desea ver
+   */
   verDetalle(incidente: Incidencia): void {
     this.incidenteSeleccionado = incidente;
     this.modoEdicion = false;
@@ -171,6 +204,7 @@ export class IncidentsComponent implements OnInit {
     this.mostrarDetalle = true;
   }
 
+  /** Cierra el modal de detalle y limpia el incidente seleccionado y modos activos. */
   cerrarDetalle(): void {
     this.mostrarDetalle = false;
     this.incidenteSeleccionado = null;
@@ -178,6 +212,10 @@ export class IncidentsComponent implements OnInit {
     this.modoResolucion = false;
   }
 
+  /**
+   * Activa el modo edición pre-llenando {@code incidenteEditado} con los datos actuales.
+   * Desactiva el modo resolución si estaba activo.
+   */
   entrarModoEdicion(): void {
     if (!this.incidenteSeleccionado) return;
     const inc = this.incidenteSeleccionado;
@@ -193,11 +231,16 @@ export class IncidentsComponent implements OnInit {
     this.modoResolucion = false;
   }
 
+  /** Cancela la edición o resolución activa y vuelve al modo Vista. */
   cancelarEdicion(): void {
     this.modoEdicion = false;
     this.modoResolucion = false;
   }
 
+  /**
+   * Valida y envía los cambios editados al backend mediante PUT.
+   * Cierra el modal y recarga la lista al completarse correctamente.
+   */
   guardarEdicion(): void {
     if (!this.incidenteSeleccionado) return;
     if (!this.incidenteEditado.titulo.trim()) {
@@ -229,6 +272,10 @@ export class IncidentsComponent implements OnInit {
     });
   }
 
+  /**
+   * Valida la descripción de resolución y envía la incidencia al backend con estado "Resuelto".
+   * Cierra el modal y recarga la lista al completarse correctamente.
+   */
   resolverIncidencia(): void {
     if (!this.incidenteSeleccionado) return;
     const inc = this.incidenteSeleccionado;
@@ -261,6 +308,10 @@ export class IncidentsComponent implements OnInit {
     });
   }
 
+  /**
+   * Activa el modo resolución pre-cargando la resolución existente (si la hubiera).
+   * Desactiva el modo edición si estaba activo.
+   */
   activarModoResolucion(): void {
     if (!this.incidenteSeleccionado) return;
     this.incidenteEditado.resolucion = this.incidenteSeleccionado.resolucion || '';
@@ -268,6 +319,11 @@ export class IncidentsComponent implements OnInit {
     this.modoEdicion = false;
   }
 
+  /**
+   * Convierte el estado interno de la app al texto en español para enviar al backend.
+   * @param state Estado en formato interno ('open', 'inprogress', etc.)
+   * @returns Texto en español ('Abierto', 'En Progreso', etc.)
+   */
   private estadoAEspanol(state: string): string {
     const map: {[k: string]: string} = {
       'open': 'Abierto', 'inprogress': 'En Progreso',
@@ -276,6 +332,11 @@ export class IncidentsComponent implements OnInit {
     return map[state] || 'Abierto';
   }
 
+  /**
+   * Convierte la prioridad del modelo Angular al campo impacto del backend.
+   * @param priority Prioridad ('Baja', 'Media', 'Alta', 'Crítica')
+   * @returns Impacto en formato backend ('Bajo', 'Medio', 'Alto', 'Critico')
+   */
   private prioridadAImpacto(priority: string): string {
     const map: {[k: string]: string} = {
       'Baja': 'Bajo', 'Media': 'Medio', 'Alta': 'Alto', 'Crítica': 'Critico'
