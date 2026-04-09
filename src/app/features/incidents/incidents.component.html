@@ -15,7 +15,7 @@
           class="search-input" 
           placeholder="Filtrar incidentes"
           [(ngModel)]="busqueda"
-          (input)="onBusquedaChange()"
+          (ngModelChange)="aplicarFiltros()"
         />
         <button class="btn-action" (click)="cargarIncidentes()">
           🔄 Actualizar
@@ -31,19 +31,19 @@
       <section class="metrics">
         <div class="metric-card">
           <h4>Abiertos</h4>
-          <div class="metric-value">{{ obtenerEstadisticas().abiertos }}</div>
+          <div class="metric-value">{{ obtenerEstadisticas().porEstado.abiertos }}</div>
         </div>
         <div class="metric-card">
           <h4>En proceso</h4>
-          <div class="metric-value">{{ obtenerEstadisticas().enProgreso }}</div>
+          <div class="metric-value">{{ obtenerEstadisticas().porEstado.enProgreso }}</div>
         </div>
         <div class="metric-card">
           <h4>Pendientes</h4>
-          <div class="metric-value">{{ obtenerEstadisticas().pendientes }}</div>
+          <div class="metric-value">{{ obtenerEstadisticas().porEstado.pendientes }}</div>
         </div>
         <div class="metric-card">
           <h4>Resueltos</h4>
-          <div class="metric-value">{{ obtenerEstadisticas().resueltos }}</div>
+          <div class="metric-value">{{ obtenerEstadisticas().porEstado.resueltos }}</div>
         </div>
       </section>
 
@@ -51,7 +51,7 @@
       <section class="incidents-section">
         <div class="section-header">
           <h3>Incidentes</h3>
-          <select [(ngModel)]="filtroEstado" (change)="onFiltroChange()" class="filter-select">
+          <select [(ngModel)]="filtroEstado" (ngModelChange)="aplicarFiltros()" class="filter-select">
             <option value="all">Todos</option>
             <option value="open">Abierto</option>
             <option value="inprogress">En proceso</option>
@@ -111,7 +111,7 @@
                 <td>{{ inc.project }}</td>
                 <td>{{ inc.date }}</td>
                 <td>
-                  <button class="btn-small" title="Ver detalle">Ver</button>
+                  <button class="btn-small" (click)="verDetalle(inc)" title="Ver detalle">👁️ Ver</button>
                 </td>
               </tr>
             </tbody>
@@ -146,15 +146,30 @@
 
       <div class="form-row-2">
         <div class="form-group">
-          <label>Estado</label>
-          <select [(ngModel)]="nuevaIncidencia.estado" class="form-input">
-            <option value="Abierto">Abierto</option>
-            <option value="En Progreso">En Progreso</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Cerrado">Cerrado</option>
+          <label>Categoría</label>
+          <select [(ngModel)]="nuevaIncidencia.categoria" class="form-input">
+            <option value="">Seleccionar...</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+            <option value="Red">Red</option>
+            <option value="Acceso">Acceso</option>
+            <option value="Rendimiento">Rendimiento</option>
+            <option value="Otro">Otro</option>
           </select>
         </div>
 
+        <div class="form-group">
+          <label>Urgencia</label>
+          <select [(ngModel)]="nuevaIncidencia.urgencia" class="form-input">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+            <option value="Crítica">Crítica</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-2">
         <div class="form-group">
           <label>Impacto</label>
           <select [(ngModel)]="nuevaIncidencia.impacto" class="form-input">
@@ -164,13 +179,28 @@
             <option value="Critico">Crítico</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <label>Ubicación / Área afectada</label>
+          <input type="text" [(ngModel)]="nuevaIncidencia.ubicacion"
+                 placeholder="Ej: Oficina principal, Piso 2..."
+                 class="form-input" />
+        </div>
       </div>
 
       <div class="form-group">
-        <label>Ubicación / Área afectada</label>
-        <input type="text" [(ngModel)]="nuevaIncidencia.ubicacion"
-               placeholder="Ej: Oficina principal, Servidor A, Módulo de pagos..."
+        <label>Aplicación / Sistema afectado</label>
+        <input type="text" [(ngModel)]="nuevaIncidencia.aplicacion"
+               placeholder="Ej: Sistema de nómina, ERP, Portal web..."
                class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label>Actividad que estaba realizando</label>
+        <textarea [(ngModel)]="nuevaIncidencia.actividad"
+                  placeholder="Describe qué estabas haciendo cuando ocurrió el problema..."
+                  rows="3"
+                  class="form-input"></textarea>
       </div>
     </div>
 
@@ -179,6 +209,204 @@
       <button class="btn-save" (click)="guardarIncidencia()" [disabled]="guardando">
         {{ guardando ? 'Guardando...' : '💾 Guardar Incidencia' }}
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver Detalle de Incidencia -->
+<div class="modal-overlay" *ngIf="mostrarDetalle" (click)="cerrarDetalle()">
+  <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <span *ngIf="!modoEdicion && !modoResolucion">Detalle: {{ incidenteSeleccionado?.id }}</span>
+        <span *ngIf="modoEdicion">✏️ Editando: {{ incidenteSeleccionado?.id }}</span>
+        <span *ngIf="modoResolucion">✅ Resolver: {{ incidenteSeleccionado?.id }}</span>
+      </h2>
+      <button class="btn-close" (click)="cerrarDetalle()">✕</button>
+    </div>
+
+    <!-- ── MODO VISTA ── -->
+    <div class="modal-body" *ngIf="incidenteSeleccionado && !modoEdicion && !modoResolucion">
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <h4>Título</h4>
+          <p>{{ incidenteSeleccionado.title }}</p>
+        </div>
+
+        <div class="detalle-item">
+          <h4>Estado</h4>
+          <p>
+            <span class="badge" [ngClass]="{
+              'badge-open': incidenteSeleccionado.state === 'open',
+              'badge-inprogress': incidenteSeleccionado.state === 'inprogress',
+              'badge-pending': incidenteSeleccionado.state === 'pending',
+              'badge-resolved': incidenteSeleccionado.state === 'resolved'
+            }">
+              {{ incidenteSeleccionado.state === 'open' ? 'Abierto' :
+                 incidenteSeleccionado.state === 'inprogress' ? 'En Proceso' :
+                 incidenteSeleccionado.state === 'pending' ? 'Pendiente' : 'Resuelto' }}
+            </span>
+          </p>
+        </div>
+
+        <div class="detalle-item">
+          <h4>Prioridad</h4>
+          <p>
+            <span class="badge" [ngClass]="{
+              'badge-baja': incidenteSeleccionado.priority === 'Baja',
+              'badge-media': incidenteSeleccionado.priority === 'Media',
+              'badge-alta': incidenteSeleccionado.priority === 'Alta',
+              'badge-critica': incidenteSeleccionado.priority === 'Crítica'
+            }">
+              {{ incidenteSeleccionado.priority }}
+            </span>
+          </p>
+        </div>
+
+        <div class="detalle-item">
+          <h4>Asignado</h4>
+          <p>{{ incidenteSeleccionado.assignee || 'Sin asignar' }}</p>
+        </div>
+
+        <div class="detalle-item">
+          <h4>Proyecto / Ubicación</h4>
+          <p>{{ incidenteSeleccionado.project }}</p>
+        </div>
+
+        <div class="detalle-item">
+          <h4>Fecha</h4>
+          <p>{{ incidenteSeleccionado.date }}</p>
+        </div>
+
+        <div class="detalle-item full-width">
+          <h4>Usuario Reportante</h4>
+          <p>{{ incidenteSeleccionado.user }} ({{ incidenteSeleccionado.userEmail }})</p>
+        </div>
+
+        <div class="detalle-item full-width" *ngIf="incidenteSeleccionado.app">
+          <h4>Aplicación</h4>
+          <p>{{ incidenteSeleccionado.app }}</p>
+        </div>
+
+        <div class="detalle-item full-width" *ngIf="incidenteSeleccionado.reason">
+          <h4>Descripción / Motivo</h4>
+          <p>{{ incidenteSeleccionado.reason }}</p>
+        </div>
+
+        <div class="detalle-item full-width" *ngIf="incidenteSeleccionado.activity">
+          <h4>Actividad</h4>
+          <p>{{ incidenteSeleccionado.activity }}</p>
+        </div>
+
+        <div class="detalle-item full-width" *ngIf="incidenteSeleccionado.resolucion">
+          <h4>✅ Resolución</h4>
+          <p class="resolucion-text">{{ incidenteSeleccionado.resolucion }}</p>
+          <small *ngIf="incidenteSeleccionado.fechaResolucion" class="fecha-resolucion">
+            Resuelto: {{ incidenteSeleccionado.fechaResolucion }}
+          </small>
+        </div>
+
+        <div class="detalle-item full-width" *ngIf="incidenteSeleccionado.tags && incidenteSeleccionado.tags.length > 0">
+          <h4>Etiquetas</h4>
+          <div class="tags">
+            <span class="tag" *ngFor="let tag of incidenteSeleccionado.tags">{{ tag }}</span>
+          </div>
+        </div>
+
+        <div class="detalle-item full-width" *ngIf="incidenteSeleccionado.comments && incidenteSeleccionado.comments.length > 0">
+          <h4>Comentarios</h4>
+          <div class="comentarios">
+            <div class="comentario" *ngFor="let comment of incidenteSeleccionado.comments">
+              <div class="comentario-header">
+                <strong>{{ comment.author }}</strong>
+                <span class="comentario-fecha">{{ comment.date }}</span>
+              </div>
+              <p>{{ comment.text }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MODO EDICIÓN ── -->
+    <div class="modal-body" *ngIf="incidenteSeleccionado && modoEdicion">
+      <div class="form-group">
+        <label>Título <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="incidenteEditado.titulo" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="incidenteEditado.descripcion" rows="4" class="form-input"></textarea>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="incidenteEditado.estado" class="form-input">
+            <option value="Abierto">Abierto</option>
+            <option value="En Progreso">En Proceso</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Resuelto">Resuelto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Impacto</label>
+          <select [(ngModel)]="incidenteEditado.impacto" class="form-input">
+            <option value="Bajo">Bajo</option>
+            <option value="Medio">Medio</option>
+            <option value="Alto">Alto</option>
+            <option value="Critico">Crítico</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Ubicación / Área</label>
+        <input type="text" [(ngModel)]="incidenteEditado.ubicacion" class="form-input" />
+      </div>
+    </div>
+
+    <!-- ── MODO RESOLUCIÓN ── -->
+    <div class="modal-body" *ngIf="incidenteSeleccionado && modoResolucion">
+      <div class="resolucion-banner">
+        <p>Describe cómo se resolvió este incidente. El estado cambiará a <strong>Resuelto</strong>.</p>
+      </div>
+      <div class="form-group">
+        <label>Descripción de la resolución <span class="required">*</span></label>
+        <textarea
+          [(ngModel)]="incidenteEditado.resolucion"
+          rows="6"
+          class="form-input"
+          placeholder="Explica cómo se solucionó el problema, pasos realizados, herramientas usadas...">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <!-- Botones modo vista -->
+      <ng-container *ngIf="!modoEdicion && !modoResolucion">
+        <button class="btn-cancel" (click)="cerrarDetalle()">Cerrar</button>
+        <button class="btn-edit" (click)="entrarModoEdicion()">✏️ Editar</button>
+        <button class="btn-resolver"
+          *ngIf="incidenteSeleccionado?.state !== 'resolved'"
+          (click)="activarModoResolucion()">
+          ✅ Resolver
+        </button>
+      </ng-container>
+
+      <!-- Botones modo edición -->
+      <ng-container *ngIf="modoEdicion">
+        <button class="btn-cancel" (click)="cancelarEdicion()" [disabled]="guardandoCambios">Cancelar</button>
+        <button class="btn-save" (click)="guardarEdicion()" [disabled]="guardandoCambios">
+          {{ guardandoCambios ? 'Guardando...' : '💾 Guardar Cambios' }}
+        </button>
+      </ng-container>
+
+      <!-- Botones modo resolución -->
+      <ng-container *ngIf="modoResolucion">
+        <button class="btn-cancel" (click)="cancelarEdicion()" [disabled]="guardandoCambios">Cancelar</button>
+        <button class="btn-resolver-confirm" (click)="resolverIncidencia()" [disabled]="guardandoCambios">
+          {{ guardandoCambios ? 'Procesando...' : '✅ Confirmar Resolución' }}
+        </button>
+      </ng-container>
     </div>
   </div>
 </div>

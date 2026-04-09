@@ -26,13 +26,33 @@ export class IncidentsComponent implements OnInit {
 
   // Modal nueva incidencia
   mostrarModal: boolean = false;
+  mostrarDetalle: boolean = false;
   guardando: boolean = false;
+  guardandoCambios: boolean = false;
+  modoEdicion: boolean = false;
+  modoResolucion: boolean = false;
+  incidenteSeleccionado: Incidencia | null = null;
+
+  // Copia editable del incidente seleccionado
+  incidenteEditado = {
+    titulo: '',
+    descripcion: '',
+    estado: '',
+    impacto: '',
+    ubicacion: '',
+    resolucion: ''
+  };
+  
   nuevaIncidencia = {
     titulo: '',
     descripcion: '',
     estado: 'Abierto',
     impacto: 'Medio',
-    ubicacion: ''
+    ubicacion: '',
+    categoria: '',
+    aplicacion: '',
+    actividad: '',
+    urgencia: 'Media'
   };
 
   constructor(
@@ -54,17 +74,30 @@ export class IncidentsComponent implements OnInit {
   }
 
   aplicarFiltros(): void {
+    const termino = this.busqueda.toLowerCase().trim();
     this.incidentesFiltrados = this.incidentes.filter(inc => {
       const cumpleFiltro = this.filtroEstado === 'all' || inc.state === this.filtroEstado;
-      const cumpleBusqueda = this.busqueda === '' ||
-        inc.id.toLowerCase().includes(this.busqueda.toLowerCase()) ||
-        inc.title.toLowerCase().includes(this.busqueda.toLowerCase());
+      const cumpleBusqueda = termino === '' ||
+        inc.id.toLowerCase().includes(termino) ||
+        inc.title.toLowerCase().includes(termino) ||
+        inc.reason.toLowerCase().includes(termino) ||
+        inc.project.toLowerCase().includes(termino);
       return cumpleFiltro && cumpleBusqueda;
     });
   }
 
   abrirModal(): void {
-    this.nuevaIncidencia = { titulo: '', descripcion: '', estado: 'Abierto', impacto: 'Medio', ubicacion: '' };
+    this.nuevaIncidencia = {
+      titulo: '',
+      descripcion: '',
+      estado: 'Abierto',
+      impacto: 'Medio',
+      ubicacion: '',
+      categoria: '',
+      aplicacion: '',
+      actividad: '',
+      urgencia: 'Media'
+    };
     this.mostrarModal = true;
   }
 
@@ -129,5 +162,124 @@ export class IncidentsComponent implements OnInit {
 
   onBusquedaChange(): void {
     this.aplicarFiltros();
+  }
+
+  verDetalle(incidente: Incidencia): void {
+    this.incidenteSeleccionado = incidente;
+    this.modoEdicion = false;
+    this.modoResolucion = false;
+    this.mostrarDetalle = true;
+  }
+
+  cerrarDetalle(): void {
+    this.mostrarDetalle = false;
+    this.incidenteSeleccionado = null;
+    this.modoEdicion = false;
+    this.modoResolucion = false;
+  }
+
+  entrarModoEdicion(): void {
+    if (!this.incidenteSeleccionado) return;
+    const inc = this.incidenteSeleccionado;
+    this.incidenteEditado = {
+      titulo: inc.title,
+      descripcion: inc.reason,
+      estado: this.estadoAEspanol(inc.state),
+      impacto: this.prioridadAImpacto(inc.priority),
+      ubicacion: inc.project,
+      resolucion: inc.resolucion || ''
+    };
+    this.modoEdicion = true;
+    this.modoResolucion = false;
+  }
+
+  cancelarEdicion(): void {
+    this.modoEdicion = false;
+    this.modoResolucion = false;
+  }
+
+  guardarEdicion(): void {
+    if (!this.incidenteSeleccionado) return;
+    if (!this.incidenteEditado.titulo.trim()) {
+      this.notificationService.toast('El título es obligatorio', 3000, 'error');
+      return;
+    }
+    this.guardandoCambios = true;
+    this.incidentsService.actualizarIncidenciaBackend(
+      this.incidenteSeleccionado.id,
+      this.incidenteEditado.titulo,
+      this.incidenteEditado.descripcion,
+      this.incidenteEditado.estado,
+      this.incidenteEditado.impacto,
+      this.incidenteEditado.ubicacion,
+      this.incidenteEditado.resolucion,
+      false
+    ).subscribe({
+      next: () => {
+        this.guardandoCambios = false;
+        this.modoEdicion = false;
+        this.notificationService.toast('Incidencia actualizada correctamente', 3000, 'success');
+        this.cerrarDetalle();
+        this.cargarIncidentes();
+      },
+      error: () => {
+        this.guardandoCambios = false;
+        this.notificationService.toast('Error al actualizar la incidencia', 3000, 'error');
+      }
+    });
+  }
+
+  resolverIncidencia(): void {
+    if (!this.incidenteSeleccionado) return;
+    const inc = this.incidenteSeleccionado;
+    if (!this.incidenteEditado.resolucion.trim()) {
+      this.notificationService.toast('Debes describir cómo se resolvió el incidente', 3000, 'error');
+      return;
+    }
+    this.guardandoCambios = true;
+    this.incidentsService.actualizarIncidenciaBackend(
+      inc.id,
+      inc.title,
+      inc.reason,
+      'Resuelto',
+      this.prioridadAImpacto(inc.priority),
+      inc.project,
+      this.incidenteEditado.resolucion,
+      true
+    ).subscribe({
+      next: () => {
+        this.guardandoCambios = false;
+        this.modoResolucion = false;
+        this.notificationService.toast('Incidencia marcada como resuelta', 3000, 'success');
+        this.cerrarDetalle();
+        this.cargarIncidentes();
+      },
+      error: () => {
+        this.guardandoCambios = false;
+        this.notificationService.toast('Error al resolver la incidencia', 3000, 'error');
+      }
+    });
+  }
+
+  activarModoResolucion(): void {
+    if (!this.incidenteSeleccionado) return;
+    this.incidenteEditado.resolucion = this.incidenteSeleccionado.resolucion || '';
+    this.modoResolucion = true;
+    this.modoEdicion = false;
+  }
+
+  private estadoAEspanol(state: string): string {
+    const map: {[k: string]: string} = {
+      'open': 'Abierto', 'inprogress': 'En Progreso',
+      'pending': 'Pendiente', 'resolved': 'Resuelto'
+    };
+    return map[state] || 'Abierto';
+  }
+
+  private prioridadAImpacto(priority: string): string {
+    const map: {[k: string]: string} = {
+      'Baja': 'Bajo', 'Media': 'Medio', 'Alta': 'Alto', 'Crítica': 'Critico'
+    };
+    return map[priority] || 'Medio';
   }
 }

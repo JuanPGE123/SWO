@@ -350,5 +350,213 @@
     &:hover { opacity: 0.85; }
     &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
+
+  .btn-edit {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    &:hover { background: rgba(251, 191, 36, 0.2); }
+  }
+
+  .btn-resolver {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    &:hover { opacity: 0.85; }
+  }
+
+  .btn-resolver-confirm {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    &:hover { opacity: 0.85; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+// ── Modal Detalle (más ancho) ─────────────────────────────────────────────────
+.modal-large {
+  width: 720px;
+  max-width: 95vw;
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.detalle-item {
+  h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6b7d92;
+    margin: 0 0 6px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    color: #e6eef6;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.badge-open {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+  }
+  &.badge-inprogress {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+  &.badge-pending {
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
+  }
+  &.badge-resolved {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+  }
+
+  &.badge-baja {
+    background: rgba(156, 163, 175, 0.15);
+    color: #9ca3af;
+  }
+  &.badge-media {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+  }
+  &.badge-alta {
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
+  }
+  &.badge-critica {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+}
+
+// ── Tags ──────────────────────────────────────────────────────────────────────
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    background: rgba(5, 208, 230, 0.1);
+    color: #05d0e6;
+    border: 1px solid rgba(5, 208, 230, 0.2);
+  }
+}
+
+// ── Comentarios ───────────────────────────────────────────────────────────────
+.comentarios {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .comentario {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+
+    .comentario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      strong {
+        color: #05d0e6;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .comentario-fecha {
+        font-size: 11px;
+        color: #6b7d92;
+      }
+    }
+
+    p {
+      margin: 0;
+      color: #9aa5b1;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+  }
+}
+
+// ── Resolución ────────────────────────────────────────────────────────────────
+.resolucion-text {
+  background: rgba(34, 197, 94, 0.08);
+  border-left: 3px solid #22c55e;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  color: #e6eef6 !important;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.fecha-resolucion {
+  display: block;
+  margin-top: 6px;
+  color: #6b7d92;
+  font-size: 11px;
+}
+
+.resolucion-banner {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 4px;
+
+  p {
+    margin: 0;
+    color: #86efac;
+    font-size: 13px;
+    line-height: 1.5;
+  }
 }
 
