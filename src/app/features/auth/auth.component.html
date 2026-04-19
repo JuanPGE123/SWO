@@ -59,7 +59,7 @@
           [error]="emailError"
           [disabled]="isLoading"
           autocomplete="username"
-          required
+          [required]="true"
           hint="Ingrese su correo institucional"
         ></app-input>
 
@@ -74,7 +74,7 @@
           [disabled]="isLoading"
           [showPasswordToggle]="true"
           autocomplete="current-password"
-          required
+          [required]="true"
           hint="Mínimo 6 caracteres"
         ></app-input>
 

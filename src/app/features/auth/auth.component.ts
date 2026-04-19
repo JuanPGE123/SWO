@@ -134,15 +134,14 @@ export class AuthComponent implements OnInit {
         '',
         [
           Validators.required,
-          Validators.email,
-          Validators.minLength(VALIDATION_CONSTANTS.EMAIL.MIN_LENGTH)
+          Validators.email
         ]
       ],
       password: [
         '',
         [
           Validators.required,
-          Validators.minLength(VALIDATION_CONSTANTS.PASSWORD.MIN_LENGTH)
+          Validators.minLength(VALIDATION_CONSTANTS.PASSWORD_MIN_LENGTH)
         ]
       ]
     });
@@ -266,10 +265,6 @@ export class AuthComponent implements OnInit {
       return 'Ingrese un correo electrónico válido';
     }
 
-    if (control.errors['minlength']) {
-      return `El correo debe tener al menos ${VALIDATION_CONSTANTS.EMAIL.MIN_LENGTH} caracteres`;
-    }
-
     return '';
   }
 
@@ -289,7 +284,7 @@ export class AuthComponent implements OnInit {
     }
 
     if (control.errors['minlength']) {
-      return `La contraseña debe tener al menos ${VALIDATION_CONSTANTS.PASSWORD.MIN_LENGTH} caracteres`;
+      return `La contraseña debe tener al menos ${VALIDATION_CONSTANTS.PASSWORD_MIN_LENGTH} caracteres`;
     }
 
     return '';

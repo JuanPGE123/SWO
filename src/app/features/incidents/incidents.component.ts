@@ -29,7 +29,7 @@
 
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { IncidentsService } from '../../core/services/incidents.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
@@ -51,6 +51,7 @@ import { EstadoIncidencia, PrioridadIncidencia } from '../../core/enums/app.enum
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     SidebarComponent,
     ModalComponent,
     ButtonComponent,
@@ -122,15 +123,6 @@ export class IncidentsComponent implements OnInit {
 
   /** Indica si el modal de detalle está en modo resolución */
   modoResolucion: boolean = false;
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // LIFECYCLE HOOKS
-  // ═════════════════════════════════════════════════════════════════════════
-
-  ngOnInit(): void {
-    this.initForms();
-    this.cargarIncidentes();
-  }
 
   // ═════════════════════════════════════════════════════════════════════════
   // LIFECYCLE HOOKS
@@ -537,7 +529,7 @@ export class IncidentsComponent implements OnInit {
     const nuevoEstado = (event.target as HTMLSelectElement).value;
     this.incidentsService.cambiarEstado(
       incidente.id,
-      nuevoEstado as 'open' | 'inprogress' | 'pending' | 'resolved'
+      nuevoEstado as EstadoIncidencia
     );
     this.notificationService.toast(
       `Estado de ${incidente.id} actualizado`,
@@ -553,259 +545,7 @@ export class IncidentsComponent implements OnInit {
     const nuevaPrioridad = (event.target as HTMLSelectElement).value;
     this.incidentsService.cambiarPrioridad(
       incidente.id,
-      nuevaPrioridad as 'Baja' | 'Media' | 'Alta' | 'Crítica'
-    );
-    this.notificationService.toast(
-      'Prioridad actualizada',
-      2000,
-      'success'
-    );
-  }
-
-  /**
-   * Asigna una incidencia a un responsable
-   */
-  asignar(incidente: Incidencia, nuevoAsignado: string): void {
-    this.incidentsService.asignarIncidencia(incidente.id, nuevoAsignado);
-    this.notificationService.toast(
-      `Asignado a ${nuevoAsignado}`,
-      2000,
-      'success'
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ESTADÍSTICAS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Obtiene las estadísticas actuales del servicio
-   */
-  obtenerEstadisticas() {
-    return this.incidentsService.obtenerEstadísticas();
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GETTERS PARA MENSAJES DE ERROR
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Mensaje de error para el campo título (nueva incidencia)
-   */
-  get tituloNuevaError(): string {
-    return this.getFieldError(this.nuevaIncidenciaForm, 'titulo');
-  }
-
-  /**
-   * Mensaje de error para el campo descripción (nueva incidencia)
-   */
-  get descripcionNuevaError(): string {
-    return this.getFieldError(this.nuevaIncidenciaForm, 'descripcion');
-  }
-
-  /**
-   * Mensaje de error para el campo título (edición)
-   */
-  get tituloEdicionError(): string {
-    return this.getFieldError(this.edicionForm, 'titulo');
-  }
-
-  /**
-   * Mensaje de error para el campo descripción (edición)
-   */
-  get descripcionEdicionError(): string {
-    return this.getFieldError(this.edicionForm, 'descripcion');
-  }
-
-  /**
-   * Mensaje de error para el campo resolución
-   */
-  get resolucionError(): string {
-    return this.getFieldError(this.resolucionForm, 'resolucion');
-  }
-
-  /**
-   * Obtiene el mensaje de error apropiado para un campo
-   * @private
-   */
-  private getFieldError(form: FormGroup, fieldName: string): string {
-    const control = form.get(fieldName);
-    
-    if (!control || !control.touched || !control.errors) {
-      return '';
-    }
-
-    if (control.errors['required']) {
-      return 'Este campo es obligatorio';
-    }
-
-    if (control.errors['whitespace']) {
-      return 'No puede contener solo espacios en blanco';
-    }
-
-    if (control.errors['minlength']) {
-      return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
-    }
-
-    if (control.errors['maxlength']) {
-      return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
-    }
-
-    if (control.errors['minWords']) {
-      return `Debe contener al menos ${control.errors['minWords'].required} palabras`;
-    }
-
-    if (control.errors['forbiddenWords']) {
-      return `Contiene palabras no permitidas: ${control.errors['forbiddenWords'].word}`;
-    }
-
-    return 'Campo inválido';
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // UTILIDADES
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Convierte estado interno a formato español
-   * @private
-   */
-  private estadoAEspanol(state: string): string {
-    const map: {[k: string]: string} = {
-      'open': 'Abierto',
-      'inprogress': 'En Progreso',
-      'pending': 'Pendiente',
-      'resolved': 'Resuelto'
-    };
-    return map[state] || 'Abierto';
-  }
-
-  /**
-   * Convierte prioridad a formato de impacto del backend
-   * @private
-   */
-  private prioridadAImpacto(priority: string): string {
-    const map: {[k: string]: string} = {
-      'Baja': 'Bajo',
-      'Media': 'Medio',
-      'Alta': 'Alto',
-      'Crítica': 'Critico'
-    };
-    return map[priority] || 'Medio';
-  }
-
-  /**
-   * Verifica si el formulario de nueva incidencia tiene cambios sin guardar
-   */
-  get formularioNuevaTieneCambios(): boolean {
-    return this.nuevaIncidenciaForm.dirty;
-  }
-
-  /**
-   * Verifica si el formulario de edición tiene cambios sin guardar
-   */
-  get formularioEdicionTieneCambios(): boolean {
-    return this.edicionForm.dirty || this.resolucionForm.dirty;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GESTIÓN DE RESOLUCIÓN
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Activa el modo resolución
-   */
-  activarModoResolucion(): void {
-    if (!this.incidenteSeleccionado) return;
-    
-    this.resolucionForm.patchValue({
-      resolucion: this.incidenteSeleccionado.resolucion || ''
-    });
-
-    this.modoResolucion = true;
-    this.modoEdicion = false;
-  }
-
-  /**
-   * Marca la incidencia como resuelta
-   */
-  resolverIncidencia(): void {
-    if (!this.incidenteSeleccionado) return;
-
-    if (this.resolucionForm.invalid) {
-      this.resolucionForm.markAllAsTouched();
-      this.notificationService.toast(
-        'Debes describir cómo se resolvió la incidencia',
-        3000,
-        'error'
-      );
-      return;
-    }
-
-    this.guardandoCambios = true;
-    const inc = this.incidenteSeleccionado;
-    const resolucion = this.resolucionForm.value.resolucion;
-
-    this.incidentsService.actualizarIncidenciaBackend(
-      inc.id,
-      inc.title,
-      inc.reason,
-      'Resuelto',
-      this.prioridadAImpacto(inc.priority),
-      inc.project,
-      resolucion,
-      true
-    ).subscribe({
-      next: () => {
-        this.guardandoCambios = false;
-        this.modoResolucion = false;
-        this.notificationService.toast(
-          'Incidencia marcada como resuelta',
-          3000,
-          'success'
-        );
-        this.cerrarDetalle();
-        this.cargarIncidentes();
-      },
-      error: () => {
-        this.guardandoCambios = false;
-        this.notificationService.toast(
-          'Error al resolver la incidencia',
-          3000,
-          'error'
-        );
-      }
-    });
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ACCIONES RÁPIDAS (TABLA)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Cambia el estado de una incidencia desde la tabla
-   */
-  cambiarEstado(incidente: Incidencia, event: Event): void {
-    const nuevoEstado = (event.target as HTMLSelectElement).value;
-    this.incidentsService.cambiarEstado(
-      incidente.id,
-      nuevoEstado as 'open' | 'inprogress' | 'pending' | 'resolved'
-    );
-    this.notificationService.toast(
-      `Estado de ${incidente.id} actualizado`,
-      2000,
-      'success'
-    );
-  }
-
-  /**
-   * Cambia la prioridad de una incidencia desde la tabla
-   */
-  cambiarPrioridad(incidente: Incidencia, event: Event): void {
-    const nuevaPrioridad = (event.target as HTMLSelectElement).value;
-    this.incidentsService.cambiarPrioridad(
-      incidente.id,
-      nuevaPrioridad as 'Baja' | 'Media' | 'Alta' | 'Crítica'
+      nuevaPrioridad as PrioridadIncidencia
     );
     this.notificationService.toast(
       'Prioridad actualizada',

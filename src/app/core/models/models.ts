@@ -613,6 +613,9 @@ export interface Configuracion {
    * @default true
    */
   notificaciones: boolean;
+  
+  /**
+   * Correo del jefe directo
    * @format email
    * @optional
    * @example 'maria.gonzalez@empresa.com'

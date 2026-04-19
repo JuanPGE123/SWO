@@ -282,14 +282,14 @@ export class IncidentsService {
    */
   private mapearEstado(estado: string): EstadoIncidencia {
     const mapeo: { [key: string]: EstadoIncidencia } = {
-      'Abierto': 'open',
-      'En Progreso': 'inprogress',
-      'En progreso': 'inprogress',
-      'Pendiente': 'pending',
-      'Cerrado': 'resolved',
-      'Resuelto': 'resolved'
+      'Abierto': EstadoIncidencia.ABIERTO,
+      'En Progreso': EstadoIncidencia.EN_PROGRESO,
+      'En progreso': EstadoIncidencia.EN_PROGRESO,
+      'Pendiente': EstadoIncidencia.PENDIENTE,
+      'Cerrado': EstadoIncidencia.CERRADO,
+      'Resuelto': EstadoIncidencia.RESUELTO
     };
-    return mapeo[estado] || 'open';
+    return mapeo[estado] || EstadoIncidencia.ABIERTO;
   }
 
   /**
@@ -304,7 +304,8 @@ export class IncidentsService {
       'open': 'Abierto',
       'inprogress': 'En Progreso',
       'pending': 'Pendiente',
-      'resolved': 'Resuelto'
+      'resolved': 'Resuelto',
+      'closed': 'Cerrado'
     };
     return mapeo[estado];
   }
@@ -318,13 +319,13 @@ export class IncidentsService {
    */
   private mapearImpacto(impacto: string): PrioridadIncidencia {
     const mapeo: { [key: string]: PrioridadIncidencia } = {
-      'Bajo': 'Baja',
-      'Medio': 'Media',
-      'Alto': 'Alta',
-      'Critico': 'Crítica',
-      'Crítico': 'Crítica'
+      'Bajo': PrioridadIncidencia.BAJA,
+      'Medio': PrioridadIncidencia.MEDIA,
+      'Alto': PrioridadIncidencia.ALTA,
+      'Critico': PrioridadIncidencia.CRITICA,
+      'Crítico': PrioridadIncidencia.CRITICA
     };
-    return mapeo[impacto] || 'Media';
+    return mapeo[impacto] || PrioridadIncidencia.MEDIA;
   }
 
   /**
@@ -401,13 +402,13 @@ export class IncidentsService {
     // Filtrar por estado
     if (filtros.estado) {
       const estados = Array.isArray(filtros.estado) ? filtros.estado : [filtros.estado];
-      resultado = resultado.filter(inc => estados.includes(inc.state));
+      resultado = resultado.filter(inc => estados.includes(inc.state as EstadoIncidencia));
     }
 
     // Filtrar por prioridad
     if (filtros.prioridad) {
       const prioridades = Array.isArray(filtros.prioridad) ? filtros.prioridad : [filtros.prioridad];
-      resultado = resultado.filter(inc => prioridades.includes(inc.priority));
+      resultado = resultado.filter(inc => prioridades.includes(inc.priority as PrioridadIncidencia));
     }
 
     // Filtrar por asignado
@@ -571,10 +572,11 @@ export class IncidentsService {
    */
   private esTransicionEstadoValida(estadoActual: EstadoIncidencia, estadoNuevo: EstadoIncidencia): boolean {
     const transicionesValidas: { [key in EstadoIncidencia]: EstadoIncidencia[] } = {
-      'open': ['inprogress', 'pending', 'resolved'],
-      'inprogress': ['pending', 'resolved', 'open'],
-      'pending': ['inprogress', 'resolved', 'open'],
-      'resolved': ['open']
+      [EstadoIncidencia.ABIERTO]: [EstadoIncidencia.EN_PROGRESO, EstadoIncidencia.PENDIENTE, EstadoIncidencia.RESUELTO],
+      [EstadoIncidencia.EN_PROGRESO]: [EstadoIncidencia.PENDIENTE, EstadoIncidencia.RESUELTO, EstadoIncidencia.ABIERTO],
+      [EstadoIncidencia.PENDIENTE]: [EstadoIncidencia.EN_PROGRESO, EstadoIncidencia.RESUELTO, EstadoIncidencia.ABIERTO],
+      [EstadoIncidencia.RESUELTO]: [EstadoIncidencia.ABIERTO],
+      [EstadoIncidencia.CERRADO]: [EstadoIncidencia.ABIERTO]
     };
 
     return transicionesValidas[estadoActual]?.includes(estadoNuevo) || false;
@@ -798,11 +800,11 @@ export class IncidentsService {
         return;
       }
 
-      // Validar transici�n de estado
-      if (!this.esTransicionEstadoValida(incidencia.state, nuevoEstado)) {
+      // Validar transición de estado
+      if (!this.esTransicionEstadoValida(incidencia.state as EstadoIncidencia, nuevoEstado)) {
         observer.error(this.sharedService.crearError(
           'INVALID_TRANSITION',
-          'Transici�n de estado no v�lida',
+          'Transición de estado no válida',
           `No se puede cambiar de '${incidencia.state}' a '${nuevoEstado}'`
         ));
         observer.complete();

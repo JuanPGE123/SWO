@@ -179,7 +179,7 @@ export class UsersService {
    */
   obtenerUsuariosPorArea(area: string): Usuario[] {
     return this.usuariosData.filter(usr => 
-      usr.area.toLowerCase() === area.toLowerCase()
+      usr.area?.toLowerCase() === area.toLowerCase()
     );
   }
 
@@ -195,7 +195,7 @@ export class UsersService {
       usr.nombre.toLowerCase().includes(t) ||
       usr.apellido.toLowerCase().includes(t) ||
       usr.correo.toLowerCase().includes(t) ||
-      usr.area.toLowerCase().includes(t) ||
+      (usr.area?.toLowerCase().includes(t) || false) ||
       (usr.nombre + ' ' + usr.apellido).toLowerCase().includes(t)
     );
   }
@@ -211,7 +211,7 @@ export class UsersService {
 
     if (filtros.area) {
       resultado = resultado.filter(usr => 
-        usr.area.toLowerCase().includes(filtros.area!.toLowerCase())
+        usr.area?.toLowerCase().includes(filtros.area!.toLowerCase()) || false
       );
     }
 
@@ -221,7 +221,7 @@ export class UsersService {
         usr.nombre.toLowerCase().includes(texto) ||
         usr.apellido.toLowerCase().includes(texto) ||
         usr.correo.toLowerCase().includes(texto) ||
-        usr.area.toLowerCase().includes(texto)
+        (usr.area?.toLowerCase().includes(texto) || false)
       );
     }
 
@@ -266,7 +266,7 @@ export class UsersService {
     const areasTecnicas = ['soporte', 'ti', 'desarrollo', 'sistemas', 'helpdesk'];
     
     return this.usuariosData.filter(usr =>
-      areasTecnicas.some(area => usr.area.toLowerCase().includes(area))
+      usr.area && areasTecnicas.some(area => usr.area!.toLowerCase().includes(area))
     );
   }
 
@@ -294,7 +294,9 @@ export class UsersService {
   obtenerConteosPorArea(): { [area: string]: number } {
     const conteos: { [area: string]: number } = {};
     this.usuariosData.forEach(usr => {
-      conteos[usr.area] = (conteos[usr.area] || 0) + 1;
+      if (usr.area) {
+        conteos[usr.area] = (conteos[usr.area] || 0) + 1;
+      }
     });
     return conteos;
   }
@@ -314,7 +316,7 @@ export class UsersService {
    * @returns Array con nombres de áreas
    */
   obtenerListaAreas(): string[] {
-    const areas = new Set(this.usuariosData.map(usr => usr.area));
+    const areas = new Set(this.usuariosData.map(usr => usr.area).filter((area): area is string => area !== undefined));
     return Array.from(areas).sort();
   }
 
