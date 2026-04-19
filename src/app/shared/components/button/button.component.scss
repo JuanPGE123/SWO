@@ -1,0 +1,300 @@
+/**
+ * Estilos del componente Button
+ * 
+ * Variables CSS personalizadas para facilitar la personalización del tema.
+ * Incluye todas las variantes, tamaños, estados y animaciones.
+ */
+
+:host {
+  display: inline-block;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIABLES DE DISEÑO
+// ═══════════════════════════════════════════════════════════════════════════
+
+$btn-primary-bg: #3b82f6;
+$btn-primary-hover: #2563eb;
+$btn-primary-text: #ffffff;
+
+$btn-secondary-bg: #6b7280;
+$btn-secondary-hover: #4b5563;
+$btn-secondary-text: #ffffff;
+
+$btn-danger-bg: #ef4444;
+$btn-danger-hover: #dc2626;
+$btn-danger-text: #ffffff;
+
+$btn-success-bg: #10b981;
+$btn-success-hover: #059669;
+$btn-success-text: #ffffff;
+
+$btn-warning-bg: #f59e0b;
+$btn-warning-hover: #d97706;
+$btn-warning-text: #ffffff;
+
+$btn-disabled-bg: #e5e7eb;
+$btn-disabled-text: #9ca3af;
+
+$btn-border-radius: 6px;
+$btn-transition: all 0.2s ease-in-out;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTILOS BASE DEL BOTÓN
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: $btn-border-radius;
+  transition: $btn-transition;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+
+  &:focus:not(:focus-visible) {
+    box-shadow: none;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAMAÑOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-medium {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+.btn-large {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIANTES DE COLOR - SÓLIDAS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-primary {
+  background-color: $btn-primary-bg;
+  color: $btn-primary-text;
+  border-color: $btn-primary-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-primary-hover;
+    border-color: $btn-primary-hover;
+  }
+}
+
+.btn-secondary {
+  background-color: $btn-secondary-bg;
+  color: $btn-secondary-text;
+  border-color: $btn-secondary-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-secondary-hover;
+    border-color: $btn-secondary-hover;
+  }
+}
+
+.btn-danger {
+  background-color: $btn-danger-bg;
+  color: $btn-danger-text;
+  border-color: $btn-danger-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-danger-hover;
+    border-color: $btn-danger-hover;
+  }
+}
+
+.btn-success {
+  background-color: $btn-success-bg;
+  color: $btn-success-text;
+  border-color: $btn-success-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-success-hover;
+    border-color: $btn-success-hover;
+  }
+}
+
+.btn-warning {
+  background-color: $btn-warning-bg;
+  color: $btn-warning-text;
+  border-color: $btn-warning-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-warning-hover;
+    border-color: $btn-warning-hover;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIANTES OUTLINE (BORDE SIN RELLENO)
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: $btn-primary-bg;
+  border-color: $btn-primary-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-primary-bg;
+    color: $btn-primary-text;
+  }
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  color: $btn-secondary-bg;
+  border-color: $btn-secondary-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-secondary-bg;
+    color: $btn-secondary-text;
+  }
+}
+
+.btn-outline-danger {
+  background-color: transparent;
+  color: $btn-danger-bg;
+  border-color: $btn-danger-bg;
+
+  &:hover:not(:disabled) {
+    background-color: $btn-danger-bg;
+    color: $btn-danger-text;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIANTE GHOST (SIN BORDE NI FONDO)
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-ghost {
+  background-color: transparent;
+  color: $btn-primary-bg;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn:disabled,
+.btn-loading {
+  background-color: $btn-disabled-bg !important;
+  color: $btn-disabled-text !important;
+  border-color: $btn-disabled-bg !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+
+  &:hover {
+    transform: none;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANCHO COMPLETO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-full-width {
+  width: 100%;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTENIDO DEL BOTÓN
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-content {
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.btn-icon-left {
+  margin-right: 0.25rem;
+}
+
+.btn-icon-right {
+  margin-left: 0.25rem;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPINNER DE LOADING
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACCESIBILIDAD
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Mejora el contraste en modo de alto contraste del sistema
+@media (prefers-contrast: high) {
+  .btn {
+    border-width: 2px;
+  }
+}
+
+// Respeta la preferencia de movimiento reducido del usuario
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+
+  .btn-spinner {
+    animation: none;
+    border-right-color: currentColor;
+  }
+}

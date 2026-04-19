@@ -1,0 +1,99 @@
+<div [class]="getContainerClasses()">
+  <!-- Label -->
+  <label *ngIf="label" [for]="inputId" class="input-label">
+    {{ label }}
+    <span *ngIf="required" class="input-required" aria-label="obligatorio">*</span>
+  </label>
+
+  <!-- Contenedor del input con iconos -->
+  <div class="input-wrapper">
+    <!-- Icono prefijo -->
+    <span *ngIf="prefixIcon" class="input-icon input-icon-prefix" aria-hidden="true">
+      {{ prefixIcon }}
+    </span>
+
+    <!-- Input (para tipos normales) -->
+    <input
+      *ngIf="type !== 'textarea'"
+      #inputElement
+      [id]="inputId"
+      [type]="getInputType()"
+      [class]="getInputClasses()"
+      [value]="value"
+      [placeholder]="placeholder || ''"
+      [required]="required"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [minlength]="minlength || undefined"
+      [maxlength]="maxlength || undefined"
+      [min]="min || undefined"
+      [max]="max || undefined"
+      [pattern]="pattern || undefined"
+      [autocomplete]="autocomplete"
+      [attr.aria-label]="label || placeholder"
+      [attr.aria-required]="required"
+      [attr.aria-invalid]="shouldShowError()"
+      [attr.aria-describedby]="(hint || error) ? inputId + '-description' : undefined"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+    />
+
+    <!-- Textarea -->
+    <textarea
+      *ngIf="type === 'textarea'"
+      #inputElement
+      [id]="inputId"
+      [class]="getInputClasses()"
+      [value]="value"
+      [placeholder]="placeholder || ''"
+      [required]="required"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [minlength]="minlength || undefined"
+      [maxlength]="maxlength || undefined"
+      [rows]="rows"
+      [attr.aria-label]="label || placeholder"
+      [attr.aria-required]="required"
+      [attr.aria-invalid]="shouldShowError()"
+      [attr.aria-describedby]="(hint || error) ? inputId + '-description' : undefined"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+    ></textarea>
+
+    <!-- Icono sufijo -->
+    <span *ngIf="suffixIcon && !(type === 'password' && showPasswordToggle)" 
+          class="input-icon input-icon-suffix" 
+          aria-hidden="true">
+      {{ suffixIcon }}
+    </span>
+
+    <!-- Toggle de visibilidad para contraseñas -->
+    <button
+      *ngIf="type === 'password' && showPasswordToggle"
+      type="button"
+      class="input-password-toggle"
+      (click)="togglePasswordVisibility()"
+      [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+      tabindex="0"
+    >
+      <span aria-hidden="true">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+    </button>
+  </div>
+
+  <!-- Hint o mensaje de error -->
+  <div
+    *ngIf="hint || error"
+    [id]="inputId + '-description'"
+    class="input-description"
+    [class.input-description-error]="shouldShowError()"
+    [attr.role]="shouldShowError() ? 'alert' : undefined"
+  >
+    <span *ngIf="shouldShowError()">{{ error }}</span>
+    <span *ngIf="!shouldShowError() && hint">{{ hint }}</span>
+  </div>
+
+  <!-- Contador de caracteres (opcional para maxlength) -->
+  <div *ngIf="maxlength && value" class="input-counter">
+    {{ value.length }} / {{ maxlength }}
+  </div>
+</div>

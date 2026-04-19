@@ -9,6 +9,9 @@ dist/
 src/favicon.ico
 build_*.txt
 
+# Excluir resumen de mejoras (documentación interna)
+RESUMEN_MEJORAS.md
+
 # Java compiled artifacts
 *.class
 *.war
@@ -18,3 +21,10 @@ webapp/WEB-INF/classes/
 webapp/WEB-INF/lib/
 java/bin/
 webapp/3rdpartylicenses.txt
+
+# Directorios temporales de Tomcat
+temp*/
+
+# Logs de Tomcat
+tomcat/logs/
+*.log.*

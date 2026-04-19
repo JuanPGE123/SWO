@@ -1,0 +1,276 @@
+/**
+ * Estilos del componente Modal
+ * 
+ * Incluye overlay, animaciones de entrada/salida, tamaños configurables
+ * y estilos responsivos para móviles.
+ */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIABLES DE DISEÑO
+// ═══════════════════════════════════════════════════════════════════════════
+
+$modal-overlay-bg: rgba(0, 0, 0, 0.5);
+$modal-content-bg: #ffffff;
+$modal-border-radius: 8px;
+$modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$modal-header-border: #e5e7eb;
+$modal-footer-border: #e5e7eb;
+$modal-padding: 1.5rem;
+$modal-z-index: 1000;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OVERLAY (FONDO OSCURO)
+// ═══════════════════════════════════════════════════════════════════════════
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $modal-z-index;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: $modal-overlay-bg;
+  backdrop-filter: blur(2px);
+  animation: modal-overlay-fade-in 0.2s ease-out;
+}
+
+@keyframes modal-overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTENEDOR DEL MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  background-color: $modal-content-bg;
+  border-radius: $modal-border-radius;
+  box-shadow: $modal-shadow;
+  animation: modal-content-scale-in 0.2s ease-out;
+  overflow: hidden;
+
+  @media (max-width: 640px) {
+    max-height: 95vh;
+    width: 100%;
+    margin: 0.5rem;
+  }
+}
+
+@keyframes modal-content-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAMAÑOS DEL MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+.modal-small {
+  width: 100%;
+  max-width: 400px;
+}
+
+.modal-medium {
+  width: 100%;
+  max-width: 600px;
+}
+
+.modal-large {
+  width: 100%;
+  max-width: 900px;
+}
+
+.modal-full {
+  width: 95vw;
+  max-width: none;
+  max-height: 95vh;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════════════════════════
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $modal-padding;
+  border-bottom: 1px solid $modal-header-border;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.modal-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  margin: -0.5rem -0.5rem -0.5rem 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BODY
+// ═══════════════════════════════════════════════════════════════════════════
+
+.modal-body {
+  flex: 1;
+  padding: $modal-padding;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Scrollbar personalizado
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f3f4f6;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #9ca3af;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FOOTER
+// ═══════════════════════════════════════════════════════════════════════════
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: $modal-padding;
+  border-top: 1px solid $modal-footer-border;
+  flex-shrink: 0;
+
+  // Si está vacío, ocultarlo
+  &:empty {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+
+    // Botones a ancho completo en móvil
+    ::ng-deep app-button,
+    ::ng-deep button {
+      width: 100%;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACCESIBILIDAD
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Mejora el contraste en modo de alto contraste
+@media (prefers-contrast: high) {
+  .modal-content {
+    border: 2px solid #000000;
+  }
+
+  .modal-header,
+  .modal-footer {
+    border-width: 2px;
+  }
+}
+
+// Respeta la preferencia de movimiento reducido
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content {
+    animation: none;
+  }
+
+  .modal-close-button {
+    transition: none;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════════════════
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    animation: modal-content-slide-up 0.3s ease-out;
+  }
+
+  @keyframes modal-content-slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+
+  .modal-title {
+    font-size: 1.125rem;
+  }
+}

@@ -1,46 +1,121 @@
 ﻿﻿/**
- * incidents.service.ts
+ * @fileoverview Servicio empresarial de gestión de incidencias del sistema SWO
  * 
- * Servicio empresarial de gesti�n de incidencias del sistema SWO.
- * 
- * Responsabilidades principales:
+ * **Responsabilidades principales:**
  * - CRUD completo de incidencias con validaciones de negocio
- * - Gesti�n de estados y transiciones con reglas empresariales
- * - Asignaci�n de incidencias con validaci�n de permisos
- * - Historial de cambios y auditor�a
- * - Filtrado y b�squeda avanzada
- * - Estad�sticas y m�tricas en tiempo real
- * - Integraci�n con backend Java REST API
+ * - Gestión de estados y transiciones con reglas empresariales
+ * - Asignación de incidencias con validación de permisos por rol
+ * - Historial de cambios y auditoría completa de modificaciones
+ * - Filtrado y búsqueda avanzada con múltiples criterios
+ * - Estadísticas y métricas en tiempo real (KPIs)
+ * - Integración bidireccional con backend Java REST API
+ * - Caché inteligente para optimización de consultas frecuentes
  * 
- * Reglas de Negocio Implementadas:
- * - Solo incidencias en estado 'Abierto' pueden asignarse
- * - Solo el usuario asignado puede cambiar el estado
- * - Validaci�n de campos obligatorios
- * - Control por roles (admin, agente, usuario)
- * - Historial autom�tico de todas las modificaciones
+ * **Reglas de Negocio Implementadas:**
+ * - Solo incidencias en estado 'Abierto' pueden asignarse inicialmente
+ * - Solo el usuario asignado o administradores pueden cambiar el estado
+ * - Validación estricta de campos obligatorios con feedback descriptivo
+ * - Control granular por roles (Administrador > Analista/Agente > Usuario)
+ * - Historial automático de todas las modificaciones con timestamp y usuario
+ * - Transiciones de estado validadas según flujo definido
+ * - Validación de prioridades y estados contra enumeraciones
+ * 
+ * **Flujo de estados permitido:**
+ * ```
+ * open → inprogress → resolved
+ *   ↓       ↓           ↓
+ * pending ← ←  →  → → open (solo admin)
+ * ```
+ * 
+ * **Arquitectura de datos:**
+ * - Estado reactivo con RxJS BehaviorSubject
+ * - Sincronización automática con backend
+ * - Mapeo bidireccional entre modelos frontend/backend
+ * - Cache con invalidación inteligente
+ * 
+ * **Uso típico:**
+ * ```typescript
+ * // Suscribirse a cambios de incidencias:
+ * this.incidentsService.obtenerIncidencias().subscribe(incidencias => {
+ *   this.incidencias = incidencias;
+ * });
+ * 
+ * // Crear nueva incidencia:
+ * this.incidentsService.crearIncidencia({
+ *   titulo: 'Error en sistema',
+ *   descripcion: 'El sistema no permite login',
+ *   estado: 'Abierto',
+ *   impacto: 'Alto'
+ * }).subscribe(resultado => {
+ *   if (resultado.success) console.log('Incidencia creada:', resultado.id);
+ * });
+ * 
+ * // Actualizar estado:
+ * this.incidentsService.actualizarEstado('INC-123', 'inprogress')
+ *   .subscribe(success => {
+ *     if (success) console.log('Estado actualizado');
+ *   });
+ * 
+ * // Obtener estadísticas:
+ * const stats = this.incidentsService.obtenerEstadisticas();
+ * console.log(`Total: ${stats.total}, Abiertas: ${stats.porEstado.abiertos}`);
+ * ```
+ * 
+ * **Optimizaciones implementadas:**
+ * - Caché de estadísticas con TTL de 5 minutos
+ * - Búsqueda indexada por ID para O(1) lookup
+ * - Filtrado multi-criterio eficiente
+ * - Reducción de llamadas HTTP mediante estado local
+ * 
+ * **Seguridad:**
+ * - Validación de permisos antes de cada modificación
+ * - Sanitización de inputs para prevenir XSS
+ * - Auditoría completa de cambios con usuario y timestamp
+ * - Validación de transiciones de estado
  * 
  * @author Equipo SWO
  * @version 2.0.0
+ * @since 2026-04-19
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Incidencia } from '../models/models';
+import { 
+  CrearIncidenciaRequest, 
+  ActualizarIncidenciaRequest,
+  IncidenciaBackendDTO,
+  mapIncidenciaFromBackend,
+  mapEstadoToBackend,
+  mapPrioridadToBackend
+} from '../models/dtos';
+import { 
+  EstadoIncidencia, 
+  PrioridadIncidencia,
+  RolUsuario 
+} from '../enums/app.enums';
+import { 
+  API_ENDPOINTS,
+  NOTIFICATION_MESSAGES,
+  VALIDATION_CONSTANTS 
+} from '../constants/app.constants';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { SharedService, ResultadoValidacion } from './shared.service';
 
 /**
- * Tipos de estado v�lidos para incidencias
+ * Re-exportación de tipos desde enums para compatibilidad
+ * @deprecated Usar directamente desde app.enums.ts
  */
-export type EstadoIncidencia = 'open' | 'inprogress' | 'pending' | 'resolved';
+export type EstadoIncidenciaType = 'open' | 'inprogress' | 'pending' | 'resolved';
 
 /**
- * Tipos de prioridad válidos para incidencias
+ * Re-exportación de tipos de prioridad para compatibilidad
+ * @deprecated Usar directamente desde app.enums.ts
  */
-export type PrioridadIncidencia = 'Baja' | 'Media' | 'Alta' | 'Crítica';
+export type PrioridadIncidenciaType = 'Baja' | 'Media' | 'Alta' | 'Crítica';
 
 /**
  * Entrada de historial de cambios

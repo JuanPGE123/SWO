@@ -1,0 +1,258 @@
+/**
+ * Estilos del componente Input
+ * 
+ * Incluye variantes de estado (normal, focus, error, disabled),
+ * integración con iconos, y accesibilidad completa.
+ */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIABLES DE DISEÑO
+// ═══════════════════════════════════════════════════════════════════════════
+
+$input-border-color: #d1d5db;
+$input-border-color-focus: #3b82f6;
+$input-border-color-error: #ef4444;
+$input-bg-color: #ffffff;
+$input-bg-color-disabled: #f3f4f6;
+$input-text-color: #111827;
+$input-text-color-disabled: #9ca3af;
+$input-placeholder-color: #9ca3af;
+$input-border-radius: 6px;
+$input-padding-vertical: 0.5rem;
+$input-padding-horizontal: 0.75rem;
+$input-transition: all 0.2s ease-in-out;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTENEDOR PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LABEL
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.input-required {
+  color: #ef4444;
+  margin-left: 0.125rem;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTENEDOR DEL INPUT (con iconos)
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CAMPO DE INPUT/TEXTAREA BASE
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-field {
+  width: 100%;
+  padding: $input-padding-vertical $input-padding-horizontal;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: $input-text-color;
+  background-color: $input-bg-color;
+  border: 1px solid $input-border-color;
+  border-radius: $input-border-radius;
+  transition: $input-transition;
+  outline: none;
+
+  &::placeholder {
+    color: $input-placeholder-color;
+  }
+
+  // Focus
+  &:focus {
+    border-color: $input-border-color-focus;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  // Disabled
+  &:disabled {
+    background-color: $input-bg-color-disabled;
+    color: $input-text-color-disabled;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Readonly
+  &:read-only {
+    background-color: #f9fafb;
+    cursor: default;
+  }
+
+  // Con icono prefijo
+  &.input-with-prefix {
+    padding-left: 2.5rem;
+  }
+
+  // Con icono sufijo
+  &.input-with-suffix {
+    padding-right: 2.5rem;
+  }
+}
+
+// Textarea específico
+textarea.input-field {
+  resize: vertical;
+  min-height: 5rem;
+
+  &.input-with-autosize {
+    resize: none;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO DE ERROR
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-error {
+  border-color: $input-border-color-error !important;
+
+  &:focus {
+    border-color: $input-border-color-error !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+  }
+}
+
+.input-container-error {
+  .input-label {
+    color: $input-border-color-error;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ICONOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.input-icon-prefix {
+  left: 0.75rem;
+}
+
+.input-icon-suffix {
+  right: 0.75rem;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOGGLE DE CONTRASEÑA
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: #6b7280;
+  transition: $input-transition;
+
+  &:hover {
+    color: #374151;
+  }
+
+  &:focus {
+    outline: none;
+    color: $input-border-color-focus;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MENSAJES DE AYUDA/ERROR
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.input-description-error {
+  color: $input-border-color-error;
+  font-weight: 500;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTADOR DE CARACTERES
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-counter {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACCESIBILIDAD
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Mejora el contraste en modo de alto contraste
+@media (prefers-contrast: high) {
+  .input-field {
+    border-width: 2px;
+  }
+}
+
+// Respeta la preferencia de movimiento reducido
+@media (prefers-reduced-motion: reduce) {
+  .input-field,
+  .input-password-toggle {
+    transition: none;
+  }
+}
+
+// Mejora la visibilidad del focus para navegación por teclado
+.input-field:focus-visible {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADOS DESHABILITADOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.input-container-disabled {
+  opacity: 0.7;
+
+  .input-label {
+    color: $input-text-color-disabled;
+  }
+
+  .input-icon {
+    color: $input-text-color-disabled;
+  }
+}
