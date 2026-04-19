@@ -65,6 +65,9 @@ export const NOTIFICATION_MESSAGES = {
     UNAUTHORIZED: 'No tienes permisos para realizar esta acción',
     NOT_FOUND: 'El recurso solicitado no fue encontrado',
     INVALID_DATA: 'Los datos ingresados no son válidos',
+    VALIDATION_FAILED: 'Los datos del formulario contienen errores. Por favor, corrígelos',
+    SAVE_FAILED: 'Error al guardar los cambios. Por favor, intenta nuevamente',
+    UPDATE_FAILED: 'Error al actualizar el registro. Por favor, intenta nuevamente',
     GENERIC: 'Ha ocurrido un error inesperado',
   },
   

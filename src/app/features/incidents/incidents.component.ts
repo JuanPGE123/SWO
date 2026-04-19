@@ -157,8 +157,8 @@ export class IncidentsComponent implements OnInit {
         [
           Validators.required,
           CustomValidators.noWhitespace(),
-          Validators.minLength(VALIDATION_CONSTANTS.TITULO_MIN_LENGTH),
-          Validators.maxLength(VALIDATION_CONSTANTS.TITULO_MAX_LENGTH)
+          Validators.minLength(VALIDATION_CONSTANTS.TITLE_MIN_LENGTH),
+          Validators.maxLength(VALIDATION_CONSTANTS.TITLE_MAX_LENGTH)
         ]
       ],
       descripcion: [
@@ -187,8 +187,8 @@ export class IncidentsComponent implements OnInit {
         [
           Validators.required,
           CustomValidators.noWhitespace(),
-          Validators.minLength(VALIDATION_CONSTANTS.TITULO_MIN_LENGTH),
-          Validators.maxLength(VALIDATION_CONSTANTS.TITULO_MAX_LENGTH)
+          Validators.minLength(VALIDATION_CONSTANTS.TITLE_MIN_LENGTH),
+          Validators.maxLength(VALIDATION_CONSTANTS.TITLE_MAX_LENGTH)
         ]
       ],
       descripcion: [
@@ -705,51 +705,7 @@ export class IncidentsComponent implements OnInit {
    * Verifica si el formulario de edición tiene cambios sin guardar
    */
   get formularioEdicionTieneCambios(): boolean {
-    return this.edicionForm.dirty || this.resolucionForm.dirty) return;
-
-    if (this.edicionForm.invalid) {
-      this.edicionForm.markAllAsTouched();
-      this.notificationService.toast(
-        NOTIFICATION_MESSAGES.ERROR.VALIDATION_FAILED,
-        3000,
-        'error'
-      );
-      return;
-    }
-
-    this.guardandoCambios = true;
-    const datos = this.edicionForm.value;
-
-    this.incidentsService.actualizarIncidenciaBackend(
-      this.incidenteSeleccionado.id,
-      datos.titulo,
-      datos.descripcion,
-      datos.estado,
-      datos.impacto,
-      datos.ubicacion,
-      '',
-      false
-    ).subscribe({
-      next: () => {
-        this.guardandoCambios = false;
-        this.modoEdicion = false;
-        this.notificationService.toast(
-          NOTIFICATION_MESSAGES.SUCCESS.INCIDENT_UPDATED,
-          3000,
-          'success'
-        );
-        this.cerrarDetalle();
-        this.cargarIncidentes();
-      },
-      error: () => {
-        this.guardandoCambios = false;
-        this.notificationService.toast(
-          NOTIFICATION_MESSAGES.ERROR.UPDATE_FAILED,
-          3000,
-          'error'
-        );
-      }
-    });
+    return this.edicionForm.dirty || this.resolucionForm.dirty;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
