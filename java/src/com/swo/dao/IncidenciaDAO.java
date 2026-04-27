@@ -113,4 +113,112 @@ public class IncidenciaDAO {
             return false;
         }
     }
+
+    // 5. ASIGNACIÓN - Asignar incidencia a un empleado
+    public boolean asignarIncidencia(int idIncidencia, int idEmpleado) {
+        // Primero verificar si ya existe una asignación activa
+        String sqlCheck = "SELECT COUNT(*) FROM asignaciones WHERE id_incidencia = ? AND estado_asignacion != 'Completado'";
+        String sqlInsert = "INSERT INTO asignaciones (id_incidencia, id_empleado, fecha_asignacion, estado_asignacion) " +
+                          "VALUES (?, ?, NOW(), 'Asignado')";
+        
+        try (Connection con = ConexionBD.obtenerConexion()) {
+            // Verificar si ya hay asignación
+            try (PreparedStatement pstCheck = con.prepareStatement(sqlCheck)) {
+                pstCheck.setInt(1, idIncidencia);
+                ResultSet rs = pstCheck.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // Ya existe una asignación, actualizarla en lugar de crear nueva
+                    String sqlUpdate = "UPDATE asignaciones SET id_empleado = ?, fecha_asignacion = NOW(), " +
+                                     "estado_asignacion = 'Reasignado' WHERE id_incidencia = ? AND estado_asignacion != 'Completado'";
+                    try (PreparedStatement pstUpdate = con.prepareStatement(sqlUpdate)) {
+                        pstUpdate.setInt(1, idEmpleado);
+                        pstUpdate.setInt(2, idIncidencia);
+                        return pstUpdate.executeUpdate() > 0;
+                    }
+                }
+            }
+            
+            // No existe asignación, crear nueva
+            try (PreparedStatement pst = con.prepareStatement(sqlInsert)) {
+                pst.setInt(1, idIncidencia);
+                pst.setInt(2, idEmpleado);
+                return pst.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al asignar incidencia: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 6. CAMBIAR PRIORIDAD
+    public boolean actualizarPrioridad(int idIncidencia, String nuevaPrioridad) {
+        String sql = "UPDATE incidencias SET prioridad = ? WHERE id_incidencia = ?";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
+            pst.setString(1, nuevaPrioridad);
+            pst.setInt(2, idIncidencia);
+            
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar prioridad: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 7. OBTENER INCIDENCIA POR ID
+    public Incidencia obtenerIncidenciaPorId(int idIncidencia) {
+        String sql = "SELECT * FROM incidencias WHERE id_incidencia = ?";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
+            pst.setInt(1, idIncidencia);
+            ResultSet rs = pst.executeQuery();
+            
+            if (rs.next()) {
+                Incidencia inc = new Incidencia();
+                inc.setIdIncidencia(rs.getInt("id_incidencia"));
+                inc.setTitulo(rs.getString("titulo"));
+                inc.setDescripcion(rs.getString("descripcion"));
+                inc.setEstado(rs.getString("estado"));
+                inc.setUbicacion(rs.getString("ubicacion"));
+                inc.setImpacto(rs.getString("impacto"));
+                inc.setPrioridad(rs.getString("prioridad"));
+                inc.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
+                inc.setIdUsuarioReporta(rs.getInt("id_usuario_reporta"));
+                inc.setResolucion(rs.getString("resolucion"));
+                inc.setFechaResolucion(rs.getTimestamp("fecha_resolucion"));
+                return inc;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener incidencia: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // 8. CALCULAR TIEMPO PROMEDIO DE RESOLUCIÓN
+    /**
+     * Calcula el tiempo promedio de resolución en horas para incidencias cerradas/resueltas.
+     * Solo considera incidencias con estado 'Cerrado' o 'Resuelto' y que tengan fecha_cierre.
+     * 
+     * @return Tiempo promedio en horas. Retorna 0 si no hay incidencias cerradas.
+     */
+    public double obtenerTiempoPromedioResolucion() {
+        String sql = "SELECT AVG(TIMESTAMPDIFF(HOUR, fecha_creacion, fecha_cierre)) AS promedio " +
+                     "FROM incidencias " +
+                     "WHERE (estado = 'Cerrado' OR estado = 'Resuelto') " +
+                     "AND fecha_cierre IS NOT NULL";
+        
+        try (Connection con = ConexionBD.obtenerConexion();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            
+            if (rs.next()) {
+                return rs.getDouble("promedio");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al calcular tiempo promedio: " + e.getMessage());
+        }
+        return 0.0;
+    }
 }

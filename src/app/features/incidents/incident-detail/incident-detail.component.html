@@ -61,15 +61,45 @@
 
       <!-- Comentarios -->
       <section class="detail-section">
-        <h3>Comentarios ({{ incidente.comments.length }})</h3>
-        <div class="comments-list">
-          <div *ngFor="let comment of incidente.comments" class="comment">
+        <h3>Comentarios ({{ comentarios.length }})</h3>
+        
+        <!-- Lista de comentarios -->
+        <div class="comments-list" *ngIf="comentarios.length > 0">
+          <div *ngFor="let comentario of comentarios" class="comment">
             <div class="comment-header">
-              <strong>{{ comment.author }}</strong>
-              <span class="comment-date">{{ comment.date }}</span>
+              <strong>{{ comentario.autor }}</strong>
+              <span class="comment-date">{{ comentario.fecha }}</span>
             </div>
-            <div class="comment-body">{{ comment.text }}</div>
+            <div class="comment-body">{{ comentario.comentario }}</div>
           </div>
+        </div>
+
+        <!-- Mensaje si no hay comentarios -->
+        <div *ngIf="comentarios.length === 0 && !cargandoComentarios" class="no-comments">
+          No hay comentarios todavía. Sé el primero en comentar.
+        </div>
+
+        <!-- Estado de carga -->
+        <div *ngIf="cargandoComentarios" class="loading">
+          Cargando comentarios...
+        </div>
+
+        <!-- Formulario para agregar comentario -->
+        <div class="add-comment-section">
+          <h4>Agregar Comentario</h4>
+          <textarea 
+            [(ngModel)]="nuevoComentario" 
+            placeholder="Escribe tu comentario aquí..."
+            rows="4"
+            [disabled]="agregandoComentario"
+            class="comment-textarea">
+          </textarea>
+          <button 
+            (click)="agregarComentario()" 
+            [disabled]="!nuevoComentario.trim() || agregandoComentario"
+            class="btn btn-primary">
+            {{ agregandoComentario ? 'Agregando...' : 'Agregar Comentario' }}
+          </button>
         </div>
       </section>
     </div>

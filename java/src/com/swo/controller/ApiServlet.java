@@ -1,10 +1,12 @@
 package com.swo.controller;
 
+import com.swo.dao.ComentarioDAO;
 import com.swo.dao.ConocimientoDAO;
 import com.swo.dao.IncidenciaDAO;
 import com.swo.dao.ProyectoDAO;
 import com.swo.dao.ReporteDAO;
 import com.swo.dao.UsuarioDAO;
+import com.swo.model.Comentario;
 import com.swo.model.Conocimiento;
 import com.swo.model.Incidencia;
 import com.swo.model.Proyecto;
@@ -46,6 +48,7 @@ public class ApiServlet extends HttpServlet {
     private ProyectoDAO proyectoDAO;
     private ReporteDAO reporteDAO;
     private ConocimientoDAO conocimientoDAO;
+    private ComentarioDAO comentarioDAO;
 
     /**
      * Inicializa los DAOs al arrancar el servlet.
@@ -62,6 +65,7 @@ public class ApiServlet extends HttpServlet {
         usuarioDAO = new UsuarioDAO();
         proyectoDAO = new ProyectoDAO();
         reporteDAO = new ReporteDAO();
+        comentarioDAO = new ComentarioDAO();
         conocimientoDAO = new ConocimientoDAO();
     }
 
@@ -134,11 +138,28 @@ public class ApiServlet extends HttpServlet {
                     case "Cerrado": case "Resuelto": cerradas++; break;
                 }
             }
+            
+            // Calcular tiempo promedio de resolución
+            double tiempoPromedioHoras = incidenciaDAO.obtenerTiempoPromedioResolucion();
+            
             out.print("{\"total\":" + inc.size()
                 + ",\"abiertas\":" + abiertas
                 + ",\"enProgreso\":" + enProgreso
                 + ",\"pendientes\":" + pendientes
-                + ",\"cerradas\":" + cerradas + "}");
+                + ",\"cerradas\":" + cerradas
+                + ",\"tiempoPromedioResolucionHoras\":" + String.format("%.1f", tiempoPromedioHoras)
+                + "}");
+
+        } else if (path.matches("/incidencias/\\d+/comentarios")) {
+            // GET /api/incidencias/{id}/comentarios - Obtener comentarios de una incidencia
+            try {
+                int idIncidencia = Integer.parseInt(path.split("/")[2]);
+                List<Comentario> comentarios = comentarioDAO.obtenerComentariosPorIncidencia(idIncidencia);
+                out.print(comentariosToJson(comentarios));
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"ID invalido\"}");
+            }
 
         } else {
             res.setStatus(404);
@@ -311,6 +332,69 @@ public class ApiServlet extends HttpServlet {
             if (session != null) session.invalidate();
             out.print("{\"success\":true}");
 
+        } else if (path.matches("/incidencias/\\d+/comentarios")) {
+            // POST /api/incidencias/{id}/comentarios - Agregar comentario
+            try {
+                int idIncidencia = Integer.parseInt(path.split("/")[2]);
+                String comentarioTexto = req.getParameter("comentario");
+                String idUsuarioStr = req.getParameter("idUsuario");
+                
+                if (comentarioTexto == null || comentarioTexto.trim().isEmpty()) {
+                    res.setStatus(400);
+                    out.print("{\"error\":\"El comentario no puede estar vacio\"}");
+                    return;
+                }
+                
+                int idUsuario = 1; // Usuario por defecto
+                if (idUsuarioStr != null && !idUsuarioStr.isEmpty()) {
+                    idUsuario = Integer.parseInt(idUsuarioStr);
+                } else {
+                    HttpSession session = req.getSession(false);
+                    if (session != null && session.getAttribute("idUsuario") != null) {
+                        idUsuario = (Integer) session.getAttribute("idUsuario");
+                    }
+                }
+                
+                Comentario comentario = new Comentario(idIncidencia, idUsuario, comentarioTexto);
+                boolean ok = comentarioDAO.insertarComentario(comentario);
+                
+                if (ok) {
+                    out.print("{\"success\":true,\"mensaje\":\"Comentario agregado\"}");
+                } else {
+                    res.setStatus(500);
+                    out.print("{\"error\":\"No se pudo agregar el comentario\"}");
+                }
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+            }
+
+        } else if (path.matches("/incidencias/\\d+/asignar")) {
+            // POST /api/incidencias/{id}/asignar - Asignar incidencia a un empleado
+            try {
+                int idIncidencia = Integer.parseInt(path.split("/")[2]);
+                String idEmpleadoStr = req.getParameter("idEmpleado");
+                
+                if (idEmpleadoStr == null || idEmpleadoStr.trim().isEmpty()) {
+                    res.setStatus(400);
+                    out.print("{\"error\":\"idEmpleado es obligatorio\"}");
+                    return;
+                }
+                
+                int idEmpleado = Integer.parseInt(idEmpleadoStr);
+                boolean ok = incidenciaDAO.asignarIncidencia(idIncidencia, idEmpleado);
+                
+                if (ok) {
+                    out.print("{\"success\":true,\"mensaje\":\"Incidencia asignada\"}");
+                } else {
+                    res.setStatus(500);
+                    out.print("{\"error\":\"No se pudo asignar la incidencia\"}");
+                }
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+            }
+
         } else {
             res.setStatus(404);
             out.print("{\"error\":\"Ruta no encontrada\"}");
@@ -443,6 +527,56 @@ public class ApiServlet extends HttpServlet {
                 out.print("{\"error\":\"ID invalido\"}");
             } catch (Exception e) {
                 res.setStatus(500);
+                out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+            }
+        } else if (path.matches("/incidencias/\\d+/estado")) {
+            // PUT /api/incidencias/{id}/estado - Cambiar estado
+            try {
+                int idIncidencia = Integer.parseInt(path.split("/")[2]);
+                java.util.Map<String, String> params = parsePutBody(req);
+                String nuevoEstado = params.get("estado");
+                
+                if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
+                    res.setStatus(400);
+                    out.print("{\"error\":\"estado es obligatorio\"}");
+                    return;
+                }
+                
+                boolean ok = incidenciaDAO.actualizarEstadoIncidencia(idIncidencia, nuevoEstado);
+                
+                if (ok) {
+                    out.print("{\"success\":true,\"mensaje\":\"Estado actualizado\"}");
+                } else {
+                    res.setStatus(500);
+                    out.print("{\"error\":\"No se pudo actualizar el estado\"}");
+                }
+            } catch (Exception e) {
+                res.setStatus(400);
+                out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
+            }
+        } else if (path.matches("/incidencias/\\d+/prioridad")) {
+            // PUT /api/incidencias/{id}/prioridad - Cambiar prioridad
+            try {
+                int idIncidencia = Integer.parseInt(path.split("/")[2]);
+                java.util.Map<String, String> params = parsePutBody(req);
+                String nuevaPrioridad = params.get("prioridad");
+                
+                if (nuevaPrioridad == null || nuevaPrioridad.trim().isEmpty()) {
+                    res.setStatus(400);
+                    out.print("{\"error\":\"prioridad es obligatoria\"}");
+                    return;
+                }
+                
+                boolean ok = incidenciaDAO.actualizarPrioridad(idIncidencia, nuevaPrioridad);
+                
+                if (ok) {
+                    out.print("{\"success\":true,\"mensaje\":\"Prioridad actualizada\"}");
+                } else {
+                    res.setStatus(500);
+                    out.print("{\"error\":\"No se pudo actualizar la prioridad\"}");
+                }
+            } catch (Exception e) {
+                res.setStatus(400);
                 out.print("{\"error\":\"" + escJson(e.getMessage()) + "\"}");
             }
         } else {
@@ -777,5 +911,61 @@ public class ApiServlet extends HttpServlet {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    /**
+     * Serializa una lista de comentarios a formato JSON.
+     *
+     * @param lista Lista de objetos Comentario
+     * @return String JSON con el array de comentarios
+     */
+    private String comentariosToJson(List<Comentario> lista) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lista.size(); i++) {
+            Comentario c = lista.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("{")
+              .append("\"id\":").append(c.getIdComentario()).append(",")
+              .append("\"idIncidencia\":").append(c.getIdIncidencia()).append(",")
+              .append("\"idUsuario\":").append(c.getIdUsuario()).append(",")
+              .append("\"autor\":\"").append(escJson(c.getNombreUsuario())).append("\",")
+              .append("\"comentario\":\"").append(escJson(c.getComentario())).append("\",")
+              .append("\"esSolucion\":").append(c.isEsSolucion()).append(",")
+              .append("\"fecha\":\"").append(c.getFechaComentario() != null ? sdf.format(c.getFechaComentario()) : "").append("\"")
+              .append("}");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    /**
+     * Parsea el body de una petición PUT y extrae los parámetros.
+     * Necesario porque Tomcat 7 no parsea automáticamente el body de PUT.
+     *
+     * @param req Petición HTTP
+     * @return Mapa con los parámetros extraídos
+     * @throws IOException Si hay error leyendo el body
+     */
+    private java.util.Map<String, String> parsePutBody(HttpServletRequest req) throws IOException {
+        java.util.Map<String, String> params = new java.util.HashMap<>();
+        java.io.BufferedReader reader = req.getReader();
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        String body = sb.toString();
+        if (body != null && !body.isEmpty()) {
+            for (String pair : body.split("&")) {
+                int eq = pair.indexOf('=');
+                if (eq > 0) {
+                    String k = java.net.URLDecoder.decode(pair.substring(0, eq), "UTF-8");
+                    String v = java.net.URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+                    params.put(k, v);
+                }
+            }
+        }
+        return params;
     }
 }
