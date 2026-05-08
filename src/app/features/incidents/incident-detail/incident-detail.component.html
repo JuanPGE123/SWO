@@ -59,49 +59,106 @@
         </div>
       </section>
 
-      <!-- Comentarios -->
+      <!-- Navegación por pestañas -->
       <section class="detail-section">
-        <h3>Comentarios ({{ comentarios.length }})</h3>
-        
-        <!-- Lista de comentarios -->
-        <div class="comments-list" *ngIf="comentarios.length > 0">
-          <div *ngFor="let comentario of comentarios" class="comment">
-            <div class="comment-header">
-              <strong>{{ comentario.autor }}</strong>
-              <span class="comment-date">{{ comentario.fecha }}</span>
-            </div>
-            <div class="comment-body">{{ comentario.comentario }}</div>
-          </div>
-        </div>
-
-        <!-- Mensaje si no hay comentarios -->
-        <div *ngIf="comentarios.length === 0 && !cargandoComentarios" class="no-comments">
-          No hay comentarios todavía. Sé el primero en comentar.
-        </div>
-
-        <!-- Estado de carga -->
-        <div *ngIf="cargandoComentarios" class="loading">
-          Cargando comentarios...
-        </div>
-
-        <!-- Formulario para agregar comentario -->
-        <div class="add-comment-section">
-          <h4>Agregar Comentario</h4>
-          <textarea 
-            [(ngModel)]="nuevoComentario" 
-            placeholder="Escribe tu comentario aquí..."
-            rows="4"
-            [disabled]="agregandoComentario"
-            class="comment-textarea">
-          </textarea>
+        <div class="tabs">
           <button 
-            (click)="agregarComentario()" 
-            [disabled]="!nuevoComentario.trim() || agregandoComentario"
-            class="btn btn-primary">
-            {{ agregandoComentario ? 'Agregando...' : 'Agregar Comentario' }}
+            [class.active]="tabActiva === 'info'" 
+            (click)="cambiarTab('info')"
+            class="tab-button">
+            Información
           </button>
+          <button 
+            [class.active]="tabActiva === 'comments'" 
+            (click)="cambiarTab('comments')"
+            class="tab-button">
+            Comentarios
+          </button>
+          <button 
+            [class.active]="tabActiva === 'files'" 
+            (click)="cambiarTab('files')"
+            class="tab-button">
+            Archivos
+          </button>
+          <button 
+            [class.active]="tabActiva === 'history'" 
+            (click)="cambiarTab('history')"
+            class="tab-button">
+            Historial
+          </button>
+        </div>
+
+        <!-- Contenido de pestañas -->
+        <div class="tab-content">
+          <!-- Pestaña: Información -->
+          <div *ngIf="tabActiva === 'info'" class="tab-pane">
+            <div *ngIf="!modoEdicion">
+              <p><strong>Descripción:</strong> {{ incidente.reason }}</p>
+              <p><strong>Actividad:</strong> {{ incidente.activity }}</p>
+              <div class="actions">
+                <button (click)="activarEdicion()" class="btn btn-primary">Editar</button>
+                <button (click)="mostrarCambioEstado()" class="btn btn-secondary">Cambiar Estado</button>
+              </div>
+            </div>
+            <div *ngIf="modoEdicion">
+              <app-incident-form
+                [incident]="incidente"
+                [editMode]="true"
+                [saving]="guardando"
+                (onSubmit)="guardarCambios($event)"
+                (onCancel)="cancelarEdicion()">
+              </app-incident-form>
+            </div>
+          </div>
+
+          <!-- Pestaña: Comentarios -->
+          <div *ngIf="tabActiva === 'comments'" class="tab-pane">
+            <app-incident-comments
+              [incidentId]="incidenteId"
+              [comments]="incidente.comments"
+              (onCommentAdded)="onComentarioAgregado($event)">
+            </app-incident-comments>
+          </div>
+
+          <!-- Pestaña: Archivos -->
+          <div *ngIf="tabActiva === 'files'" class="tab-pane">
+            <app-incident-files
+              [incidentId]="incidenteId"
+              [files]="archivos"
+              (onFileUploaded)="onArchivoSubido($event)"
+              (onFileDeleted)="onArchivoEliminado($event)">
+            </app-incident-files>
+          </div>
+
+          <!-- Pestaña: Historial -->
+          <div *ngIf="tabActiva === 'history'" class="tab-pane">
+            <app-incident-history
+              [incidentId]="incidenteId"
+              [history]="historial"
+              [autoLoad]="false">
+            </app-incident-history>
+          </div>
         </div>
       </section>
     </div>
   </main>
+
+  <!-- Modal de cambio de estado -->
+  <div *ngIf="mostrarSelectorEstado" class="modal-overlay" (click)="cancelarCambioEstado()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Cambiar Estado</h3>
+      <div class="form-group">
+        <label>Nuevo Estado</label>
+        <select [(ngModel)]="nuevoEstado" class="form-select">
+          <option *ngFor="let estado of estados" [value]="estado.value">
+            {{ estado.label }}
+          </option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button (click)="cancelarCambioEstado()" class="btn btn-secondary">Cancelar</button>
+        <button (click)="cambiarEstado()" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
 </div>

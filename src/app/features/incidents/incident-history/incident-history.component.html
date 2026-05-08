@@ -1,0 +1,118 @@
+<!--
+  Componente de Historial de Cambios
+  Timeline visual de eventos de una incidencia
+  
+  Características:
+  - Timeline vertical
+  - Iconos contextuales
+  - Colores por tipo de evento
+  - Filtros opcionales
+-->
+
+<div class="incident-history">
+  
+  <!-- Encabezado -->
+  <div class="history-header">
+    <h3 class="history-title">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Historial de Cambios
+    </h3>
+    <span class="history-count">{{ historialInterno.length }}</span>
+  </div>
+
+  <!-- Filtros (opcional) -->
+  <div *ngIf="showFilters && historialInterno.length > 0" class="history-filters">
+    <button
+      *ngFor="let tipo of getTiposUnicos()"
+      type="button"
+      class="filter-btn"
+      [class.active]="filtroActivo === tipo"
+      (click)="cambiarFiltro(tipo)"
+    >
+      {{ getNombreFiltro(tipo) }}
+    </button>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="cargando" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando historial...</p>
+  </div>
+
+  <!-- Timeline -->
+  <div class="history-timeline" *ngIf="!cargando">
+    
+    <!-- Estado vacío -->
+    <div *ngIf="historialFiltrado.length === 0" class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="empty-text">No hay eventos en el historial</p>
+      <p class="empty-hint">Los cambios aparecerán aquí automáticamente</p>
+    </div>
+
+    <!-- Eventos -->
+    <div 
+      *ngFor="let evento of historialFiltrado; let i = index; let last = last" 
+      class="timeline-item"
+      [class.last]="last"
+    >
+      
+      <!-- Icono del evento -->
+      <div class="timeline-icon" [class]="evento.color">
+        <span class="material-icons">{{ evento.icono }}</span>
+      </div>
+
+      <!-- Línea conectora -->
+      <div *ngIf="!last" class="timeline-line"></div>
+
+      <!-- Contenido del evento -->
+      <div class="timeline-content">
+        
+        <!-- Cabecera -->
+        <div class="event-header">
+          <span class="event-action">{{ evento.accion }}</span>
+          <span class="event-date">{{ formatDate(evento.fecha) }}</span>
+        </div>
+
+        <!-- Descripción -->
+        <p class="event-description">{{ evento.descripcion }}</p>
+
+        <!-- Valores (si aplica) -->
+        <div 
+          *ngIf="evento.valorAnterior || evento.valorNuevo" 
+          class="event-values"
+        >
+          <div *ngIf="evento.valorAnterior" class="value-change">
+            <span class="value-label">Anterior:</span>
+            <span class="value-old">{{ evento.valorAnterior }}</span>
+          </div>
+          <svg *ngIf="evento.valorAnterior && evento.valorNuevo" class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+          <div *ngIf="evento.valorNuevo" class="value-change">
+            <span class="value-label">Nuevo:</span>
+            <span class="value-new">{{ evento.valorNuevo }}</span>
+          </div>
+        </div>
+
+        <!-- Usuario -->
+        <div class="event-footer">
+          <svg class="user-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span class="event-user">{{ evento.usuario }}</span>
+          <span class="event-time">• {{ formatTime(evento.fecha) }}</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

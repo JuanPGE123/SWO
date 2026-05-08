@@ -88,6 +88,8 @@
                     [value]="inc.state"
                     (change)="cambiarEstado(inc, $event)"
                     class="select-small"
+                    [disabled]="inc.state === 'resolved'"
+                    [title]="inc.state === 'resolved' ? 'Incidencia resuelta: el estado no puede modificarse' : ''"
                   >
                     <option value="open">Abierto</option>
                     <option value="inprogress">En proceso</option>
@@ -203,6 +205,16 @@
                   placeholder="Describe qué estabas haciendo cuando ocurrió el problema..."
                   rows="3"
                   class="form-input"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Asignar a</label>
+        <select formControlName="usuarioAsignado" class="form-input">
+          <option value="">Sin asignar</option>
+          <option *ngFor="let u of usuarios" [value]="u.id">
+            {{ u.nombre }} {{ u.apellido }}
+          </option>
+        </select>
       </div>
     </div>
 
@@ -345,12 +357,20 @@
       <div class="form-row-2">
         <div class="form-group">
           <label>Estado</label>
-          <select formControlName="estado" class="form-input">
-            <option value="Abierto">Abierto</option>
-            <option value="En Progreso">En Proceso</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Resuelto">Resuelto</option>
-          </select>
+          <ng-container *ngIf="incidenteSeleccionado?.state === 'resolved'; else estadoEditable">
+            <div class="estado-resuelto-readonly">
+              <span class="badge badge-resolved">✅ Resuelto</span>
+              <small class="estado-resuelto-nota">El estado no puede modificarse una vez resuelta la incidencia.</small>
+            </div>
+          </ng-container>
+          <ng-template #estadoEditable>
+            <select formControlName="estado" class="form-input">
+              <option value="Abierto">Abierto</option>
+              <option value="En Progreso">En Proceso</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Resuelto">Resuelto</option>
+            </select>
+          </ng-template>
         </div>
         <div class="form-group">
           <label>Impacto</label>

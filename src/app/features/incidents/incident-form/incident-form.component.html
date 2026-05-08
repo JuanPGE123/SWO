@@ -1,0 +1,262 @@
+<!--
+  Formulario de Incidencia
+  Componente reutilizable para crear y editar incidencias
+  
+  Características:
+  - Validación en tiempo real
+  - Feedback visual de errores
+  - Soporte para modo creación y edición
+  - Diseño responsivo
+-->
+
+<form [formGroup]="incidentForm" (ngSubmit)="onFormSubmit()" class="incident-form">
+  
+  <!-- Título del formulario -->
+  <div class="form-header">
+    <h2>{{ editMode ? 'Editar Incidencia' : 'Nueva Incidencia' }}</h2>
+    <p class="form-subtitle">
+      {{ editMode ? 'Modifica los datos de la incidencia' : 'Complete los siguientes campos para crear una nueva incidencia' }}
+    </p>
+  </div>
+
+  <!-- Sección de datos principales -->
+  <div class="form-section">
+    <h3 class="section-title">Información Principal</h3>
+
+    <!-- Título -->
+    <div class="form-group">
+      <label for="titulo" class="form-label required">
+        Título
+        <span class="label-hint">Descripción breve del problema</span>
+      </label>
+      <input
+        type="text"
+        id="titulo"
+        formControlName="titulo"
+        class="form-input"
+        [class.error]="hasError('titulo')"
+        placeholder="Ej: No puedo acceder al sistema de nómina"
+        maxlength="100"
+      />
+      <div class="error-message" *ngIf="hasError('titulo')">
+        {{ getErrorMessage('titulo') }}
+      </div>
+      <div class="char-counter">
+        {{ incidentForm.get('titulo')?.value?.length || 0 }} / 100 caracteres
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group">
+      <label for="descripcion" class="form-label required">
+        Descripción
+        <span class="label-hint">Explica detalladamente el problema</span>
+      </label>
+      <textarea
+        id="descripcion"
+        formControlName="descripcion"
+        class="form-textarea"
+        [class.error]="hasError('descripcion')"
+        placeholder="Describe el problema con el mayor detalle posible: qué estabas haciendo, qué mensaje de error apareció, etc."
+        rows="5"
+        maxlength="500"
+      ></textarea>
+      <div class="error-message" *ngIf="hasError('descripcion')">
+        {{ getErrorMessage('descripcion') }}
+      </div>
+      <div class="char-counter">
+        {{ incidentForm.get('descripcion')?.value?.length || 0 }} / 500 caracteres
+      </div>
+    </div>
+
+    <!-- Fila de categoría y prioridad -->
+    <div class="form-row">
+      <!-- Categoría -->
+      <div class="form-group">
+        <label for="categoria" class="form-label required">
+          Categoría
+        </label>
+        <select
+          id="categoria"
+          formControlName="categoria"
+          class="form-select"
+          [class.error]="hasError('categoria')"
+        >
+          <option value="">Selecciona una categoría</option>
+          <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+        </select>
+        <div class="error-message" *ngIf="hasError('categoria')">
+          {{ getErrorMessage('categoria') }}
+        </div>
+      </div>
+
+      <!-- Prioridad -->
+      <div class="form-group">
+        <label for="prioridad" class="form-label required">
+          Prioridad
+        </label>
+        <select
+          id="prioridad"
+          formControlName="prioridad"
+          class="form-select"
+          [class.error]="hasError('prioridad')"
+        >
+          <option *ngFor="let p of prioridades" [value]="p.value">
+            {{ p.label }}
+          </option>
+        </select>
+        <div class="error-message" *ngIf="hasError('prioridad')">
+          {{ getErrorMessage('prioridad') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado (solo en modo edición) -->
+    <div class="form-group" *ngIf="editMode">
+      <label for="estado" class="form-label required">
+        Estado
+      </label>
+      <select
+        id="estado"
+        formControlName="estado"
+        class="form-select"
+        [class.error]="hasError('estado')"
+      >
+        <option *ngFor="let e of estados" [value]="e.value">
+          {{ e.label }}
+        </option>
+      </select>
+      <div class="error-message" *ngIf="hasError('estado')">
+        {{ getErrorMessage('estado') }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de asignación -->
+  <div class="form-section">
+    <h3 class="section-title">Asignación</h3>
+
+    <div class="form-row">
+      <!-- Usuario asignado -->
+      <div class="form-group">
+        <label for="usuarioAsignado" class="form-label">
+          Usuario Asignado
+          <span class="label-hint">Opcional</span>
+        </label>
+        <select
+          id="usuarioAsignado"
+          formControlName="usuarioAsignado"
+          class="form-select"
+        >
+          <option value="">Sin asignar</option>
+          <option *ngFor="let usuario of usuarios" [value]="usuario.nombre + ' ' + usuario.apellido">
+            {{ usuario.nombre }} {{ usuario.apellido }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Proyecto -->
+      <div class="form-group">
+        <label for="proyecto" class="form-label">
+          Proyecto
+          <span class="label-hint">Opcional</span>
+        </label>
+        <select
+          id="proyecto"
+          formControlName="proyecto"
+          class="form-select"
+        >
+          <option value="">Sin proyecto</option>
+          <option *ngFor="let proyecto of proyectos" [value]="proyecto.nombre">
+            {{ proyecto.nombre }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de información adicional -->
+  <div class="form-section">
+    <h3 class="section-title">Información Adicional</h3>
+
+    <!-- Ubicación -->
+    <div class="form-group">
+      <label for="ubicacion" class="form-label">
+        Ubicación
+        <span class="label-hint">Lugar físico donde ocurre el problema</span>
+      </label>
+      <input
+        type="text"
+        id="ubicacion"
+        formControlName="ubicacion"
+        class="form-input"
+        placeholder="Ej: Edificio A, Piso 3, Oficina 301"
+        maxlength="100"
+      />
+    </div>
+
+    <!-- Fila de aplicación y actividad -->
+    <div class="form-row">
+      <!-- Aplicación -->
+      <div class="form-group">
+        <label for="aplicacion" class="form-label">
+          Aplicación/Sistema
+        </label>
+        <input
+          type="text"
+          id="aplicacion"
+          formControlName="aplicacion"
+          class="form-input"
+          placeholder="Ej: Sistema de Nómina"
+        />
+      </div>
+
+      <!-- Actividad -->
+      <div class="form-group">
+        <label for="actividad" class="form-label">
+          Actividad
+        </label>
+        <input
+          type="text"
+          id="actividad"
+          formControlName="actividad"
+          class="form-input"
+          placeholder="Ej: Intentando ingresar al sistema"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="form-actions">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="cancelar()"
+      [disabled]="saving"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="incidentForm.invalid || saving"
+    >
+      <span *ngIf="!saving">
+        {{ editMode ? 'Guardar Cambios' : 'Crear Incidencia' }}
+      </span>
+      <span *ngIf="saving" class="loading-spinner">
+        <i class="spinner"></i>
+        Guardando...
+      </span>
+    </button>
+  </div>
+
+  <!-- Indicador de campos requeridos -->
+  <div class="form-footer">
+    <p class="required-note">
+      <span class="required-mark">*</span> Campos obligatorios
+    </p>
+  </div>
+
+</form>

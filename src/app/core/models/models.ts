@@ -1113,3 +1113,190 @@ export interface Configuracion {
    */
   notificaciones: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INTERFACES PARA MÓDULO DE INCIDENTES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Representa un archivo adjunto en una incidencia
+ * 
+ * Permite adjuntar documentos, imágenes y otros archivos a las incidencias
+ * para proporcionar evidencia o información adicional.
+ * 
+ * **Uso:**
+ * - Capturas de pantalla de errores
+ * - Documentos de soporte
+ * - Logs del sistema
+ * - Imágenes de ubicación física
+ * 
+ * @interface
+ * @example
+ * ```typescript
+ * const archivo: ArchivoAdjunto = {
+ *   id: 'FILE-001',
+ *   nombre: 'captura_error.png',
+ *   tamanio: 245678,
+ *   tipo: 'image/png',
+ *   url: 'https://servidor.com/archivos/captura_error.png',
+ *   fechaCarga: '2026-05-03T10:30:00.000Z',
+ *   usuarioCarga: 'Juan Pérez'
+ * };
+ * ```
+ */
+export interface ArchivoAdjunto {
+  /**
+   * Identificador único del archivo
+   * @example 'FILE-001' | 'attachment-123'
+   */
+  id: string;
+
+  /**
+   * Nombre del archivo con extensión
+   * @example 'captura_error.png' | 'reporte_sistema.pdf'
+   */
+  nombre: string;
+
+  /**
+   * Tamaño del archivo en bytes
+   * @example 245678 (245.6 KB)
+   */
+  tamanio: number;
+
+  /**
+   * Tipo MIME del archivo
+   * @example 'image/png' | 'application/pdf' | 'text/plain'
+   */
+  tipo: string;
+
+  /**
+   * URL de descarga del archivo
+   * Puede ser relativa o absoluta
+   * @example '/api/archivos/download/123' | 'https://servidor.com/archivos/file.png'
+   */
+  url: string;
+
+  /**
+   * Fecha y hora de carga del archivo
+   * @format ISO 8601
+   * @example '2026-05-03T10:30:00.000Z'
+   */
+  fechaCarga: string;
+
+  /**
+   * Nombre del usuario que subió el archivo
+   * @example 'Juan Pérez'
+   */
+  usuarioCarga: string;
+
+  /**
+   * Descripción opcional del archivo
+   * @optional
+   * @example 'Captura de pantalla del error de login'
+   */
+  descripcion?: string;
+}
+
+/**
+ * Representa una entrada en el historial de cambios de una incidencia
+ * 
+ * Registra todas las modificaciones realizadas a una incidencia a lo largo
+ * de su ciclo de vida, proporcionando trazabilidad completa.
+ * 
+ * **Tipos de cambios registrados:**
+ * - Creación de la incidencia
+ * - Cambios de estado
+ * - Cambios de prioridad
+ * - Asignación a técnicos
+ * - Comentarios agregados
+ * - Archivos adjuntos
+ * - Ediciones de datos
+ * 
+ * @interface
+ * @example
+ * ```typescript
+ * const cambio: HistorialCambio = {
+ *   id: 'HIST-001',
+ *   fecha: '2026-05-03T10:30:00.000Z',
+ *   usuario: 'María González',
+ *   tipo: 'estado',
+ *   accion: 'Cambio de estado',
+ *   descripcion: 'Estado cambiado de "Abierto" a "En Progreso"',
+ *   valorAnterior: 'Abierto',
+ *   valorNuevo: 'En Progreso'
+ * };
+ * ```
+ */
+export interface HistorialCambio {
+  /**
+   * Identificador único de la entrada del historial
+   * @example 'HIST-001' | 'history-123'
+   */
+  id: string;
+
+  /**
+   * Fecha y hora del cambio
+   * @format ISO 8601
+   * @example '2026-05-03T10:30:00.000Z'
+   */
+  fecha: string;
+
+  /**
+   * Nombre del usuario que realizó el cambio
+   * Puede ser 'Sistema' para cambios automáticos
+   * @example 'Juan Pérez' | 'Sistema'
+   */
+  usuario: string;
+
+  /**
+   * Tipo de cambio realizado
+   * - 'creacion': Incidencia creada
+   * - 'estado': Cambio de estado
+   * - 'prioridad': Cambio de prioridad
+   * - 'asignacion': Asignación a técnico
+   * - 'comentario': Comentario agregado
+   * - 'archivo': Archivo adjuntado
+   * - 'edicion': Edición de datos
+   */
+  tipo: 'creacion' | 'estado' | 'prioridad' | 'asignacion' | 'comentario' | 'archivo' | 'edicion';
+
+  /**
+   * Acción específica realizada
+   * @example 'Cambio de estado' | 'Archivo adjuntado' | 'Comentario agregado'
+   */
+  accion: string;
+
+  /**
+   * Descripción detallada del cambio
+   * @example 'Estado cambiado de "Abierto" a "En Progreso"'
+   */
+  descripcion: string;
+
+  /**
+   * Valor antes del cambio (si aplica)
+   * @optional
+   * @example 'Abierto'
+   */
+  valorAnterior?: any;
+
+  /**
+   * Valor después del cambio (si aplica)
+   * @optional
+   * @example 'En Progreso'
+   */
+  valorNuevo?: any;
+
+  /**
+   * Icono para visualización en timeline
+   * @optional
+   * @example 'refresh' | 'comment' | 'attach_file'
+   */
+  icono?: string;
+
+  /**
+   * Color asociado al tipo de cambio
+   * @optional
+   * @example 'primary' | 'success' | 'warning' | 'danger'
+   */
+  color?: string;
+}

@@ -213,6 +213,7 @@ public class ApiServlet extends HttpServlet {
                 String ubicacion = req.getParameter("ubicacion");
                 String impacto = req.getParameter("impacto");
                 String idStr = req.getParameter("idUsuarioReporta");
+                String idUsuarioAsignadoStr = req.getParameter("idUsuarioAsignado");
 
                 if (titulo == null || titulo.isEmpty() || descripcion == null || descripcion.isEmpty()) {
                     res.setStatus(400);
@@ -232,9 +233,20 @@ public class ApiServlet extends HttpServlet {
                 inc.setUbicacion(ubicacion);
                 inc.setImpacto(impacto != null && !impacto.isEmpty() ? impacto : "Medio");
 
-                boolean ok = incidenciaDAO.insertarIncidencia(inc);
-                if (ok) out.print("{\"success\":true,\"mensaje\":\"Incidencia creada\"}");
-                else {
+                int newId = incidenciaDAO.insertarIncidencia(inc);
+                if (newId > 0) {
+                    // Si se indicó usuario asignado, crear la asignación
+                    if (idUsuarioAsignadoStr != null && !idUsuarioAsignadoStr.isEmpty()) {
+                        try {
+                            int idUsuarioAsignado = Integer.parseInt(idUsuarioAsignadoStr);
+                            int idEmpleado = incidenciaDAO.obtenerIdEmpleadoPorUsuario(idUsuarioAsignado);
+                            if (idEmpleado > 0) {
+                                incidenciaDAO.asignarIncidencia(newId, idEmpleado);
+                            }
+                        } catch (NumberFormatException ignored) {}
+                    }
+                    out.print("{\"success\":true,\"id\":" + newId + ",\"mensaje\":\"Incidencia creada\"}");
+                } else {
                     res.setStatus(500);
                     out.print("{\"error\":\"No se pudo guardar la incidencia\"}");
                 }
@@ -761,6 +773,9 @@ public class ApiServlet extends HttpServlet {
               .append("\"fechaResolucion\":\"").append(inc.getFechaResolucion() != null ? sdf.format(inc.getFechaResolucion()) : "").append("\",")
               .append("\"fechaCreacion\":\"")
               .append(inc.getFechaCreacion() != null ? sdf.format(inc.getFechaCreacion()) : "")
+              .append("\",")
+              .append("\"asignado\":\"")
+              .append(inc.getAsignado() != null ? escJson(inc.getAsignado()) : "")
               .append("\"}");
         }
         sb.append("]");

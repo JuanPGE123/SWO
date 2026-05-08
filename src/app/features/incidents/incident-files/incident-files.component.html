@@ -1,0 +1,184 @@
+<!--
+  Componente de Archivos Adjuntos de Incidencia
+  Permite subir, visualizar y descargar archivos
+  
+  Características:
+  - Drag & drop
+  - Preview de imágenes
+  - Validación de archivos
+  - Progress bar
+-->
+
+<div class="incident-files">
+  
+  <!-- Encabezado -->
+  <div class="files-header">
+    <h3 class="files-title">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+      </svg>
+      Archivos Adjuntos
+    </h3>
+    <span class="files-count">{{ archivosInternos.length }}</span>
+  </div>
+
+  <!-- Área de subida de archivos -->
+  <div 
+    class="upload-area"
+    [class.drag-active]="dragActive"
+    (drop)="onFileDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+  >
+    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+    </svg>
+
+    <div class="upload-content">
+      <p class="upload-text">
+        <strong>Arrastra archivos aquí</strong> o haz clic para seleccionar
+      </p>
+      <p class="upload-hint">
+        Tipos permitidos: PDF, Imágenes, Word, Excel, TXT
+        <br>
+        Tamaño máximo: {{ formatFileSize(maxFileSize) }}
+      </p>
+    </div>
+
+    <input
+      type="file"
+      id="fileInput"
+      class="file-input"
+      multiple
+      (change)="onFileSelected($event)"
+      [disabled]="subiendo"
+    />
+
+    <label for="fileInput" class="btn btn-primary btn-upload">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M12 4v16m8-8H4"/>
+      </svg>
+      Seleccionar archivos
+    </label>
+  </div>
+
+  <!-- Barra de progreso de subida -->
+  <div *ngIf="subiendo" class="upload-progress">
+    <div class="progress-info">
+      <span>Subiendo archivo...</span>
+      <span>{{ progresoSubida }}%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="progresoSubida"></div>
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="cargando" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando archivos...</p>
+  </div>
+
+  <!-- Lista de archivos -->
+  <div class="files-list" *ngIf="!cargando">
+    
+    <!-- Estado vacío -->
+    <div *ngIf="archivosInternos.length === 0" class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      <p class="empty-text">No hay archivos adjuntos</p>
+      <p class="empty-hint">Sube archivos para adjuntar evidencia o documentación</p>
+    </div>
+
+    <!-- Archivos -->
+    <div 
+      *ngFor="let archivo of archivosInternos" 
+      class="file-item"
+      [class.is-image]="esImagen(archivo)"
+    >
+      
+      <!-- Icono o thumbnail -->
+      <div class="file-icon" [class.clickable]="esImagen(archivo)" (click)="previewArchivo(archivo)">
+        <!-- Thumbnail para imágenes -->
+        <img 
+          *ngIf="esImagen(archivo)" 
+          [src]="archivo.url" 
+          [alt]="archivo.nombre"
+          class="file-thumbnail"
+        />
+        
+        <!-- Icono para otros tipos -->
+        <div *ngIf="!esImagen(archivo)" class="file-icon-placeholder">
+          <span class="material-icons">{{ getIcono(archivo) }}</span>
+        </div>
+      </div>
+
+      <!-- Información del archivo -->
+      <div class="file-info">
+        <h4 class="file-name" [title]="archivo.nombre">{{ archivo.nombre }}</h4>
+        <div class="file-meta">
+          <span class="file-size">{{ formatFileSize(archivo.tamanio) }}</span>
+          <span class="file-separator">•</span>
+          <span class="file-date">{{ formatDate(archivo.fechaCarga) }}</span>
+          <span class="file-separator">•</span>
+          <span class="file-user">{{ archivo.usuarioCarga }}</span>
+        </div>
+        <p *ngIf="archivo.descripcion" class="file-description">
+          {{ archivo.descripcion }}
+        </p>
+      </div>
+
+      <!-- Acciones -->
+      <div class="file-actions">
+        <button 
+          type="button"
+          class="btn-icon-action"
+          title="Descargar"
+          (click)="descargarArchivo(archivo)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+        </button>
+
+        <button 
+          type="button"
+          class="btn-icon-action delete"
+          title="Eliminar"
+          (click)="eliminarArchivo(archivo)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal de preview de imagen -->
+<div *ngIf="archivoPreview" class="preview-modal" (click)="cerrarPreview()">
+  <div class="preview-content" (click)="$event.stopPropagation()">
+    <button class="preview-close" (click)="cerrarPreview()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    
+    <img [src]="archivoPreview.url" [alt]="archivoPreview.nombre" class="preview-image" />
+    
+    <div class="preview-info">
+      <h3>{{ archivoPreview.nombre }}</h3>
+      <p>{{ formatFileSize(archivoPreview.tamanio) }} • {{ formatDate(archivoPreview.fechaCarga) }}</p>
+    </div>
+  </div>
+</div>

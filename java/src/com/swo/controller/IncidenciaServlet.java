@@ -79,9 +79,9 @@ public class IncidenciaServlet extends HttpServlet {
             incidencia.setImpacto(impacto != null && !impacto.isEmpty() ? impacto : "Medio");
             
             // Insertar en la base de datos
-            boolean resultado = incidenciaDAO.insertarIncidencia(incidencia);
+            int resultado = incidenciaDAO.insertarIncidencia(incidencia);
             
-            if (resultado) {
+            if (resultado > 0) {
                 // Redirigir al método GET para mostrar la lista actualizada
                 response.sendRedirect("IncidenciaServlet?mensaje=Incidencia registrada exitosamente");
             } else {

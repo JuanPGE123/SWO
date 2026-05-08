@@ -1,0 +1,445 @@
+/**
+ * Estilos para el componente de comentarios de incidencia
+ * 
+ * Proporciona un diseño limpio tipo "chat" para mostrar y agregar
+ * comentarios a una incidencia.
+ * 
+ * Características:
+ * - Diseño tipo timeline/chat
+ * - Avatares de usuario
+ * - Scroll personalizado
+ * - Estados de carga
+ * - Responsivo
+ */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIABLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+:host {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --border-color: #e5e7eb;
+  --bg-color: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-color: #1f2937;
+  --text-secondary: #6b7280;
+  --text-light: #9ca3af;
+  --avatar-bg: #3b82f6;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTENEDOR PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+.incident-comments {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENCABEZADO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.comments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+
+  .comments-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      color: var(--primary-color);
+    }
+  }
+
+  .comments-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 14px;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LISTA DE COMENTARIOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.comments-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  max-height: 500px;
+
+  // Scroll personalizado
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO VACÍO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+
+  .empty-text {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .empty-hint {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-light);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ITEM DE COMENTARIO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.comment-item {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.3s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.first {
+    animation: slideIn 0.4s ease;
+  }
+}
+
+// Avatar
+.comment-avatar {
+  flex-shrink: 0;
+
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--avatar-bg);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 50%;
+    text-transform: uppercase;
+  }
+}
+
+// Contenido del comentario
+.comment-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+
+  .comment-author {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .comment-date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+}
+
+.comment-text {
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FORMULARIO DE NUEVO COMENTARIO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.comment-form {
+  padding: 1.5rem;
+  border-top: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+
+  .form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+
+    .form-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0;
+    }
+
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+
+      &.warning {
+        color: #f59e0b;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f3f4f6;
+    }
+
+    &::placeholder {
+      color: var(--text-light);
+    }
+
+    &.error {
+      border-color: #dc2626;
+      background: #fef2f2;
+    }
+  }
+
+  .form-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .form-help {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BOTONES
+// ═══════════════════════════════════════════════════════════════════════════
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.btn-primary {
+    background: var(--primary-color);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+
+  .btn-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADOS DE CARGA
+// ═══════════════════════════════════════════════════════════════════════════
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  gap: 1rem;
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANIMACIONES
+// ═══════════════════════════════════════════════════════════════════════════
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════════════════
+
+@media (max-width: 640px) {
+  .comments-header {
+    padding: 1rem;
+  }
+
+  .comments-list {
+    padding: 1rem;
+  }
+
+  .comment-form {
+    padding: 1rem;
+  }
+
+  .comment-avatar .avatar-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
+  }
+}

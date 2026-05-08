@@ -1,0 +1,358 @@
+/**
+ * Estilos para el componente de formulario de incidencias
+ * 
+ * Proporciona un diseño limpio, profesional y responsivo para
+ * la creación y edición de incidencias.
+ * 
+ * Características:
+ * - Diseño responsivo (mobile-first)
+ * - Variables CSS para fácil personalización
+ * - Estados visuales (hover, focus, error)
+ * - Accesibilidad (contraste, tamaños de fuente)
+ */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIABLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+:host {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary-color: #6b7280;
+  --error-color: #dc2626;
+  --success-color: #16a34a;
+  --border-color: #e5e7eb;
+  --bg-color: #ffffff;
+  --text-color: #1f2937;
+  --text-secondary: #6b7280;
+  --input-bg: #f9fafb;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTENEDOR PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+.incident-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--bg-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENCABEZADO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-header {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-color);
+  }
+
+  .form-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECCIONES DEL FORMULARIO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-section {
+  margin-bottom: 2rem;
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GRUPOS DE CAMPOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-group {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Filas con múltiples campos
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ETIQUETAS
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+
+  // Indicador de campo obligatorio
+  &.required::after {
+    content: ' *';
+    color: var(--error-color);
+    font-weight: 700;
+  }
+
+  .label-hint {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CAMPOS DE ENTRADA
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  background: var(--input-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f3f4f6;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  // Estado de error
+  &.error {
+    border-color: var(--error-color);
+    background: #fef2f2;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+  }
+}
+
+// Área de texto específica
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+// Select específico
+.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MENSAJES Y CONTADORES
+// ═══════════════════════════════════════════════════════════════════════════
+
+.error-message {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--error-color);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &::before {
+    content: '⚠';
+    font-size: 0.9rem;
+  }
+}
+
+.char-counter {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BOTONES DE ACCIÓN
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border-color);
+
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+  }
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 120px;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  // Botón primario
+  &.btn-primary {
+    background: var(--primary-color);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+
+  // Botón secundario
+  &.btn-secondary {
+    background: transparent;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+
+    &:hover:not(:disabled) {
+      background: var(--input-bg);
+      border-color: var(--secondary-color);
+    }
+  }
+}
+
+// Spinner de carga
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PIE DEL FORMULARIO
+// ═══════════════════════════════════════════════════════════════════════════
+
+.form-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+
+  .required-note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    
+    .required-mark {
+      color: var(--error-color);
+      font-weight: 700;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════════════════
+
+@media (max-width: 768px) {
+  .incident-form {
+    padding: 1.5rem;
+  }
+
+  .form-header h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .incident-form {
+    padding: 1rem;
+  }
+
+  .form-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

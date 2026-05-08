@@ -140,6 +140,7 @@ export interface CrearIncidenciaDTO {
   ubicacion?: string;             // Ubicaci�n/�rea afectada
   idUsuarioReporta?: number;      // ID del usuario que reporta
   idProyecto?: number;            // ID del proyecto asociado (opcional)
+  idUsuarioAsignado?: number;     // ID del usuario a asignar (opcional)
 }
 
 /**
@@ -640,13 +641,17 @@ export class IncidentsService {
     }
 
     // 3. Preparar par�metros para el backend
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('titulo', datos.titulo)
       .set('descripcion', datos.descripcion)
       .set('estado', datos.estado || 'Abierto')
       .set('impacto', datos.impacto || 'Medio')
       .set('ubicacion', datos.ubicacion || 'SWO')
       .set('idUsuarioReporta', String(idUsuario));
+
+    if (datos.idUsuarioAsignado) {
+      params = params.set('idUsuarioAsignado', String(datos.idUsuarioAsignado));
+    }
 
     // 4. Intentar guardar en el backend
     return new Observable(observer => {

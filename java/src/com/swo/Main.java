@@ -78,7 +78,7 @@ public class Main {
             3  // Usuario ID 3
         );
         
-        if (incidenciaDAO.insertarIncidencia(nuevaInc)) {
+        if (incidenciaDAO.insertarIncidencia(nuevaInc) > 0) {
             System.out.println("✓ Incidencia creada exitosamente");
         } else {
             System.out.println("✗ Error al crear incidencia");

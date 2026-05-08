@@ -8,11 +8,11 @@ import java.util.List;
 
 public class IncidenciaDAO {
 
-    // 1. INSERCIÓN (Create)
-    public boolean insertarIncidencia(Incidencia incidencia) {
+    // 1. INSERCIÓN (Create) - retorna el ID generado, o -1 si falla
+    public int insertarIncidencia(Incidencia incidencia) {
         String sql = "INSERT INTO incidencias (titulo, descripcion, estado, ubicacion, impacto, id_usuario_reporta, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, NOW())";
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             pst.setString(1, incidencia.getTitulo());
             pst.setString(2, incidencia.getDescripcion());
@@ -21,17 +21,27 @@ public class IncidenciaDAO {
             pst.setString(5, incidencia.getImpacto() != null ? incidencia.getImpacto() : "Medio");
             pst.setInt(6, incidencia.getIdUsuarioReporta());
             
-            return pst.executeUpdate() > 0;
+            int rows = pst.executeUpdate();
+            if (rows > 0) {
+                ResultSet keys = pst.getGeneratedKeys();
+                if (keys.next()) return keys.getInt(1);
+            }
+            return -1;
         } catch (SQLException e) {
             System.err.println("Error al insertar: " + e.getMessage());
-            return false;
+            return -1;
         }
     }
 
     // 2. CONSULTA (Read)
     public List<Incidencia> obtenerIncidencias() {
         List<Incidencia> listaIncidencias = new ArrayList<>();
-        String sql = "SELECT * FROM incidencias";
+        String sql = "SELECT i.*, u.nombre_completo AS asignado " +
+                     "FROM incidencias i " +
+                     "LEFT JOIN asignaciones a ON i.id_incidencia = a.id_incidencia " +
+                     "   AND a.estado_asignacion NOT IN ('Completado') " +
+                     "LEFT JOIN empleados e ON a.id_empleado = e.id_empleado " +
+                     "LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario";
         
         try (Connection con = ConexionBD.obtenerConexion();
              Statement st = con.createStatement();
@@ -47,8 +57,9 @@ public class IncidenciaDAO {
                 inc.setImpacto(rs.getString("impacto"));
                 inc.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
                 inc.setIdUsuarioReporta(rs.getInt("id_usuario_reporta"));
-                inc.setResolucion(rs.getString("resolucion"));
-                inc.setFechaResolucion(rs.getTimestamp("fecha_resolucion"));
+                inc.setAsignado(rs.getString("asignado"));
+                try { inc.setResolucion(rs.getString("resolucion")); } catch (SQLException ignored) {}
+                try { inc.setFechaResolucion(rs.getTimestamp("fecha_resolucion")); } catch (SQLException ignored) {}
                 listaIncidencias.add(inc);
             }
         } catch (SQLException e) {
@@ -114,7 +125,21 @@ public class IncidenciaDAO {
         }
     }
 
-    // 5. ASIGNACIÓN - Asignar incidencia a un empleado
+    // 5a. Busca el id_empleado dado un id_usuario
+    public int obtenerIdEmpleadoPorUsuario(int idUsuario) {
+        String sql = "SELECT id_empleado FROM empleados WHERE id_usuario = ? AND estado_laboral = 'Activo' LIMIT 1";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, idUsuario);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) return rs.getInt("id_empleado");
+        } catch (SQLException e) {
+            System.err.println("Error al buscar empleado: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    // 5b. ASIGNACIÓN - Asignar incidencia a un empleado
     public boolean asignarIncidencia(int idIncidencia, int idEmpleado) {
         // Primero verificar si ya existe una asignación activa
         String sqlCheck = "SELECT COUNT(*) FROM asignaciones WHERE id_incidencia = ? AND estado_asignacion != 'Completado'";

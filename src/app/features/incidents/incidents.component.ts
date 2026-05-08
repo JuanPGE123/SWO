@@ -32,11 +32,12 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { IncidentsService } from '../../core/services/incidents.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { UsersService } from '../../core/services/users.service';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { InputComponent } from '../../shared/components/input/input.component';
-import { Incidencia } from '../../core/models/models';
+import { Incidencia, Usuario } from '../../core/models/models';
 import { CustomValidators } from '../../shared/validators/custom-validators';
 import { VALIDATION_CONSTANTS, NOTIFICATION_MESSAGES } from '../../core/constants/app.constants';
 import { EstadoIncidencia, PrioridadIncidencia } from '../../core/enums/app.enums';
@@ -69,6 +70,7 @@ export class IncidentsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly incidentsService = inject(IncidentsService);
   private readonly notificationService = inject(NotificationService);
+  private readonly usersService = inject(UsersService);
 
   // ═════════════════════════════════════════════════════════════════════════
   // DATOS Y ESTADO
@@ -76,6 +78,9 @@ export class IncidentsComponent implements OnInit {
 
   /** Lista completa de incidencias del servicio */
   incidentes: Incidencia[] = [];
+
+  /** Lista de usuarios disponibles para asignar */
+  usuarios: Usuario[] = [];
 
   /** Lista filtrada según criterios de búsqueda y estado */
   incidentesFiltrados: Incidencia[] = [];
@@ -131,6 +136,10 @@ export class IncidentsComponent implements OnInit {
   ngOnInit(): void {
     this.initForms();
     this.cargarIncidentes();
+    this.usersService.obtenerUsuarios().subscribe({
+      next: (usuarios) => { this.usuarios = usuarios; },
+      error: () => {}
+    });
   }
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -169,7 +178,8 @@ export class IncidentsComponent implements OnInit {
       categoria: [''],
       aplicacion: [''],
       actividad: [''],
-      urgencia: ['Media']
+      urgencia: ['Media'],
+      usuarioAsignado: ['']
     });
 
     // Formulario de edición
@@ -278,7 +288,8 @@ export class IncidentsComponent implements OnInit {
       categoria: '',
       aplicacion: '',
       actividad: '',
-      urgencia: 'Media'
+      urgencia: 'Media',
+      usuarioAsignado: ''
     });
     this.mostrarModalNueva = true;
   }
@@ -308,6 +319,9 @@ export class IncidentsComponent implements OnInit {
 
     this.guardando = true;
     const datos = this.nuevaIncidenciaForm.value;
+    if (datos.usuarioAsignado) {
+      datos.idUsuarioAsignado = parseInt(datos.usuarioAsignado, 10);
+    }
 
     this.incidentsService.crearIncidencia(datos).subscribe({
       next: (resp) => {

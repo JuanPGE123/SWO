@@ -16,6 +16,7 @@ public class Incidencia {
     private int idUsuarioReporta;
     private String resolucion;
     private Timestamp fechaResolucion;
+    private String asignado;
 
     // Constructor vacío
     public Incidencia() {}
@@ -61,4 +62,7 @@ public class Incidencia {
 
     public Timestamp getFechaResolucion() { return fechaResolucion; }
     public void setFechaResolucion(Timestamp fechaResolucion) { this.fechaResolucion = fechaResolucion; }
+
+    public String getAsignado() { return asignado; }
+    public void setAsignado(String asignado) { this.asignado = asignado; }
 }
