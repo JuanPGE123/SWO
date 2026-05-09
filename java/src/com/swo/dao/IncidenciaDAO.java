@@ -39,14 +39,18 @@ public class IncidenciaDAO {
         String sql = "SELECT i.*, u.nombre_completo AS asignado, u.id_usuario AS id_usuario_asignado " +
                      "FROM incidencias i " +
                      "LEFT JOIN (" +
-                     "  SELECT a.id_incidencia, a.id_empleado, a.fecha_asignacion " +
-                     "  FROM asignaciones a " +
-                     "  WHERE a.estado_asignacion NOT IN ('Completado') " +
-                     "  ORDER BY a.fecha_asignacion DESC " +
+                     "  SELECT a1.id_incidencia, a1.id_empleado " +
+                     "  FROM asignaciones a1 " +
+                     "  INNER JOIN (" +
+                     "    SELECT id_incidencia, MAX(fecha_asignacion) AS max_fecha " +
+                     "    FROM asignaciones " +
+                     "    WHERE estado_asignacion NOT IN ('Completado') " +
+                     "    GROUP BY id_incidencia" +
+                     "  ) a2 ON a1.id_incidencia = a2.id_incidencia AND a1.fecha_asignacion = a2.max_fecha " +
+                     "  WHERE a1.estado_asignacion NOT IN ('Completado') " +
                      ") a ON i.id_incidencia = a.id_incidencia " +
                      "LEFT JOIN empleados e ON a.id_empleado = e.id_empleado " +
-                     "LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario " +
-                     "GROUP BY i.id_incidencia";
+                     "LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario";
         
         try (Connection con = ConexionBD.obtenerConexion();
              Statement st = con.createStatement();
@@ -116,11 +120,17 @@ public class IncidenciaDAO {
             pst.setInt(7, id);
             boolean resultado = pst.executeUpdate() > 0;
             
-            // Si se proporcionó un usuario para asignar, actualizar la asignación
-            if (resultado && idUsuarioAsignado != null && idUsuarioAsignado > 0) {
-                int idEmpleado = obtenerIdEmpleadoPorUsuario(idUsuarioAsignado);
-                if (idEmpleado > 0) {
-                    asignarIncidencia(id, idEmpleado);
+            // Manejar la asignación de usuario
+            if (resultado && idUsuarioAsignado != null) {
+                if (idUsuarioAsignado > 0) {
+                    // Asignar a un usuario específico
+                    int idEmpleado = obtenerIdEmpleadoPorUsuario(idUsuarioAsignado);
+                    if (idEmpleado > 0) {
+                        asignarIncidencia(id, idEmpleado);
+                    }
+                } else {
+                    // idUsuarioAsignado == 0 significa "Sin asignar" - completar asignación actual
+                    desasignarIncidencia(id);
                 }
             }
             
@@ -167,29 +177,18 @@ public class IncidenciaDAO {
 
     // 5b. ASIGNACIÓN - Asignar incidencia a un empleado
     public boolean asignarIncidencia(int idIncidencia, int idEmpleado) {
-        // Primero verificar si ya existe una asignación activa
-        String sqlCheck = "SELECT COUNT(*) FROM asignaciones WHERE id_incidencia = ? AND estado_asignacion != 'Completado'";
-        String sqlInsert = "INSERT INTO asignaciones (id_incidencia, id_empleado, fecha_asignacion, estado_asignacion) " +
-                          "VALUES (?, ?, NOW(), 'Asignado')";
-        
         try (Connection con = ConexionBD.obtenerConexion()) {
-            // Verificar si ya hay asignación
-            try (PreparedStatement pstCheck = con.prepareStatement(sqlCheck)) {
-                pstCheck.setInt(1, idIncidencia);
-                ResultSet rs = pstCheck.executeQuery();
-                if (rs.next() && rs.getInt(1) > 0) {
-                    // Ya existe una asignación, actualizarla en lugar de crear nueva
-                    String sqlUpdate = "UPDATE asignaciones SET id_empleado = ?, fecha_asignacion = NOW(), " +
-                                     "estado_asignacion = 'Reasignado' WHERE id_incidencia = ? AND estado_asignacion != 'Completado'";
-                    try (PreparedStatement pstUpdate = con.prepareStatement(sqlUpdate)) {
-                        pstUpdate.setInt(1, idEmpleado);
-                        pstUpdate.setInt(2, idIncidencia);
-                        return pstUpdate.executeUpdate() > 0;
-                    }
-                }
+            // Primero, completar cualquier asignación anterior
+            String sqlComplete = "UPDATE asignaciones SET estado_asignacion = 'Completado' " +
+                               "WHERE id_incidencia = ? AND estado_asignacion NOT IN ('Completado')";
+            try (PreparedStatement pstComplete = con.prepareStatement(sqlComplete)) {
+                pstComplete.setInt(1, idIncidencia);
+                pstComplete.executeUpdate();
             }
             
-            // No existe asignación, crear nueva
+            // Crear nueva asignación
+            String sqlInsert = "INSERT INTO asignaciones (id_incidencia, id_empleado, fecha_asignacion, estado_asignacion) " +
+                             "VALUES (?, ?, NOW(), 'Asignado')";
             try (PreparedStatement pst = con.prepareStatement(sqlInsert)) {
                 pst.setInt(1, idIncidencia);
                 pst.setInt(2, idEmpleado);
@@ -197,6 +196,20 @@ public class IncidenciaDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al asignar incidencia: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // 5c. DESASIGNACIÓN - Completar asignación actual sin crear nueva
+    public boolean desasignarIncidencia(int idIncidencia) {
+        String sql = "UPDATE asignaciones SET estado_asignacion = 'Completado' " +
+                    "WHERE id_incidencia = ? AND estado_asignacion NOT IN ('Completado')";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, idIncidencia);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al desasignar incidencia: " + e.getMessage());
             return false;
         }
     }

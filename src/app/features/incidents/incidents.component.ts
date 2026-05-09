@@ -431,7 +431,10 @@ export class IncidentsComponent implements OnInit {
 
     this.guardandoCambios = true;
     const datos = this.edicionForm.value;
-    const idUsuarioAsignado = datos.usuarioAsignado ? parseInt(datos.usuarioAsignado, 10) : undefined;
+    // Si usuarioAsignado está vacío, enviar 0 para indicar "Sin asignar"
+    const idUsuarioAsignado = datos.usuarioAsignado && datos.usuarioAsignado !== '' 
+      ? parseInt(datos.usuarioAsignado, 10) 
+      : 0;
 
     this.incidentsService.actualizarIncidenciaBackend(
       this.incidenteSeleccionado.id,

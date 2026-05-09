@@ -740,7 +740,7 @@ export class IncidentsService {
       .set('resolucion', resolucion || '')
       .set('resolver', String(resolver));
 
-    if (idUsuarioAsignado !== undefined && idUsuarioAsignado > 0) {
+    if (idUsuarioAsignado !== undefined) {
       params = params.set('idUsuarioAsignado', String(idUsuarioAsignado));
     }
 
