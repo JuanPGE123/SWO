@@ -38,10 +38,15 @@ public class IncidenciaDAO {
         List<Incidencia> listaIncidencias = new ArrayList<>();
         String sql = "SELECT i.*, u.nombre_completo AS asignado, u.id_usuario AS id_usuario_asignado " +
                      "FROM incidencias i " +
-                     "LEFT JOIN asignaciones a ON i.id_incidencia = a.id_incidencia " +
-                     "   AND a.estado_asignacion NOT IN ('Completado') " +
+                     "LEFT JOIN (" +
+                     "  SELECT a.id_incidencia, a.id_empleado, a.fecha_asignacion " +
+                     "  FROM asignaciones a " +
+                     "  WHERE a.estado_asignacion NOT IN ('Completado') " +
+                     "  ORDER BY a.fecha_asignacion DESC " +
+                     ") a ON i.id_incidencia = a.id_incidencia " +
                      "LEFT JOIN empleados e ON a.id_empleado = e.id_empleado " +
-                     "LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario";
+                     "LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario " +
+                     "GROUP BY i.id_incidencia";
         
         try (Connection con = ConexionBD.obtenerConexion();
              Statement st = con.createStatement();
