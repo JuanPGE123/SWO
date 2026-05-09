@@ -203,7 +203,8 @@ export class IncidentsComponent implements OnInit {
       ],
       estado: [''],
       impacto: [''],
-      ubicacion: ['', Validators.maxLength(100)]
+      ubicacion: ['', Validators.maxLength(100)],
+      usuarioAsignado: ['']
     });
 
     // Formulario de resolución
@@ -394,7 +395,8 @@ export class IncidentsComponent implements OnInit {
       descripcion: inc.reason,
       estado: this.estadoAEspanol(inc.state),
       impacto: this.prioridadAImpacto(inc.priority),
-      ubicacion: inc.project
+      ubicacion: inc.project,
+      usuarioAsignado: inc.idUsuarioAsignado ? String(inc.idUsuarioAsignado) : ''
     });
 
     this.modoEdicion = true;
@@ -429,6 +431,7 @@ export class IncidentsComponent implements OnInit {
 
     this.guardandoCambios = true;
     const datos = this.edicionForm.value;
+    const idUsuarioAsignado = datos.usuarioAsignado ? parseInt(datos.usuarioAsignado, 10) : undefined;
 
     this.incidentsService.actualizarIncidenciaBackend(
       this.incidenteSeleccionado.id,
@@ -438,7 +441,8 @@ export class IncidentsComponent implements OnInit {
       datos.impacto,
       datos.ubicacion,
       '',
-      false
+      false,
+      idUsuarioAsignado
     ).subscribe({
       next: () => {
         this.guardandoCambios = false;

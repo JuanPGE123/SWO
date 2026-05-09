@@ -259,6 +259,7 @@ export class IncidentsService {
       state: this.mapearEstado(db.estado),
       priority: this.mapearImpacto(db.impacto),
       assignee: db.asignado || 'Sin asignar',
+      idUsuarioAsignado: db.idUsuarioAsignado || undefined,
       project: db.ubicacion || 'SWO',
       date: db.fechaCreacion || new Date().toISOString().split('T')[0],
       tags: db.tags ? JSON.parse(db.tags) : [],
@@ -726,10 +727,11 @@ export class IncidentsService {
     impacto: string,
     ubicacion: string,
     resolucion: string,
-    resolver: boolean
+    resolver: boolean,
+    idUsuarioAsignado?: number
   ): Observable<any> {
     const numId = id.replace('INC-', '');
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('titulo', titulo)
       .set('descripcion', descripcion)
       .set('estado', estado)
@@ -737,6 +739,10 @@ export class IncidentsService {
       .set('ubicacion', ubicacion || '')
       .set('resolucion', resolucion || '')
       .set('resolver', String(resolver));
+
+    if (idUsuarioAsignado !== undefined && idUsuarioAsignado > 0) {
+      params = params.set('idUsuarioAsignado', String(idUsuarioAsignado));
+    }
 
     return this.http.put<any>(`${this.apiUrl}/incidencias/${numId}`, params.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }

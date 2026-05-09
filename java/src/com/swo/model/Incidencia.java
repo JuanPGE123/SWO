@@ -17,6 +17,7 @@ public class Incidencia {
     private String resolucion;
     private Timestamp fechaResolucion;
     private String asignado;
+    private Integer idUsuarioAsignado;
 
     // Constructor vacío
     public Incidencia() {}
@@ -65,4 +66,7 @@ public class Incidencia {
 
     public String getAsignado() { return asignado; }
     public void setAsignado(String asignado) { this.asignado = asignado; }
+
+    public Integer getIdUsuarioAsignado() { return idUsuarioAsignado; }
+    public void setIdUsuarioAsignado(Integer idUsuarioAsignado) { this.idUsuarioAsignado = idUsuarioAsignado; }
 }

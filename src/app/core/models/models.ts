@@ -250,6 +250,13 @@ export interface Incidencia {
   assignee: string;
 
   /** 
+   * ID del usuario asignado (opcional)
+   * Usado para editar la asignación
+   * @example 5 | undefined
+   */
+  idUsuarioAsignado?: number;
+
+  /** 
    * Proyecto o sistema al que pertenece la incidencia
    * @example 'SWO' | 'Sistema de Nómina' | 'Portal Web'
    */
@@ -747,6 +754,13 @@ export interface Incidencia {
    * @example 'María González' | 'Sin asignar'
    */
   assignee: string;
+
+  /** 
+   * ID del usuario asignado (opcional)
+   * Usado para editar la asignación
+   * @example 5 | undefined
+   */
+  idUsuarioAsignado?: number;
 
   /** 
    * Proyecto o sistema al que pertenece la incidencia

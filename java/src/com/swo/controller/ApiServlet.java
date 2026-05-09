@@ -520,6 +520,15 @@ public class ApiServlet extends HttpServlet {
                 String resolucion = params.get("resolucion");
                 String resolverStr = params.get("resolver");
                 boolean resolver = "true".equals(resolverStr);
+                String idUsuarioAsignadoStr = params.get("idUsuarioAsignado");
+                Integer idUsuarioAsignado = null;
+                if (idUsuarioAsignadoStr != null && !idUsuarioAsignadoStr.isEmpty()) {
+                    try {
+                        idUsuarioAsignado = Integer.parseInt(idUsuarioAsignadoStr);
+                    } catch (NumberFormatException e) {
+                        // Ignorar si no es un número válido
+                    }
+                }
 
                 if (titulo == null || titulo.isEmpty()) {
                     res.setStatus(400);
@@ -530,7 +539,7 @@ public class ApiServlet extends HttpServlet {
                 boolean ok = incidenciaDAO.actualizarIncidencia(id, titulo,
                     descripcion != null ? descripcion : "",
                     estado != null ? estado : "Abierto",
-                    impacto, ubicacion, resolucion, resolver);
+                    impacto, ubicacion, resolucion, resolver, idUsuarioAsignado);
 
                 if (ok) out.print("{\"success\":true,\"mensaje\":\"Incidencia actualizada\"}");
                 else { res.setStatus(500); out.print("{\"error\":\"No se pudo actualizar\"}"); }
@@ -776,7 +785,10 @@ public class ApiServlet extends HttpServlet {
               .append("\",")
               .append("\"asignado\":\"")
               .append(inc.getAsignado() != null ? escJson(inc.getAsignado()) : "")
-              .append("\"}");
+              .append("\",")
+              .append("\"idUsuarioAsignado\":")
+              .append(inc.getIdUsuarioAsignado() != null ? inc.getIdUsuarioAsignado() : "null")
+              .append("}");
         }
         sb.append("]");
         return sb.toString();

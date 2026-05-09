@@ -36,7 +36,7 @@ public class IncidenciaDAO {
     // 2. CONSULTA (Read)
     public List<Incidencia> obtenerIncidencias() {
         List<Incidencia> listaIncidencias = new ArrayList<>();
-        String sql = "SELECT i.*, u.nombre_completo AS asignado " +
+        String sql = "SELECT i.*, u.nombre_completo AS asignado, u.id_usuario AS id_usuario_asignado " +
                      "FROM incidencias i " +
                      "LEFT JOIN asignaciones a ON i.id_incidencia = a.id_incidencia " +
                      "   AND a.estado_asignacion NOT IN ('Completado') " +
@@ -58,6 +58,10 @@ public class IncidenciaDAO {
                 inc.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
                 inc.setIdUsuarioReporta(rs.getInt("id_usuario_reporta"));
                 inc.setAsignado(rs.getString("asignado"));
+                try {
+                    int idUsuarioAsignado = rs.getInt("id_usuario_asignado");
+                    if (!rs.wasNull()) inc.setIdUsuarioAsignado(idUsuarioAsignado);
+                } catch (SQLException ignored) {}
                 try { inc.setResolucion(rs.getString("resolucion")); } catch (SQLException ignored) {}
                 try { inc.setFechaResolucion(rs.getTimestamp("fecha_resolucion")); } catch (SQLException ignored) {}
                 listaIncidencias.add(inc);
@@ -86,7 +90,8 @@ public class IncidenciaDAO {
 
     // 3b. ACTUALIZACIÓN COMPLETA - Editar campos y/o resolver incidencia
     public boolean actualizarIncidencia(int id, String titulo, String descripcion,
-            String estado, String impacto, String ubicacion, String resolucion, boolean resolver) {
+            String estado, String impacto, String ubicacion, String resolucion, boolean resolver,
+            Integer idUsuarioAsignado) {
         String sql;
         if (resolver) {
             sql = "UPDATE incidencias SET titulo=?, descripcion=?, estado=?, impacto=?, ubicacion=?, " +
@@ -104,11 +109,27 @@ public class IncidenciaDAO {
             pst.setString(5, ubicacion);
             pst.setString(6, resolucion);
             pst.setInt(7, id);
-            return pst.executeUpdate() > 0;
+            boolean resultado = pst.executeUpdate() > 0;
+            
+            // Si se proporcionó un usuario para asignar, actualizar la asignación
+            if (resultado && idUsuarioAsignado != null && idUsuarioAsignado > 0) {
+                int idEmpleado = obtenerIdEmpleadoPorUsuario(idUsuarioAsignado);
+                if (idEmpleado > 0) {
+                    asignarIncidencia(id, idEmpleado);
+                }
+            }
+            
+            return resultado;
         } catch (SQLException e) {
             System.err.println("Error al actualizar incidencia: " + e.getMessage());
             return false;
         }
+    }
+
+    // Sobrecarga para mantener compatibilidad con código existente
+    public boolean actualizarIncidencia(int id, String titulo, String descripcion,
+            String estado, String impacto, String ubicacion, String resolucion, boolean resolver) {
+        return actualizarIncidencia(id, titulo, descripcion, estado, impacto, ubicacion, resolucion, resolver, null);
     }
 
     // 4. ELIMINACIÓN (Delete)
