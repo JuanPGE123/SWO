@@ -13,7 +13,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { IncidentsService } from './incidents.service';
 import { AuthService } from './auth.service';
@@ -89,59 +88,24 @@ export class ChatbotService {
 
   /**
    * Envía una consulta al chatbot y obtiene respuesta
+   * (Ollama desactivado temporalmente - usa base de conocimiento)
    */
   enviarConsulta(consulta: string): Observable<Mensaje> {
     this.escribiendoSubject.next(true);
-    
+
     return new Observable(observer => {
-      // Primero intentar con Ollama (IA local)
-      this.enviarConsultaOllama(consulta).subscribe({
-        next: (respuesta) => {
+      this.enviarConsultaConocimiento(consulta).subscribe({
+        next: (mensaje) => {
           this.escribiendoSubject.next(false);
-          const mensaje: Mensaje = {
-            texto: respuesta,
-            autor: 'bot',
-            timestamp: new Date(),
-            accion: 'consulta'
-          };
-          this.agregarMensaje(mensaje);
           observer.next(mensaje);
           observer.complete();
         },
         error: (err) => {
-          console.warn('Ollama no disponible, usando base de conocimiento:', err);
-          // Fallback a la base de conocimiento si Ollama no está disponible
-          this.enviarConsultaConocimiento(consulta).subscribe({
-            next: (mensaje) => {
-              this.escribiendoSubject.next(false);
-              observer.next(mensaje);
-              observer.complete();
-            },
-            error: (err2) => {
-              this.escribiendoSubject.next(false);
-              observer.error(err2);
-            }
-          });
+          this.escribiendoSubject.next(false);
+          observer.error(err);
         }
       });
     });
-  }
-
-  /**
-   * Envía consulta a Ollama (IA local)
-   */
-  private enviarConsultaOllama(consulta: string): Observable<string> {
-    const formData = new URLSearchParams();
-    formData.set('mensaje', consulta);
-    formData.set('modelo', 'llama2'); // Puedes cambiar el modelo aquí
-
-    return this.http.post<{success: boolean, respuesta: string}>(
-      `${this.apiUrl}/ollama`,
-      formData.toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    ).pipe(
-      map(response => response.respuesta || 'No se obtuvo respuesta')
-    );
   }
 
   /**
