@@ -52,6 +52,8 @@ public class IncidenciaDAO {
                      "LEFT JOIN empleados e ON a.id_empleado = e.id_empleado " +
                      "LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario";
         
+        System.out.println("[QUERY] Ejecutando query para obtener incidencias...");
+        
         try (Connection con = ConexionBD.obtenerConexion();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -66,10 +68,16 @@ public class IncidenciaDAO {
                 inc.setImpacto(rs.getString("impacto"));
                 inc.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
                 inc.setIdUsuarioReporta(rs.getInt("id_usuario_reporta"));
-                inc.setAsignado(rs.getString("asignado"));
+                String asignado = rs.getString("asignado");
+                inc.setAsignado(asignado);
                 try {
                     int idUsuarioAsignado = rs.getInt("id_usuario_asignado");
-                    if (!rs.wasNull()) inc.setIdUsuarioAsignado(idUsuarioAsignado);
+                    if (!rs.wasNull()) {
+                        inc.setIdUsuarioAsignado(idUsuarioAsignado);
+                        System.out.println("[QUERY] INC-" + inc.getIdIncidencia() + " asignado a: " + asignado + " (ID: " + idUsuarioAsignado + ")");
+                    } else {
+                        System.out.println("[QUERY] INC-" + inc.getIdIncidencia() + " sin asignación");
+                    }
                 } catch (SQLException ignored) {}
                 try { inc.setResolucion(rs.getString("resolucion")); } catch (SQLException ignored) {}
                 try { inc.setFechaResolucion(rs.getTimestamp("fecha_resolucion")); } catch (SQLException ignored) {}
@@ -177,13 +185,15 @@ public class IncidenciaDAO {
 
     // 5b. ASIGNACIÓN - Asignar incidencia a un empleado
     public boolean asignarIncidencia(int idIncidencia, int idEmpleado) {
+        System.out.println("[ASIGNACION] Intentando asignar incidencia " + idIncidencia + " al empleado " + idEmpleado);
         try (Connection con = ConexionBD.obtenerConexion()) {
             // Primero, completar cualquier asignación anterior
             String sqlComplete = "UPDATE asignaciones SET estado_asignacion = 'Completado' " +
                                "WHERE id_incidencia = ? AND estado_asignacion NOT IN ('Completado')";
             try (PreparedStatement pstComplete = con.prepareStatement(sqlComplete)) {
                 pstComplete.setInt(1, idIncidencia);
-                pstComplete.executeUpdate();
+                int completadas = pstComplete.executeUpdate();
+                System.out.println("[ASIGNACION] Asignaciones anteriores completadas: " + completadas);
             }
             
             // Crear nueva asignación
@@ -192,10 +202,13 @@ public class IncidenciaDAO {
             try (PreparedStatement pst = con.prepareStatement(sqlInsert)) {
                 pst.setInt(1, idIncidencia);
                 pst.setInt(2, idEmpleado);
-                return pst.executeUpdate() > 0;
+                boolean exito = pst.executeUpdate() > 0;
+                System.out.println("[ASIGNACION] Nueva asignación creada: " + exito);
+                return exito;
             }
         } catch (SQLException e) {
-            System.err.println("Error al asignar incidencia: " + e.getMessage());
+            System.err.println("[ASIGNACION] Error al asignar incidencia: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
