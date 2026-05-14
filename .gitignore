@@ -1,30 +1,98 @@
+# ================================================================
+#  .gitignore — Proyecto SWO (Java / Spring Boot / Angular 17)
+#  Optimizado para: Maven, IntelliJ IDEA, VS Code, Eclipse
+# ================================================================
+
+# ── JAVA / MAVEN ────────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+java/bin/
+webapp/WEB-INF/classes/
+webapp/WEB-INF/lib/
+
+# ── SPRING BOOT / TOMCAT ─────────────────────────────────────────
+*.log
+*.log.*
+logs/
+tomcat/logs/
+temp*/
+webapp/3rdpartylicenses.txt
+
+# ── ANGULAR / NODE ──────────────────────────────────────────────
 node_modules/
 dist/
 .angular/
-.vscode/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ── INTELLIJ IDEA ────────────────────────────────────────────────
 .idea/
-*.log
+*.iws
+*.iml
+*.ipr
+out/
+
+# ── VISUAL STUDIO CODE ──────────────────────────────────────────
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ── ECLIPSE ─────────────────────────────────────────────────────
+.classpath
+.project
+.settings/
+bin/
+*.launch
+
+# ── VARIABLES DE ENTORNO Y SECRETOS ─────────────────────────────
 .env
+.env.local
+.env.*.local
+*.env
+application-local.yml
+application-prod.yml
+application-secret.yml
+**/secrets/
+keystore.jks
+*.p12
+*.pfx
+
+# ── SISTEMAS OPERATIVOS ──────────────────────────────────────────
 .DS_Store
-src/favicon.ico
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# ── COBERTURA Y ANÁLISIS ─────────────────────────────────────────
+.jacoco/
+jacoco.exec
+*.exec
+/coverage
+.nyc_output
+.sonar/
+.scannerwork/
+
+# ── ARCHIVOS TEMPORALES ──────────────────────────────────────────
+*.tmp
+*.temp
+*.swp
+*~
 build_*.txt
+src/favicon.ico
 
-# Excluir resumen de mejoras (documentación interna)
+# ── DOCUMENTACIÓN INTERNA ────────────────────────────────────────
 RESUMEN_MEJORAS.md
-
-# Java compiled artifacts
-*.class
-*.war
-*.jar
-target/
-webapp/WEB-INF/classes/
-webapp/WEB-INF/lib/
-java/bin/
-webapp/3rdpartylicenses.txt
-
-# Directorios temporales de Tomcat
-temp*/
-
-# Logs de Tomcat
-tomcat/logs/
-*.log.*

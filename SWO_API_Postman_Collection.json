@@ -1,0 +1,907 @@
+{
+  "info": {
+    "name": "SWO API - Sistema de Gestión Completo",
+    "description": "Colección completa con 39 endpoints organizados en 5 módulos: Usuarios, Incidencias, Categorías, Proyectos y Chatbot",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081/api",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "incidenciaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoriaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "proyectoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "👤 MÓDULO USUARIOS (9 endpoints)",
+      "item": [
+        {
+          "name": "1.1 Listar Todos los Usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response tiene campo success', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test('Data es un array', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios"]
+            },
+            "description": "**Endpoint:** GET /v1/usuarios\n\n**Descripción:** Retorna la lista completa de usuarios registrados (activos e inactivos).\n\n**Respuesta esperada:**\n- Código: 200 OK\n- Body: Array de objetos UsuarioResponseDTO"
+          }
+        },
+        {
+          "name": "1.2 Listar Usuarios Activos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/activos",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "activos"]
+            },
+            "description": "**Endpoint:** GET /v1/usuarios/activos\n\n**Descripción:** Retorna únicamente usuarios con estado = true.\n\n**Uso:** Ideal para poblar dropdowns de formularios."
+          }
+        },
+        {
+          "name": "1.3 Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/23",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "23"]
+            },
+            "description": "**Endpoint:** GET /v1/usuarios/{id}\n\n**Descripción:** Busca un usuario específico por su ID.\n\n**NOTA:** Cambia el 23 por un ID real de tu base de datos.\n\n**Respuestas posibles:**\n- 200 OK: Usuario encontrado\n- 404 Not Found: Usuario no existe"
+          }
+        },
+        {
+          "name": "1.4 Obtener Usuario por Correo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/correo/admin@swo.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "correo", "admin@swo.com"]
+            },
+            "description": "**Endpoint:** GET /v1/usuarios/correo/{correo}\n\n**Descripción:** Busca usuario por correo electrónico.\n\n**Uso:** Útil para validar existencia antes de registro o en login."
+          }
+        },
+        {
+          "name": "1.5 Crear Nuevo Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.idUsuario) {",
+                  "        pm.collectionVariables.set('userId', jsonData.data.idUsuario);",
+                  "        console.log('✅ Usuario creado con ID: ' + jsonData.data.idUsuario);",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Status code es 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Usuario tiene ID asignado', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.idUsuario).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Laura Patricia Gómez\",\n  \"correo\": \"laura.gomez@swo.com\",\n  \"password\": \"Segura@2026\",\n  \"rol\": \"Técnico\",\n  \"telefono\": \"+573201234567\",\n  \"departamento\": \"Redes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios"]
+            },
+            "description": "**Endpoint:** POST /v1/usuarios\n\n**Descripción:** Registra un nuevo usuario. La contraseña se hashea automáticamente con BCrypt (factor 12).\n\n**Validaciones:**\n- nombreCompleto: 3-100 caracteres\n- correo: formato email válido + único\n- password: mínimo 8 caracteres\n- rol: Soporte|Jefe|Usuario|Administrador|Técnico\n- telefono: formato internacional\n\n**Respuestas:**\n- 201 Created: Usuario creado exitosamente\n- 400 Bad Request: Datos inválidos\n- 409 Conflict: Correo ya registrado\n\n**IMPORTANTE:** Cambia el correo cada vez que pruebes para evitar duplicados."
+          }
+        },
+        {
+          "name": "1.6 Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Laura Patricia Gómez Ruiz\",\n  \"correo\": \"laura.gomez@swo.com\",\n  \"password\": \"NuevaSegura@2026\",\n  \"rol\": \"Jefe\",\n  \"telefono\": \"+573201234567\",\n  \"departamento\": \"Jefatura Redes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "{{userId}}"]
+            },
+            "description": "**Endpoint:** PUT /v1/usuarios/{id}\n\n**Descripción:** Actualiza TODOS los campos de un usuario existente.\n\n**NOTA:** Usa la variable {{userId}} que se auto-llenó al crear el usuario.\n\n**Si enviaste password:** Se re-hashea con BCrypt.\n\n**Respuestas:**\n- 200 OK: Usuario actualizado\n- 400 Bad Request: Datos inválidos\n- 404 Not Found: Usuario no existe"
+          }
+        },
+        {
+          "name": "1.7 Desactivar Usuario (Soft Delete)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/{{userId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "{{userId}}", "desactivar"]
+            },
+            "description": "**Endpoint:** PATCH /v1/usuarios/{id}/desactivar\n\n**Descripción:** Marca el usuario como inactivo (estado = false) sin eliminarlo físicamente.\n\n**Ventajas del soft delete:**\n- Mantiene historial de incidencias reportadas\n- Se puede reactivar después\n- Cumple con auditoría\n\n**Respuestas:**\n- 200 OK: Usuario desactivado\n- 404 Not Found: Usuario no existe"
+          }
+        },
+        {
+          "name": "1.8 Activar Usuario ✅",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/{{userId}}/activar",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "{{userId}}", "activar"]
+            },
+            "description": "**Endpoint:** PATCH /v1/usuarios/{id}/activar\n\n**Descripción:** Marca el usuario como activo (estado = true). Útil para reactivar usuarios previamente desactivados.\n\n**Uso:** Permite rehabilitar cuentas de usuarios sin perder su historial.\n\n**Respuestas:**\n- 200 OK: Usuario activado exitosamente\n- 404 Not Found: Usuario no existe"
+          }
+        },
+        {
+          "name": "1.9 Eliminar Usuario Permanentemente ⚠️",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/usuarios/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "usuarios", "{{userId}}"]
+            },
+            "description": "**Endpoint:** DELETE /v1/usuarios/{id}\n\n**⚠️ ADVERTENCIA:** Esta operación es IRREVERSIBLE. Elimina físicamente el usuario de la base de datos.\n\n**Recomendación:** Usa \"Desactivar Usuario\" (1.7) en su lugar.\n\n**Respuestas:**\n- 204 No Content: Usuario eliminado\n- 404 Not Found: Usuario no existe\n- 500 Server Error: Si hay FK constraint violations"
+          }
+        }
+      ],
+      "description": "Gestión completa de usuarios del sistema SWO.\n\n**Roles válidos:**\n- Soporte\n- Jefe\n- Usuario\n- Administrador\n- Técnico"
+    },
+    {
+      "name": "🎫 MÓDULO INCIDENCIAS (9 endpoints)",
+      "item": [
+        {
+          "name": "2.1 Listar Todas (Paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Número de página (inicia en 0)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Cantidad de registros por página"
+                }
+              ]
+            },
+            "description": "**Endpoint:** GET /v1/incidencias?page=0&size=10\n\n**Descripción:** Lista incidencias con paginación automática.\n\n**Ordenamiento:** Por fechaCreacion DESC (más recientes primero)\n\n**Response incluye:**\n- content: Array de incidencias\n- totalElements: Total de registros\n- totalPages: Total de páginas\n- size: Tamaño de página\n- number: Página actual\n\n**Ejemplos:**\n- page=0&size=10 → Primera página, 10 registros\n- page=1&size=20 → Segunda página, 20 registros"
+          }
+        },
+        {
+          "name": "2.2 Filtrar por Estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/estado/Abierto?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "estado", "Abierto"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "**Endpoint:** GET /v1/incidencias/estado/{estado}\n\n**Estados válidos:**\n- Abierto\n- En Progreso\n- Pendiente\n- Resuelto\n- Cerrado\n- Cancelado\n\n**Uso:** Filtrar incidencias por su estado actual (paginado).\n\n**NOTA:** El estado es case-sensitive. Usa exactamente como se muestra arriba.\n\n**Respuestas:**\n- 200 OK: Lista filtrada\n- 400 Bad Request: Estado inválido"
+          }
+        },
+        {
+          "name": "2.3 Incidencias de un Usuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/usuario/23?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "usuario", "23"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "**Endpoint:** GET /v1/incidencias/usuario/{idUsuario}\n\n**Descripción:** Retorna todas las incidencias reportadas por un usuario específico.\n\n**Uso:** Pantalla de \"Mis Incidencias\" en el frontend.\n\n**NOTA:** Cambia el 23 por el ID del usuario que quieras consultar."
+          }
+        },
+        {
+          "name": "2.4 Buscar por Texto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/buscar?q=autenticación&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "buscar"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "autenticación",
+                  "description": "Texto a buscar"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "**Endpoint:** GET /v1/incidencias/buscar?q={texto}\n\n**Descripción:** Busca coincidencias en el **título** y **descripción** de incidencias.\n\n**Características:**\n- Case-insensitive (no distingue mayúsculas/minúsculas)\n- Busca en ambos campos simultáneamente\n- Soporta paginación\n\n**Ejemplos de búsqueda:**\n- q=servidor → Encuentra \"Servidor\", \"servidor\", \"SERVIDOR\"\n- q=red → Encuentra \"problema de red\", \"Redes caídas\"\n- q=lento → Encuentra \"sistema lento\", \"LENTITUD en app\""
+          }
+        },
+        {
+          "name": "2.5 Obtener Incidencia por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "1"]
+            },
+            "description": "**Endpoint:** GET /v1/incidencias/{id}\n\n**Descripción:** Obtiene una incidencia específica con todos sus detalles.\n\n**Response incluye:**\n- Datos completos de la incidencia\n- Nombre del usuario que reportó\n- Nombre de la categoría\n- Fechas de creación, actualización y cierre\n\n**Respuestas:**\n- 200 OK: Incidencia encontrada\n- 404 Not Found: ID no existe"
+          }
+        },
+        {
+          "name": "2.6 Crear Incidencia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.idIncidencia) {",
+                  "        pm.collectionVariables.set('incidenciaId', jsonData.data.idIncidencia);",
+                  "        console.log('✅ Incidencia creada con ID: ' + jsonData.data.idIncidencia);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Falla en el sistema de autenticación\",\n  \"descripcion\": \"Los usuarios no pueden iniciar sesión desde las 08:00 am. Se requiere revisión urgente del servidor AD.\",\n  \"estado\": \"Abierto\",\n  \"impacto\": \"Alto\",\n  \"ubicacion\": \"Piso 3 - Sala Servidores\",\n  \"idUsuarioReporta\": 23,\n  \"idCategoria\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias"]
+            },
+            "description": "**Endpoint:** POST /v1/incidencias\n\n**Descripción:** Crea una nueva incidencia en estado \"Abierto\".\n\n**Validaciones:**\n- titulo: 5-200 caracteres\n- descripcion: mínimo 10 caracteres\n- estado: Abierto|En Progreso|Pendiente|Resuelto|Cerrado|Cancelado\n- impacto: Bajo|Medio|Alto|Crítico\n- idUsuarioReporta: debe existir en BD\n- idCategoria: opcional, debe existir si se envía\n\n**IMPORTANTE:** Ajusta idUsuarioReporta e idCategoria según tu base de datos.\n\n**Respuestas:**\n- 201 Created: Incidencia creada\n- 400 Bad Request: Datos inválidos\n- 404 Not Found: Usuario o categoría no existe"
+          }
+        },
+        {
+          "name": "2.7 Actualizar Incidencia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Falla en el sistema de autenticación - ACTUALIZADA\",\n  \"descripcion\": \"Problema identificado en el servidor AD principal. Se requiere reinicio del servicio.\",\n  \"estado\": \"En Progreso\",\n  \"impacto\": \"Crítico\",\n  \"ubicacion\": \"Piso 3 - Sala Servidores - Rack 5\",\n  \"idUsuarioReporta\": 23,\n  \"idCategoria\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/{{incidenciaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "{{incidenciaId}}"]
+            },
+            "description": "**Endpoint:** PUT /v1/incidencias/{id}\n\n**Descripción:** Actualiza TODOS los campos de una incidencia.\n\n**NOTA:** Usa la variable {{incidenciaId}} que se auto-llenó al crear la incidencia.\n\n**Respuestas:**\n- 200 OK: Incidencia actualizada\n- 400 Bad Request: Datos inválidos\n- 404 Not Found: Incidencia no existe"
+          }
+        },
+        {
+          "name": "2.8 Cambiar Estado de Incidencia",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/{{incidenciaId}}/estado?nuevoEstado=Resuelto",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "{{incidenciaId}}", "estado"],
+              "query": [
+                {
+                  "key": "nuevoEstado",
+                  "value": "Resuelto",
+                  "description": "Nuevo estado (Abierto|En Progreso|Pendiente|Resuelto|Cerrado|Cancelado)"
+                }
+              ]
+            },
+            "description": "**Endpoint:** PATCH /v1/incidencias/{id}/estado?nuevoEstado={estado}\n\n**Descripción:** Endpoint especializado para cambiar SOLO el estado de una incidencia.\n\n**Lógica especial:**\n- Si cambias a \"Resuelto\" o \"Cerrado\" → Registra automáticamente fechaCierre\n- Valida que el estado sea válido\n\n**Estados válidos:**\n- Abierto\n- En Progreso\n- Pendiente\n- Resuelto\n- Cerrado\n- Cancelado\n\n**Respuestas:**\n- 200 OK: Estado actualizado\n- 400 Bad Request: Estado inválido\n- 404 Not Found: Incidencia no existe"
+          }
+        },
+        {
+          "name": "2.9 Eliminar Incidencia ⚠️",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/incidencias/{{incidenciaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "incidencias", "{{incidenciaId}}"]
+            },
+            "description": "**Endpoint:** DELETE /v1/incidencias/{id}\n\n**⚠️ ADVERTENCIA:** Elimina físicamente la incidencia (irreversible).\n\n**Recomendación:** Usa \"Cambiar Estado\" (2.8) a \"Cancelado\" en su lugar.\n\n**Respuestas:**\n- 204 No Content: Incidencia eliminada\n- 404 Not Found: Incidencia no existe"
+          }
+        }
+      ],
+      "description": "Gestión completa del ciclo de vida de incidencias (tickets).\n\n**Características:**\n- Paginación automática\n- Filtros por estado y usuario\n- Búsqueda de texto libre\n- Auto-registro de fechaCierre"
+    },
+    {
+      "name": "🏷️ MÓDULO CATEGORÍAS (7 endpoints)",
+      "item": [
+        {
+          "name": "3.1 Listar Todas las Categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias"]
+            },
+            "description": "**Endpoint:** GET /v1/categorias\n\n**Descripción:** Retorna todas las categorías (activas e inactivas).\n\n**Response incluye:**\n- idCategoria\n- nombreCategoria\n- descripcion\n- color (código hexadecimal para UI)\n- icono (clase CSS de Font Awesome)\n- estado (true/false)\n- fechaCreacion"
+          }
+        },
+        {
+          "name": "3.2 Listar Categorías Activas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias/activas",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias", "activas"]
+            },
+            "description": "**Endpoint:** GET /v1/categorias/activas\n\n**Descripción:** Solo categorías con estado = true.\n\n**Uso:** Ideal para poblar dropdowns en formularios de creación de incidencias."
+          }
+        },
+        {
+          "name": "3.3 Obtener Categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias", "1"]
+            },
+            "description": "**Endpoint:** GET /v1/categorias/{id}\n\n**Descripción:** Obtiene una categoría específica por su ID.\n\n**Respuestas:**\n- 200 OK: Categoría encontrada\n- 404 Not Found: ID no existe"
+          }
+        },
+        {
+          "name": "3.4 Crear Categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.idCategoria) {",
+                  "        pm.collectionVariables.set('categoriaId', jsonData.data.idCategoria);",
+                  "        console.log('✅ Categoría creada con ID: ' + jsonData.data.idCategoria);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCategoria\": \"Seguridad Informática\",\n  \"descripcion\": \"Incidencias relacionadas con vulnerabilidades, malware y accesos no autorizados\",\n  \"color\": \"#FF9800\",\n  \"icono\": \"fas fa-shield-alt\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias"]
+            },
+            "description": "**Endpoint:** POST /v1/categorias\n\n**Descripción:** Crea una nueva categoría. El nombre debe ser **único**.\n\n**Validaciones:**\n- nombreCategoria: 3-100 caracteres, único\n- descripcion: máximo 500 caracteres\n- color: formato hexadecimal #RRGGBB\n- icono: máximo 50 caracteres (ej: \"fas fa-server\")\n\n**Respuestas:**\n- 201 Created: Categoría creada\n- 400 Bad Request: Datos inválidos\n- 409 Conflict: Nombre ya existe"
+          }
+        },
+        {
+          "name": "3.5 Actualizar Categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCategoria\": \"Ciberseguridad\",\n  \"descripcion\": \"Incidencias relacionadas con seguridad informática, vulnerabilidades, malware y accesos no autorizados\",\n  \"color\": \"#E91E63\",\n  \"icono\": \"fas fa-user-shield\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias/{{categoriaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias", "{{categoriaId}}"]
+            },
+            "description": "**Endpoint:** PUT /v1/categorias/{id}\n\n**Descripción:** Actualiza todos los campos de una categoría.\n\n**Respuestas:**\n- 200 OK: Categoría actualizada\n- 400 Bad Request: Datos inválidos\n- 404 Not Found: Categoría no existe\n- 409 Conflict: Nuevo nombre ya existe"
+          }
+        },
+        {
+          "name": "3.6 Desactivar Categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias/{{categoriaId}}/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias", "{{categoriaId}}", "desactivar"]
+            },
+            "description": "**Endpoint:** PATCH /v1/categorias/{id}/desactivar\n\n**Descripción:** Soft delete - marca como inactiva sin eliminar.\n\n**Respuestas:**\n- 200 OK: Categoría desactivada\n- 404 Not Found: Categoría no existe"
+          }
+        },
+        {
+          "name": "3.7 Eliminar Categoría ⚠️",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/categorias/{{categoriaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "categorias", "{{categoriaId}}"]
+            },
+            "description": "**Endpoint:** DELETE /v1/categorias/{id}\n\n**⚠️ ADVERTENCIA:** Puede fallar si hay incidencias asociadas (restricción FK).\n\n**Recomendación:** Usa \"Desactivar Categoría\" (3.6) en su lugar.\n\n**Respuestas:**\n- 204 No Content: Categoría eliminada\n- 404 Not Found: Categoría no existe\n- 500 Server Error: FK constraint violation"
+          }
+        }
+      ],
+      "description": "Gestión de categorías para clasificar incidencias.\n\n**Ejemplos:**\n- Hardware\n- Software\n- Redes\n- Seguridad Informática"
+    },
+    {
+      "name": "📁 MÓDULO PROYECTOS (10 endpoints)",
+      "item": [
+        {
+          "name": "4.1 Crear Proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.idProyecto) {",
+                  "        pm.collectionVariables.set('proyectoId', jsonData.data.idProyecto);",
+                  "        console.log('✅ Proyecto creado con ID: ' + jsonData.data.idProyecto);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProyecto\": \"Modernización Sistema SWO\",\n  \"descripcion\": \"Migración completa del sistema de gestión de incidencias a arquitectura REST con Spring Boot y Angular\",\n  \"fechaInicio\": \"2026-05-01\",\n  \"fechaFin\": \"2026-12-31\",\n  \"estado\": \"Activo\",\n  \"presupuesto\": 150000.00,\n  \"prioridad\": \"Alta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos"]
+            },
+            "description": "**Endpoint:** POST /v1/proyectos\n\n**Descripción:** Crea un nuevo proyecto en el sistema.\n\n**Validaciones:**\n- nombreProyecto: 3-150 caracteres (obligatorio)\n- estado: Activo | En Pausa | Completado | Cancelado\n- prioridad: Baja | Media | Alta | Crítica\n- presupuesto: no negativo\n\n**Respuestas:**\n- 201 Created: Proyecto creado\n- 400 Bad Request: Datos inválidos\n- 409 Conflict: Nombre duplicado"
+          }
+        },
+        {
+          "name": "4.2 Listar Todos los Proyectos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos"]
+            },
+            "description": "**Endpoint:** GET /v1/proyectos\n\n**Descripción:** Retorna todos los proyectos registrados con sus usuarios asignados.\n\n**Response incluye:**\n- Lista completa de proyectos\n- Usuarios asignados a cada proyecto\n- Fechas de creación y actualización"
+          }
+        },
+        {
+          "name": "4.3 Obtener Proyecto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/{{proyectoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "{{proyectoId}}"]
+            },
+            "description": "**Endpoint:** GET /v1/proyectos/{id}\n\n**Descripción:** Obtiene un proyecto específico con todos sus detalles.\n\n**Respuestas:**\n- 200 OK: Proyecto encontrado\n- 404 Not Found: Proyecto no existe"
+          }
+        },
+        {
+          "name": "4.4 Filtrar Proyectos por Estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/estado/Activo",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "estado", "Activo"]
+            },
+            "description": "**Endpoint:** GET /v1/proyectos/estado/{estado}\n\n**Estados válidos:**\n- Activo\n- En Pausa\n- Completado\n- Cancelado\n\n**Uso:** Filtrar proyectos por su estado actual."
+          }
+        },
+        {
+          "name": "4.5 Buscar Proyectos por Nombre",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/buscar?q=modernización",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "buscar"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "modernización",
+                  "description": "Texto a buscar"
+                }
+              ]
+            },
+            "description": "**Endpoint:** GET /v1/proyectos/buscar?q={texto}\n\n**Descripción:** Busca proyectos cuyo nombre contenga el texto especificado (case-insensitive).\n\n**Ejemplo:** q=sistema → Encuentra \"Sistema\", \"SISTEMA\", \"sistema\""
+          }
+        },
+        {
+          "name": "4.6 Actualizar Proyecto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProyecto\": \"Modernización Sistema SWO - Fase 2\",\n  \"descripcion\": \"Segunda fase: implementación de módulos de reportes avanzados y analytics\",\n  \"fechaInicio\": \"2026-05-01\",\n  \"fechaFin\": \"2027-06-30\",\n  \"estado\": \"En Pausa\",\n  \"presupuesto\": 200000.00,\n  \"prioridad\": \"Crítica\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/{{proyectoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "{{proyectoId}}"]
+            },
+            "description": "**Endpoint:** PUT /v1/proyectos/{id}\n\n**Descripción:** Actualiza todos los campos de un proyecto.\n\n**Respuestas:**\n- 200 OK: Proyecto actualizado\n- 400 Bad Request: Datos inválidos\n- 404 Not Found: Proyecto no existe"
+          }
+        },
+        {
+          "name": "4.7 Asignar Usuario a Proyecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProyecto\": 1,\n  \"idUsuario\": 23\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/asignar-usuario",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "asignar-usuario"]
+            },
+            "description": "**Endpoint:** POST /v1/proyectos/asignar-usuario\n\n**Descripción:** Asigna un usuario específico a un proyecto. Crea la relación ManyToMany.\n\n**Body:**\n- idProyecto: ID del proyecto (obligatorio)\n- idUsuario: ID del usuario a asignar (obligatorio)\n\n**Validaciones:**\n- Ambos IDs deben existir\n- Usuario no puede estar ya asignado al proyecto\n\n**Respuestas:**\n- 200 OK: Usuario asignado exitosamente\n- 400 Bad Request: Usuario ya asignado\n- 404 Not Found: Proyecto o usuario no existe"
+          }
+        },
+        {
+          "name": "4.8 Remover Usuario de Proyecto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/{{proyectoId}}/usuario/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "{{proyectoId}}", "usuario", "{{userId}}"]
+            },
+            "description": "**Endpoint:** DELETE /v1/proyectos/{idProyecto}/usuario/{idUsuario}\n\n**Descripción:** Remueve un usuario asignado de un proyecto.\n\n**Respuestas:**\n- 200 OK: Usuario removido\n- 400 Bad Request: Usuario no está asignado\n- 404 Not Found: Proyecto o usuario no existe"
+          }
+        },
+        {
+          "name": "4.9 Listar Usuarios Asignados a Proyecto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/{{proyectoId}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "{{proyectoId}}", "usuarios"]
+            },
+            "description": "**Endpoint:** GET /v1/proyectos/{idProyecto}/usuarios\n\n**Descripción:** Retorna la lista de todos los usuarios asignados a un proyecto específico.\n\n**Uso:** Consultar el equipo de trabajo de un proyecto.\n\n**Respuestas:**\n- 200 OK: Lista de usuarios\n- 404 Not Found: Proyecto no existe"
+          }
+        },
+        {
+          "name": "4.10 Eliminar Proyecto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/proyectos/{{proyectoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "proyectos", "{{proyectoId}}"]
+            },
+            "description": "**Endpoint:** DELETE /v1/proyectos/{id}\n\n**Descripción:** Elimina un proyecto y sus asignaciones de usuarios.\n\n**Respuestas:**\n- 204 No Content: Proyecto eliminado\n- 404 Not Found: Proyecto no existe"
+          }
+        }
+      ],
+      "description": "Gestión completa de proyectos del sistema.\n\n**Características:**\n- CRUD completo\n- Asignación de usuarios\n- Filtrado por estado\n- Búsqueda por nombre"
+    },
+    {
+      "name": "💬 MÓDULO CHATBOT (4 endpoints)",
+      "item": [
+        {
+          "name": "5.1 Enviar Mensaje al Chatbot",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.sessionId) {",
+                  "        pm.collectionVariables.set('sessionId', jsonData.data.sessionId);",
+                  "        console.log('✅ Mensaje enviado. SessionId: ' + jsonData.data.sessionId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 23,\n  \"mensaje\": \"Hola, necesito ayuda para reportar una incidencia\",\n  \"tipoConsulta\": \"soporte\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chatbot/enviar",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chatbot", "enviar"]
+            },
+            "description": "**Endpoint:** POST /v1/chatbot/enviar\n\n**Descripción:** Envía un mensaje del usuario al chatbot y recibe una respuesta automática. El historial se almacena en la BD.\n\n**Body:**\n- idUsuario: ID del usuario (obligatorio)\n- mensaje: Texto del mensaje (1-2000 caracteres, obligatorio)\n- sessionId: ID de sesión (opcional, se genera automáticamente si no se envía)\n- tipoConsulta: incidencia | soporte | información | otro (opcional)\n\n**Respuesta del bot:**\n- Respuestas contextuales basadas en palabras clave\n- Guías paso a paso\n- Enlaces a secciones del sistema\n\n**Respuestas:**\n- 201 Created: Mensaje procesado\n- 400 Bad Request: Datos inválidos\n- 404 Not Found: Usuario no existe"
+          }
+        },
+        {
+          "name": "5.2 Obtener Historial de Usuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/chatbot/historial/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chatbot", "historial", "{{userId}}"]
+            },
+            "description": "**Endpoint:** GET /v1/chatbot/historial/{idUsuario}\n\n**Descripción:** Retorna todo el historial de conversaciones de un usuario con el chatbot, ordenado por fecha descendente.\n\n**Uso:** Ver todas las interacciones previas del usuario con el bot.\n\n**Respuestas:**\n- 200 OK: Lista de conversaciones\n- 404 Not Found: Usuario no existe"
+          }
+        },
+        {
+          "name": "5.3 Obtener Conversaciones por Sesión",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/chatbot/sesion/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chatbot", "sesion", "{{sessionId}}"]
+            },
+            "description": "**Endpoint:** GET /v1/chatbot/sesion/{sessionId}\n\n**Descripción:** Retorna todas las conversaciones de una sesión específica.\n\n**Uso:** Mantener contexto de una conversación en curso. Útil para chatbots con memoria de contexto.\n\n**Respuestas:**\n- 200 OK: Lista de mensajes de la sesión"
+          }
+        },
+        {
+          "name": "5.4 Marcar Conversación como Resuelta",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/chatbot/1/resolver",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chatbot", "1", "resolver"]
+            },
+            "description": "**Endpoint:** PATCH /v1/chatbot/{idConversacion}/resolver\n\n**Descripción:** Marca una conversación específica como resuelta (resuelto = true).\n\n**Uso:** Para tracking de soporte y estadísticas de resolución.\n\n**Respuestas:**\n- 200 OK: Conversación marcada como resuelta\n- 404 Not Found: Conversación no existe"
+          }
+        }
+      ],
+      "description": "Módulo de chatbot inteligente con historial persistente.\n\n**Características:**\n- Respuestas contextuales automáticas\n- Historial completo por usuario\n- Agrupación por sesiones\n- Tracking de resolución"
+    }
+  ]
+}
