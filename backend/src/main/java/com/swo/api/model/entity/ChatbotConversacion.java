@@ -31,22 +31,18 @@ public class ChatbotConversacion {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "mensaje_usuario", nullable = false, columnDefinition = "TEXT")
-    private String mensajeUsuario;
+    @Column(name = "sesion_id", length = 100)
+    private String sesionId; // Para agrupar conversaciones de una misma sesión
 
-    @Column(name = "respuesta_bot", nullable = false, columnDefinition = "TEXT")
-    private String respuestaBot;
+    @Column(name = "fecha_inicio")
+    private LocalDateTime fechaInicio;
 
-    @Column(name = "session_id", length = 100)
-    private String sessionId; // Para agrupar conversaciones de una misma sesión
+    @Column(name = "fecha_fin")
+    private LocalDateTime fechaFin;
 
-    @CreatedDate
-    @Column(name = "fecha_mensaje", updatable = false)
-    private LocalDateTime fechaMensaje;
+    @Column(name = "estado_conversacion", length = 50)
+    private String estadoConversacion;
 
-    @Column(name = "tipo_consulta", length = 50)
-    private String tipoConsulta; // ej: "incidencia", "soporte", "información", "otro"
-
-    @Column(name = "resuelto", nullable = false)
-    private Boolean resuelto = Boolean.FALSE;
+    @Column(name = "ip_usuario", length = 50)
+    private String ipUsuario;
 }

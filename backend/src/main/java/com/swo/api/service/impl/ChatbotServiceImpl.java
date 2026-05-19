@@ -4,11 +4,14 @@ import com.swo.api.exception.ResourceNotFoundException;
 import com.swo.api.model.dto.request.ChatbotRequestDTO;
 import com.swo.api.model.dto.response.ChatbotResponseDTO;
 import com.swo.api.model.entity.ChatbotConversacion;
+import com.swo.api.model.entity.ChatbotMensaje;
 import com.swo.api.model.entity.Usuario;
 import com.swo.api.repository.ChatbotConversacionRepository;
+import com.swo.api.repository.ChatbotMensajeRepository;
 import com.swo.api.repository.UsuarioRepository;
 import com.swo.api.service.ChatbotService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,35 +23,94 @@ import java.util.stream.Collectors;
  * Implementación del servicio de Chatbot.
  * Gestiona conversaciones y genera respuestas simuladas inteligentes.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ChatbotServiceImpl implements ChatbotService {
 
     private final ChatbotConversacionRepository conversacionRepository;
+    private final ChatbotMensajeRepository mensajeRepository;
     private final UsuarioRepository usuarioRepository;
 
     @Override
     public ChatbotResponseDTO enviarMensaje(ChatbotRequestDTO dto) {
-        // Validar que el usuario exista
-        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
-            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
+        log.info("[ChatbotService] Usuario {} enviando mensaje. SessionID: {}", 
+                 dto.getIdUsuario(), dto.getSessionId());
+        
+        try {
+            // Validar que el usuario exista
+            Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+                .orElseThrow(() -> {
+                    log.warn("[ChatbotService] Usuario no encontrado con ID: {}", dto.getIdUsuario());
+                    return new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario());
+                });
 
-        // Generar respuesta del bot basada en el mensaje
-        String respuestaBot = generarRespuestaBot(dto.getMensaje(), dto.getTipoConsulta());
+            // Buscar o crear la conversación
+            String sessionId = dto.getSessionId() != null ? dto.getSessionId() : generarSessionId();
+            log.debug("[ChatbotService] Buscando conversación activa para sesión: {}", sessionId);
+            
+            ChatbotConversacion conversacion = conversacionRepository
+                .findBySesionIdOrderByFechaInicioAsc(sessionId).stream()
+                .filter(c -> "Iniciada".equals(c.getEstadoConversacion()) || "Activa".equals(c.getEstadoConversacion()))
+                .findFirst()
+                .orElseGet(() -> {
+                    log.info("[ChatbotService] Creando nueva conversación para sesión: {}", sessionId);
+                    ChatbotConversacion nueva = new ChatbotConversacion();
+                    nueva.setUsuario(usuario);
+                    nueva.setSesionId(sessionId);
+                    nueva.setFechaInicio(java.time.LocalDateTime.now());
+                    nueva.setEstadoConversacion("Activa");
+                    return conversacionRepository.save(nueva);
+                });
 
-        // Crear la conversación
-        ChatbotConversacion conversacion = new ChatbotConversacion();
-        conversacion.setUsuario(usuario);
-        conversacion.setMensajeUsuario(dto.getMensaje());
-        conversacion.setRespuestaBot(respuestaBot);
-        conversacion.setSessionId(dto.getSessionId() != null ? dto.getSessionId() : generarSessionId());
-        conversacion.setTipoConsulta(dto.getTipoConsulta() != null ? dto.getTipoConsulta() : "general");
-        conversacion.setResuelto(false);
+            // Crear mensaje del usuario
+            log.debug("[ChatbotService] Guardando mensaje del usuario en conversación ID: {}", 
+                      conversacion.getIdConversacion());
+            ChatbotMensaje mensajeUsuario = new ChatbotMensaje();
+            mensajeUsuario.setConversacion(conversacion);
+            mensajeUsuario.setTipoMensaje("Usuario");
+            mensajeUsuario.setContenido(dto.getMensaje() != null ? dto.getMensaje() : "");
+            mensajeUsuario.setMensajeUsuario(usuario.getNombreCompleto() != null ? 
+                                             usuario.getNombreCompleto() : 
+                                             "Usuario ID: " + usuario.getIdUsuario());
+            mensajeRepository.save(mensajeUsuario);
 
-        ChatbotConversacion guardada = conversacionRepository.save(conversacion);
+            // Generar respuesta del bot
+            String respuesta = generarRespuestaBot(dto.getMensaje(), dto.getTipoConsulta());
+            log.debug("[ChatbotService] Respuesta del bot generada: {} caracteres", respuesta.length());
 
-        return mapearEntidadADto(guardada);
+            // Crear mensaje del bot
+            ChatbotMensaje mensajeBot = new ChatbotMensaje();
+            mensajeBot.setConversacion(conversacion);
+            mensajeBot.setTipoMensaje("Bot");
+            mensajeBot.setContenido(respuesta);
+            mensajeBot.setMensajeUsuario("SWO Chatbot Assistant"); // Identificador del bot
+            ChatbotMensaje botGuardado = mensajeRepository.save(mensajeBot);
+
+            // Construir respuesta
+            ChatbotResponseDTO response = new ChatbotResponseDTO();
+            response.setIdConversacion(conversacion.getIdConversacion());
+            response.setSesionId(conversacion.getSesionId());
+            response.setFechaInicio(conversacion.getFechaInicio());
+            response.setEstadoConversacion(conversacion.getEstadoConversacion());
+            response.setNombreUsuario(usuario.getNombreCompleto() != null ? 
+                                     usuario.getNombreCompleto() : "Usuario sin nombre");
+            response.setMensajeUsuario(dto.getMensaje());
+            response.setRespuestaBot(respuesta);
+            response.setFechaMensaje(botGuardado.getFechaMensaje());
+
+            log.info("[ChatbotService] Mensaje procesado exitosamente. ConversaciónID: {}", 
+                     conversacion.getIdConversacion());
+            return response;
+            
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[ChatbotService] Error inesperado al procesar mensaje del usuario {}: {}", 
+                      dto.getIdUsuario(), e.getMessage(), e);
+            throw new RuntimeException("Error al procesar mensaje del chatbot: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -58,7 +120,7 @@ public class ChatbotServiceImpl implements ChatbotService {
             throw new ResourceNotFoundException("Usuario no encontrado con ID: " + idUsuario);
         }
 
-        return conversacionRepository.findByUsuario_IdUsuarioOrderByFechaMensajeDesc(idUsuario).stream()
+        return conversacionRepository.findByUsuario_IdUsuarioOrderByFechaInicioDesc(idUsuario).stream()
             .map(this::mapearEntidadADto)
             .collect(Collectors.toList());
     }
@@ -66,7 +128,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Override
     @Transactional(readOnly = true)
     public List<ChatbotResponseDTO> obtenerPorSession(String sessionId) {
-        return conversacionRepository.findBySessionIdOrderByFechaMensajeAsc(sessionId).stream()
+        return conversacionRepository.findBySesionIdOrderByFechaInicioAsc(sessionId).stream()
             .map(this::mapearEntidadADto)
             .collect(Collectors.toList());
     }
@@ -76,7 +138,8 @@ public class ChatbotServiceImpl implements ChatbotService {
         ChatbotConversacion conversacion = conversacionRepository.findById(idConversacion)
             .orElseThrow(() -> new ResourceNotFoundException("Conversación no encontrada con ID: " + idConversacion));
 
-        conversacion.setResuelto(true);
+        conversacion.setEstadoConversacion("Finalizada");
+        conversacion.setFechaFin(java.time.LocalDateTime.now());
         ChatbotConversacion actualizada = conversacionRepository.save(conversacion);
 
         return mapearEntidadADto(actualizada);
@@ -157,15 +220,30 @@ public class ChatbotServiceImpl implements ChatbotService {
      * Mapea la entidad ChatbotConversacion a DTO de respuesta.
      */
     private ChatbotResponseDTO mapearEntidadADto(ChatbotConversacion conversacion) {
+        if (conversacion == null) {
+            log.warn("[ChatbotService] Intento de mapear conversación null");
+            return null;
+        }
+        
         ChatbotResponseDTO dto = new ChatbotResponseDTO();
         dto.setIdConversacion(conversacion.getIdConversacion());
-        dto.setMensajeUsuario(conversacion.getMensajeUsuario());
-        dto.setRespuestaBot(conversacion.getRespuestaBot());
-        dto.setSessionId(conversacion.getSessionId());
-        dto.setFechaMensaje(conversacion.getFechaMensaje());
-        dto.setTipoConsulta(conversacion.getTipoConsulta());
-        dto.setResuelto(conversacion.getResuelto());
-        dto.setNombreUsuario(conversacion.getUsuario().getNombreCompleto());
+        dto.setSesionId(conversacion.getSesionId());
+        dto.setFechaInicio(conversacion.getFechaInicio());
+        dto.setFechaFin(conversacion.getFechaFin());
+        dto.setEstadoConversacion(conversacion.getEstadoConversacion());
+        dto.setIpUsuario(conversacion.getIpUsuario());
+        
+        // Validar null-safety para usuario
+        if (conversacion.getUsuario() != null) {
+            dto.setNombreUsuario(conversacion.getUsuario().getNombreCompleto() != null ? 
+                                conversacion.getUsuario().getNombreCompleto() : 
+                                "Usuario sin nombre");
+        } else {
+            log.warn("[ChatbotService] Conversación ID {} no tiene usuario asociado", 
+                     conversacion.getIdConversacion());
+            dto.setNombreUsuario("Usuario desconocido");
+        }
+        
         return dto;
     }
 }

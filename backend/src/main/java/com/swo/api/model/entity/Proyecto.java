@@ -32,45 +32,16 @@ public class Proyecto {
     @Column(name = "id_proyecto")
     private Long idProyecto;
 
-    @Column(name = "nombre_proyecto", nullable = false, length = 150)
-    private String nombreProyecto;
+    @Column(name = "nombre", nullable = false, length = 150)
+    private String nombre;
 
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "fecha_inicio")
-    private LocalDate fechaInicio;
-
-    @Column(name = "fecha_fin")
-    private LocalDate fechaFin;
-
     @Column(name = "estado", nullable = false, length = 20)
     private String estado = "Activo"; // Activo, En Pausa, Completado, Cancelado
-
-    @Column(name = "presupuesto", precision = 15, scale = 2)
-    private BigDecimal presupuesto;
-
-    @Column(name = "prioridad", length = 15)
-    private String prioridad; // Baja, Media, Alta, Crítica
 
     @CreatedDate
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
-
-    @LastModifiedDate
-    @Column(name = "fecha_actualizacion")
-    private LocalDateTime fechaActualizacion;
-
-    /**
-     * Relación ManyToMany con Usuario.
-     * Un proyecto puede tener múltiples usuarios asignados.
-     * Un usuario puede estar asignado a múltiples proyectos.
-     */
-    @ManyToMany
-    @JoinTable(
-        name = "proyecto_usuario",
-        joinColumns = @JoinColumn(name = "id_proyecto"),
-        inverseJoinColumns = @JoinColumn(name = "id_usuario")
-    )
-    private Set<Usuario> usuariosAsignados = new HashSet<>();
 }

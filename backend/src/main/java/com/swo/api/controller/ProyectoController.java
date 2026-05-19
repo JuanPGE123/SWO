@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.List;
  * Controlador REST para la gestión de Proyectos.
  * Expone endpoints para CRUD y asignación de usuarios a proyectos.
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/proyectos")
 @RequiredArgsConstructor
@@ -32,7 +34,9 @@ public class ProyectoController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Crear nuevo proyecto", description = "Registra un nuevo proyecto en el sistema")
     public ApiResponse<ProyectoResponseDTO> crear(@Valid @RequestBody ProyectoRequestDTO dto) {
+        log.info("[POST /v1/proyectos] Creando proyecto: {}", dto.getNombreProyecto());
         ProyectoResponseDTO proyecto = proyectoService.crear(dto);
+        log.info("[POST /v1/proyectos] Proyecto creado exitosamente con ID: {}", proyecto.getIdProyecto());
         return ApiResponse.created(proyecto);
     }
 
@@ -41,7 +45,9 @@ public class ProyectoController {
     public ApiResponse<ProyectoResponseDTO> actualizar(
             @Parameter(description = "ID del proyecto") @PathVariable Long id,
             @Valid @RequestBody ProyectoRequestDTO dto) {
+        log.info("[PUT /v1/proyectos/{}] Actualizando proyecto: {}", id, dto.getNombreProyecto());
         ProyectoResponseDTO proyecto = proyectoService.actualizar(id, dto);
+        log.info("[PUT /v1/proyectos/{}] Proyecto actualizado exitosamente", id);
         return ApiResponse.ok("Proyecto actualizado exitosamente", proyecto);
     }
 
@@ -89,7 +95,11 @@ public class ProyectoController {
     @Operation(summary = "Asignar usuario a proyecto", 
                description = "Asigna un usuario específico a un proyecto. Retorna el proyecto con la lista actualizada de usuarios")
     public ApiResponse<ProyectoResponseDTO> asignarUsuario(@Valid @RequestBody AsignacionProyectoDTO dto) {
+        log.info("[POST /v1/proyectos/asignar-usuario] Asignando usuario {} al proyecto {}", 
+                 dto.getIdUsuario(), dto.getIdProyecto());
         ProyectoResponseDTO proyecto = proyectoService.asignarUsuario(dto);
+        log.info("[POST /v1/proyectos/asignar-usuario] Usuario asignado exitosamente al proyecto {}", 
+                 dto.getIdProyecto());
         return ApiResponse.ok("Usuario asignado al proyecto exitosamente", proyecto);
     }
 
@@ -108,7 +118,10 @@ public class ProyectoController {
                description = "Retorna la lista de todos los usuarios asignados a un proyecto específico")
     public ApiResponse<List<UsuarioResponseDTO>> obtenerUsuariosAsignados(
             @Parameter(description = "ID del proyecto") @PathVariable Long idProyecto) {
+        log.info("[GET /v1/proyectos/{}/usuarios] Obteniendo usuarios asignados", idProyecto);
         List<UsuarioResponseDTO> usuarios = proyectoService.obtenerUsuariosAsignados(idProyecto);
+        log.info("[GET /v1/proyectos/{}/usuarios] Se encontraron {} usuarios asignados", 
+                 idProyecto, usuarios.size());
         return ApiResponse.ok(usuarios);
     }
 }

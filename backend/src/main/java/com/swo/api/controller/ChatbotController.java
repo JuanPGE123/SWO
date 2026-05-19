@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import java.util.List;
  * Controlador REST para el Chatbot del sistema.
  * Gestiona la interacción con usuarios y mantiene historial de conversaciones.
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/chatbot")
 @RequiredArgsConstructor
@@ -32,7 +34,11 @@ public class ChatbotController {
                description = "Envía un mensaje del usuario al chatbot y recibe una respuesta. " +
                            "La conversación se almacena en el historial vinculado al usuario.")
     public ApiResponse<ChatbotResponseDTO> enviarMensaje(@Valid @RequestBody ChatbotRequestDTO dto) {
+        log.info("[POST /v1/chatbot/enviar] Usuario {} enviando mensaje. Sesión: {}", 
+                 dto.getIdUsuario(), dto.getSessionId());
         ChatbotResponseDTO respuesta = chatbotService.enviarMensaje(dto);
+        log.info("[POST /v1/chatbot/enviar] Mensaje procesado exitosamente. ConversacionID: {}", 
+                 respuesta.getIdConversacion());
         return ApiResponse.created(respuesta);
     }
 

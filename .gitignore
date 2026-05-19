@@ -92,6 +92,10 @@ jacoco.exec
 *.swp
 *~
 build_*.txt
+err.txt
+err_*.txt
+error_log.txt
+out.txt
 src/favicon.ico
 
 # ── DOCUMENTACIÓN INTERNA ────────────────────────────────────────

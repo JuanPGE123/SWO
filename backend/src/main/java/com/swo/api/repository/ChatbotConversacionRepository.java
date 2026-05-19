@@ -18,28 +18,17 @@ public interface ChatbotConversacionRepository extends JpaRepository<ChatbotConv
     /**
      * Encuentra todas las conversaciones de un usuario ordenadas por fecha descendente.
      */
-    List<ChatbotConversacion> findByUsuario_IdUsuarioOrderByFechaMensajeDesc(Long idUsuario);
+    List<ChatbotConversacion> findByUsuario_IdUsuarioOrderByFechaInicioDesc(Long idUsuario);
 
     /**
-     * Encuentra conversaciones por sessionId para mantener contexto.
+     * Encuentra conversaciones por sesionId para mantener contexto.
      */
-    List<ChatbotConversacion> findBySessionIdOrderByFechaMensajeAsc(String sessionId);
+    List<ChatbotConversacion> findBySesionIdOrderByFechaInicioAsc(String sesionId);
 
     /**
-     * Encuentra conversaciones por tipo de consulta.
-     */
-    List<ChatbotConversacion> findByTipoConsulta(String tipoConsulta);
-
-    /**
-     * Cuenta conversaciones no resueltas de un usuario.
-     */
-    @Query("SELECT COUNT(c) FROM ChatbotConversacion c WHERE c.usuario.idUsuario = :idUsuario AND c.resuelto = false")
-    Long countConversacionesNoResueltas(@Param("idUsuario") Long idUsuario);
-
-    /**
-     * Obtiene las últimas N conversaciones de un usuario (para contexto).
+     * Obtiene las últimas conversaciones de un usuario (para contexto).
      */
     @Query("SELECT c FROM ChatbotConversacion c WHERE c.usuario.idUsuario = :idUsuario " +
-           "ORDER BY c.fechaMensaje DESC")
+           "ORDER BY c.fechaInicio DESC")
     List<ChatbotConversacion> findTopNByUsuario(@Param("idUsuario") Long idUsuario);
 }

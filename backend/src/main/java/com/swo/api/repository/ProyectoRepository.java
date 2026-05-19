@@ -23,14 +23,8 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long> {
     /**
      * Busca proyectos cuyo nombre contiene el texto especificado (case-insensitive).
      */
-    @Query("SELECT p FROM Proyecto p WHERE LOWER(p.nombreProyecto) LIKE LOWER(CONCAT('%', :texto, '%'))")
+    @Query("SELECT p FROM Proyecto p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :texto, '%'))")
     List<Proyecto> buscarPorNombre(@Param("texto") String texto);
-
-    /**
-     * Encuentra todos los proyectos asignados a un usuario específico.
-     */
-    @Query("SELECT p FROM Proyecto p JOIN p.usuariosAsignados u WHERE u.idUsuario = :idUsuario")
-    List<Proyecto> findProyectosByUsuario(@Param("idUsuario") Long idUsuario);
 
     /**
      * Cuenta la cantidad de proyectos por estado.
@@ -40,5 +34,5 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long> {
     /**
      * Verifica si existe un proyecto con el nombre especificado.
      */
-    boolean existsByNombreProyecto(String nombreProyecto);
+    boolean existsByNombre(String nombre);
 }

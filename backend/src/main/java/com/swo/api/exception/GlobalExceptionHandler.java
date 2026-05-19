@@ -3,8 +3,11 @@ package com.swo.api.exception;
 import com.swo.api.common.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,6 +97,50 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(500,
                         "Error de referencia nula. Contacte al administrador."));
+    }
+
+    // ── 400 – JSON malformado ──────────────────────────────────────────────────
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Object>> handleJsonParseError(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        log.warn("[400] JSON malformado en {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.badRequest("JSON inválido o malformado. Verifica la estructura del request."));
+    }
+
+    // ── 409 – Violación de integridad de datos (FK, Unique, etc.) ─────────────
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        log.error("[409] Violación de integridad de datos en {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        String mensaje = "Error de integridad de datos";
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("Duplicate entry")) {
+                mensaje = "El registro ya existe en la base de datos (duplicado)";
+            } else if (ex.getMessage().contains("foreign key constraint")) {
+                mensaje = "No se puede completar la operación por restricciones de integridad referencial";
+            }
+        }
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.conflict(mensaje));
+    }
+
+    // ── 500 – Errores de acceso a datos (DB Connection, Queries, etc.) ────────
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDataAccessException(
+            DataAccessException ex, HttpServletRequest request) {
+
+        log.error("[500] Error de acceso a datos en {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(500,
+                        "Error al acceder a la base de datos. Contacte al administrador."));
     }
 
     // ── 500 – Error interno no controlado ─────────────────────────────────────

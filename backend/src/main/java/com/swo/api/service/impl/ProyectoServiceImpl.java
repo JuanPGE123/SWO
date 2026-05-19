@@ -6,12 +6,16 @@ import com.swo.api.model.dto.request.AsignacionProyectoDTO;
 import com.swo.api.model.dto.request.ProyectoRequestDTO;
 import com.swo.api.model.dto.response.ProyectoResponseDTO;
 import com.swo.api.model.dto.response.UsuarioResponseDTO;
+import com.swo.api.model.entity.AsignacionProyecto;
 import com.swo.api.model.entity.Proyecto;
 import com.swo.api.model.entity.Usuario;
+import com.swo.api.model.enums.EstadoProyecto;
+import com.swo.api.repository.AsignacionProyectoRepository;
 import com.swo.api.repository.ProyectoRepository;
 import com.swo.api.repository.UsuarioRepository;
 import com.swo.api.service.ProyectoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
  * Implementación del servicio de Proyectos.
  * Gestiona la lógica de negocio y las asignaciones de usuarios.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,35 +34,61 @@ public class ProyectoServiceImpl implements ProyectoService {
 
     private final ProyectoRepository proyectoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final AsignacionProyectoRepository asignacionProyectoRepository;
 
     @Override
     public ProyectoResponseDTO crear(ProyectoRequestDTO dto) {
-        // Validar que no exista un proyecto con el mismo nombre
-        if (proyectoRepository.existsByNombreProyecto(dto.getNombreProyecto())) {
-            throw new BusinessException("Ya existe un proyecto con el nombre: " + dto.getNombreProyecto());
-        }
-
-        Proyecto proyecto = mapearDtoAEntidad(dto);
-        Proyecto guardado = proyectoRepository.save(proyecto);
+        log.info("[ProyectoService] Iniciando creación de proyecto: {}", dto.getNombreProyecto());
         
-        return mapearEntidadADto(guardado);
+        try {
+            // Validar que no exista un proyecto con el mismo nombre
+            if (proyectoRepository.existsByNombre(dto.getNombreProyecto())) {
+                log.warn("[ProyectoService] Ya existe un proyecto con el nombre: {}", dto.getNombreProyecto());
+                throw new BusinessException("Ya existe un proyecto con el nombre: " + dto.getNombreProyecto());
+            }
+
+            Proyecto proyecto = mapearDtoAEntidad(dto);
+            Proyecto guardado = proyectoRepository.save(proyecto);
+            log.info("[ProyectoService] Proyecto creado exitosamente con ID: {}", guardado.getIdProyecto());
+            
+            return mapearEntidadADto(guardado);
+        } catch (BusinessException e) {
+            throw e; // Relanzar excepción de negocio
+        } catch (Exception e) {
+            log.error("[ProyectoService] Error inesperado al crear proyecto: {}", dto.getNombreProyecto(), e);
+            throw new RuntimeException("Error al crear el proyecto: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ProyectoResponseDTO actualizar(Long id, ProyectoRequestDTO dto) {
-        Proyecto proyecto = proyectoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Proyecto no encontrado con ID: " + id));
-
-        // Validar nombre duplicado solo si cambió
-        if (!proyecto.getNombreProyecto().equals(dto.getNombreProyecto()) &&
-            proyectoRepository.existsByNombreProyecto(dto.getNombreProyecto())) {
-            throw new BusinessException("Ya existe un proyecto con el nombre: " + dto.getNombreProyecto());
-        }
-
-        actualizarEntidadDesdeDto(proyecto, dto);
-        Proyecto actualizado = proyectoRepository.save(proyecto);
+        log.info("[ProyectoService] Actualizando proyecto con ID: {}", id);
         
-        return mapearEntidadADto(actualizado);
+        try {
+            Proyecto proyecto = proyectoRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("[ProyectoService] Proyecto no encontrado con ID: {}", id);
+                    return new ResourceNotFoundException("Proyecto no encontrado con ID: " + id);
+                });
+
+            // Validar nombre duplicado solo si cambió
+            if (!proyecto.getNombre().equals(dto.getNombreProyecto()) &&
+                proyectoRepository.existsByNombre(dto.getNombreProyecto())) {
+                log.warn("[ProyectoService] Ya existe otro proyecto con el nombre: {}", dto.getNombreProyecto());
+                throw new BusinessException("Ya existe un proyecto con el nombre: " + dto.getNombreProyecto());
+            }
+
+            actualizarEntidadDesdeDto(proyecto, dto);
+            Proyecto actualizado = proyectoRepository.save(proyecto);
+            log.info("[ProyectoService] Proyecto ID {} actualizado exitosamente", id);
+            
+            return mapearEntidadADto(actualizado);
+        } catch (ResourceNotFoundException | BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[ProyectoService] Error inesperado al actualizar proyecto ID: {}", id, e);
+            throw new RuntimeException("Error al actualizar el proyecto: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -103,110 +134,143 @@ public class ProyectoServiceImpl implements ProyectoService {
 
     @Override
     public ProyectoResponseDTO asignarUsuario(AsignacionProyectoDTO dto) {
-        Proyecto proyecto = proyectoRepository.findById(dto.getIdProyecto())
-            .orElseThrow(() -> new ResourceNotFoundException("Proyecto no encontrado con ID: " + dto.getIdProyecto()));
-
-        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
-            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
-
-        // Validar que el usuario no esté ya asignado
-        if (proyecto.getUsuariosAsignados().contains(usuario)) {
-            throw new BusinessException("El usuario ya está asignado a este proyecto");
-        }
-
-        proyecto.getUsuariosAsignados().add(usuario);
-        Proyecto actualizado = proyectoRepository.save(proyecto);
+        log.info("[ProyectoService] Asignando usuario {} al proyecto {}", dto.getIdUsuario(), dto.getIdProyecto());
         
-        return mapearEntidadADto(actualizado);
+        try {
+            // Validar que el proyecto exista
+            Proyecto proyecto = proyectoRepository.findById(dto.getIdProyecto())
+                .orElseThrow(() -> {
+                    log.warn("[ProyectoService] Proyecto no encontrado con ID: {}", dto.getIdProyecto());
+                    return new ResourceNotFoundException("Proyecto no encontrado con ID: " + dto.getIdProyecto());
+                });
+
+            // Validar que el usuario exista
+            Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+                .orElseThrow(() -> {
+                    log.warn("[ProyectoService] Usuario no encontrado con ID: {}", dto.getIdUsuario());
+                    return new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario());
+                });
+
+            // Verificar si ya existe la asignación
+            if (asignacionProyectoRepository.existsByProyecto_IdProyectoAndUsuario_IdUsuario(
+                    dto.getIdProyecto(), dto.getIdUsuario())) {
+                log.warn("[ProyectoService] El usuario {} ya está asignado al proyecto {}", 
+                         dto.getIdUsuario(), dto.getIdProyecto());
+                throw new BusinessException("El usuario ya está asignado a este proyecto");
+            }
+
+            // Crear la asignación
+            AsignacionProyecto asignacion = new AsignacionProyecto();
+            asignacion.setProyecto(proyecto);
+            asignacion.setUsuario(usuario);
+            asignacion.setRolAsignado("Miembro");
+            asignacionProyectoRepository.save(asignacion);
+            
+            log.info("[ProyectoService] Usuario {} asignado exitosamente al proyecto {}", 
+                     dto.getIdUsuario(), dto.getIdProyecto());
+
+            return mapearEntidadADto(proyecto);
+        } catch (ResourceNotFoundException | BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[ProyectoService] Error inesperado al asignar usuario {} al proyecto {}", 
+                      dto.getIdUsuario(), dto.getIdProyecto(), e);
+            throw new RuntimeException("Error al asignar usuario al proyecto: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ProyectoResponseDTO removerUsuario(Long idProyecto, Long idUsuario) {
+        // Validar que el proyecto exista
         Proyecto proyecto = proyectoRepository.findById(idProyecto)
             .orElseThrow(() -> new ResourceNotFoundException("Proyecto no encontrado con ID: " + idProyecto));
 
-        Usuario usuario = usuarioRepository.findById(idUsuario)
-            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + idUsuario));
+        // Validar que el usuario exista
+        if (!usuarioRepository.existsById(idUsuario)) {
+            throw new ResourceNotFoundException("Usuario no encontrado con ID: " + idUsuario);
+        }
 
-        if (!proyecto.getUsuariosAsignados().contains(usuario)) {
+        // Verificar si existe la asignación
+        if (!asignacionProyectoRepository.existsByProyecto_IdProyectoAndUsuario_IdUsuario(idProyecto, idUsuario)) {
             throw new BusinessException("El usuario no está asignado a este proyecto");
         }
 
-        proyecto.getUsuariosAsignados().remove(usuario);
-        Proyecto actualizado = proyectoRepository.save(proyecto);
-        
-        return mapearEntidadADto(actualizado);
+        // Eliminar la asignación
+        asignacionProyectoRepository.deleteByProyecto_IdProyectoAndUsuario_IdUsuario(idProyecto, idUsuario);
+
+        return mapearEntidadADto(proyecto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> obtenerUsuariosAsignados(Long idProyecto) {
-        Proyecto proyecto = proyectoRepository.findById(idProyecto)
-            .orElseThrow(() -> new ResourceNotFoundException("Proyecto no encontrado con ID: " + idProyecto));
+        log.info("[ProyectoService] Obteniendo usuarios asignados al proyecto {}", idProyecto);
+        
+        try {
+            // Validar que el proyecto exista
+            if (!proyectoRepository.existsById(idProyecto)) {
+                log.warn("[ProyectoService] Proyecto no encontrado con ID: {}", idProyecto);
+                throw new ResourceNotFoundException("Proyecto no encontrado con ID: " + idProyecto);
+            }
 
-        return proyecto.getUsuariosAsignados().stream()
-            .map(this::mapearUsuarioADto)
-            .collect(Collectors.toList());
+            // Obtener todas las asignaciones del proyecto
+            List<AsignacionProyecto> asignaciones = asignacionProyectoRepository.findByProyecto_IdProyecto(idProyecto);
+            log.info("[ProyectoService] Se encontraron {} usuarios asignados al proyecto {}", 
+                     asignaciones.size(), idProyecto);
+
+            // Mapear los usuarios a DTOs
+            return asignaciones.stream()
+                .map(asignacion -> mapearUsuarioADto(asignacion.getUsuario()))
+                .collect(Collectors.toList());
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[ProyectoService] Error inesperado al obtener usuarios del proyecto {}", idProyecto, e);
+            throw new RuntimeException("Error al obtener usuarios asignados: " + e.getMessage(), e);
+        }
     }
 
     // Métodos auxiliares de mapeo
     private Proyecto mapearDtoAEntidad(ProyectoRequestDTO dto) {
         Proyecto proyecto = new Proyecto();
-        proyecto.setNombreProyecto(dto.getNombreProyecto());
+        proyecto.setNombre(dto.getNombreProyecto());
         proyecto.setDescripcion(dto.getDescripcion());
-        proyecto.setFechaInicio(dto.getFechaInicio());
-        proyecto.setFechaFin(dto.getFechaFin());
-        proyecto.setEstado(dto.getEstado() != null ? dto.getEstado() : "Activo");
-        proyecto.setPresupuesto(dto.getPresupuesto());
-        proyecto.setPrioridad(dto.getPrioridad());
+        // Normalizar y validar el estado usando el enum
+        proyecto.setEstado(EstadoProyecto.normalizar(dto.getEstado()));
+        log.debug("[ProyectoService] Estado normalizado: {}", proyecto.getEstado());
         return proyecto;
     }
 
     private void actualizarEntidadDesdeDto(Proyecto proyecto, ProyectoRequestDTO dto) {
-        proyecto.setNombreProyecto(dto.getNombreProyecto());
+        proyecto.setNombre(dto.getNombreProyecto());
         proyecto.setDescripcion(dto.getDescripcion());
-        proyecto.setFechaInicio(dto.getFechaInicio());
-        proyecto.setFechaFin(dto.getFechaFin());
-        if (dto.getEstado() != null) {
-            proyecto.setEstado(dto.getEstado());
+        if (dto.getEstado() != null && !dto.getEstado().trim().isEmpty()) {
+            // Normalizar y validar el estado usando el enum
+            String estadoNormalizado = EstadoProyecto.normalizar(dto.getEstado());
+            proyecto.setEstado(estadoNormalizado);
+            log.debug("[ProyectoService] Estado actualizado y normalizado: {}", estadoNormalizado);
         }
-        proyecto.setPresupuesto(dto.getPresupuesto());
-        proyecto.setPrioridad(dto.getPrioridad());
     }
 
     private ProyectoResponseDTO mapearEntidadADto(Proyecto proyecto) {
         ProyectoResponseDTO dto = new ProyectoResponseDTO();
         dto.setIdProyecto(proyecto.getIdProyecto());
-        dto.setNombreProyecto(proyecto.getNombreProyecto());
+        dto.setNombreProyecto(proyecto.getNombre());
         dto.setDescripcion(proyecto.getDescripcion());
-        dto.setFechaInicio(proyecto.getFechaInicio());
-        dto.setFechaFin(proyecto.getFechaFin());
         dto.setEstado(proyecto.getEstado());
-        dto.setPresupuesto(proyecto.getPresupuesto());
-        dto.setPrioridad(proyecto.getPrioridad());
         dto.setFechaCreacion(proyecto.getFechaCreacion());
-        dto.setFechaActualizacion(proyecto.getFechaActualizacion());
-
-        // Mapear usuarios asignados
-        List<ProyectoResponseDTO.UsuarioResumenDTO> usuariosDto = proyecto.getUsuariosAsignados().stream()
-            .map(usuario -> {
-                ProyectoResponseDTO.UsuarioResumenDTO resumen = new ProyectoResponseDTO.UsuarioResumenDTO();
-                resumen.setIdUsuario(usuario.getIdUsuario());
-                resumen.setNombreCompleto(usuario.getNombreCompleto());
-                resumen.setCorreo(usuario.getCorreo());
-                resumen.setRol(usuario.getRol());
-                return resumen;
-            })
-            .collect(Collectors.toList());
-        
-        dto.setUsuariosAsignados(usuariosDto);
         return dto;
     }
 
     private UsuarioResponseDTO mapearUsuarioADto(Usuario usuario) {
+        if (usuario == null) {
+            log.warn("[ProyectoService] Intento de mapear usuario null");
+            return null;
+        }
+        
         UsuarioResponseDTO dto = new UsuarioResponseDTO();
         dto.setIdUsuario(usuario.getIdUsuario());
-        dto.setNombreCompleto(usuario.getNombreCompleto());
+        dto.setNombreCompleto(usuario.getNombreCompleto() != null ? usuario.getNombreCompleto() : "Sin nombre");
         dto.setCorreo(usuario.getCorreo());
         dto.setRol(usuario.getRol());
         dto.setEstado(usuario.getEstado());
