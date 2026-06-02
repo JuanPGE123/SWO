@@ -35,6 +35,12 @@
         <springdoc.version>2.3.0</springdoc.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <lombok.version>1.18.32</lombok.version>
+        <!-- TESTING & COVERAGE -->
+        <junit-jupiter.version>5.10.0</junit-jupiter.version>
+        <mockito.version>5.3.1</mockito.version>
+        <jacoco.version>0.8.10</jacoco.version>
+        <!-- Min Coverage Requirement: 80% -->
+        <coverage.ratio>0.80</coverage.ratio>
     </properties>
 
     <!-- ─────────────────────────────────────────────────────────
@@ -100,6 +106,61 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- ── JUnit 5 (Jupiter) ────────────────────────── -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ── Mockito (Mocking Framework) ───────────────── -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ── H2 (Database En Memoria para Tests) ────────– -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ── AssertJ (Assertions mejoradas) ────────────– -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ── REST Assured (Testing API REST) ──────────── -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <!-- ─────────────────────────────────────────────────────────
@@ -107,10 +168,96 @@
     ───────────────────────────────────────────────────────────── -->
     <build>
         <plugins>
-            <!-- Spring Boot Maven Plugin -->
+
+            <!-- ──────────────────────────────────────────────────
+                 COMPILADOR (Java 17)
+            ────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- ──────────────────────────────────────────────────
+                 SUREFIRE (Test Runner)
+            ────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- ──────────────────────────────────────────────────
+                 JACOCO (Code Coverage Measurement)
+                 Genera reporte de cobertura en: target/site/jacoco/
+                 Requisito mínimo: 80% de cobertura
+            ────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <!-- PREPARE-AGENT: Prepara el agente JaCoCo -->
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- REPORT: Genera reporte HTML después de tests -->
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <!-- CHECK: Verifica cobertura mínima (FAIL si < 80%) -->
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <excludes>
+                                        <exclude>*Test</exclude>
+                                    </excludes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${coverage.ratio}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ──────────────────────────────────────────────────
+                 SPRING BOOT MAVEN PLUGIN
+                 Crea JAR ejecutable y permite: mvn spring-boot:run
+            ────────────────────────────────────────────────────── -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.4</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -118,9 +265,101 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ──────────────────────────────────────────────────
+                 FAT-JAR (Maven Assembly) - Alternativa a Spring Boot
+            ────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.swo.SwoApiApplication</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
                 </configuration>
             </plugin>
+
+            <!-- ──────────────────────────────────────────────────
+                 SITE (Maven Site Generator)
+                 Genera documentación en: target/site/
+            ────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>4.0.0-M13</version>
+            </plugin>
+
         </plugins>
     </build>
 
-</project>
+    <!-- ─────────────────────────────────────────────────────────
+         PERFILES (Profiles) para diferentes ambientes
+    ───────────────────────────────────────────────────────────── -->
+    <profiles>
+        <!-- PERFIL: development (mvn clean install -P dev) -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <maven.test.skip>false</maven.test.skip>
+                <coverage.ratio>0.70</coverage.ratio>
+            </properties>
+        </profile>
+
+        <!-- PERFIL: test (mvn clean test -P test-coverage) -->
+        <profile>
+            <id>test-coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- PERFIL: production (mvn clean package -P prod) -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <maven.test.skip>false</maven.test.skip>
+                <coverage.ratio>0.80</coverage.ratio>
+            </properties>
+        </profile>
+    </profiles>

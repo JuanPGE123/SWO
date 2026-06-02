@@ -7,8 +7,23 @@
     "start": "ng serve",
     "build": "ng build",
     "build:prod": "ng build --configuration production --base-href /SWO/",
+    "build:prod:stats": "ng build --configuration production --stats-json && webpack-bundle-analyzer dist/swo-servicedesk/stats.json",
+    "build:analyze": "npm run build:prod:stats",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:coverage": "ng test --no-watch --code-coverage --browsers=ChromeHeadless",
+    "test:ci": "ng test --watch=false --code-coverage --browsers=ChromeHeadless --reporters=junit",
+    "e2e": "ng e2e",
+    "e2e:headless": "ng e2e --headless --browsers=chrome",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "serve:prod": "http-server -c-1 -o -p 8000 -g dist/swo-servicedesk/",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "prestart": "npm run lint",
+    "prebuild": "npm run lint",
+    "prebuild:prod": "npm run lint",
+    "pretest": "npm run lint"
   },
   "private": true,
   "dependencies": {
@@ -30,7 +45,20 @@
     "@angular-devkit/build-angular": "^17.0.0",
     "@angular/cli": "^17.0.0",
     "@angular/compiler-cli": "^17.0.0",
+    "@types/jasmine": "~5.1.0",
     "@types/node": "^20.0.0",
-    "typescript": "~5.2.0"
+    "jasmine-core": "~5.1.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "karma-junit-reporter": "~2.0.1",
+    "typescript": "~5.2.0",
+    "@cypress/webpack-dev-server": "^20.5.0",
+    "cypress": "^13.6.0",
+    "@playwright/test": "^1.40.0",
+    "http-server": "^14.1.1",
+    "webpack-bundle-analyzer": "^4.10.0"
   }
 }

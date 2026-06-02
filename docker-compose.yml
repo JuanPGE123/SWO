@@ -1,0 +1,217 @@
+version: '3.9'
+
+# ════════════════════════════════════════════════════════════════════════════════
+# DOCKER COMPOSE - ORQUESTACIÓN COMPLETA DE SWO
+# ════════════════════════════════════════════════════════════════════════════════
+#
+# SERVICIOS:
+#   1. db           - MySQL 8.0 (Base de datos)
+#   2. backend      - Spring Boot 3.2.4 (API REST)
+#   3. frontend     - Nginx + Angular 17 (Interfaz web)
+#   4. phpmyadmin   - PHPMyAdmin (Gestión BD - opcional para desarrollo)
+#
+# COMANDOS:
+#   docker-compose -f docker-compose.yml up -d          # Iniciar todos
+#   docker-compose logs -f backend                       # Ver logs Backend
+#   docker-compose down -v                              # Detener y limpiar volúmenes
+#   docker-compose ps                                   # Ver estado
+#
+# ════════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # BASE DE DATOS: MySQL 8.0
+  # ────────────────────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0.35
+    container_name: swo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-swo_prod}
+      MYSQL_USER: ${DB_USER:-swo_prod}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-swo_prod_password}
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_INITDB_SKIP_TZINFO: 'yes'
+    volumes:
+      # Persistencia de datos
+      - db_data:/var/lib/mysql
+      # Script de inicialización
+      - ./java/swo_database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      # Configuración custom de MySQL
+      - ./mysql.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - swo_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --max_connections=1000
+      --max_allowed_packet=256M
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --log-error=/var/log/mysql/error.log
+      --general-log=1
+      --general-log-file=/var/log/mysql/general.log
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # BACKEND: Spring Boot API REST
+  # ────────────────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-backend
+      cache_from:
+        - maven:3.9.4-eclipse-temurin-17
+    container_name: swo-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Configuración de Spring Boot
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-swo_prod}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-swo_prod}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-swo_prod_password}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      SPRING_SERVER_PORT: 8080
+      SPRING_SERVER_SERVLET_CONTEXT_PATH: /api
+      # JVM Options
+      JAVA_OPTS: -Xmx512m -Xms256m -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+      # Logging
+      LOGGING_LEVEL_ROOT: WARN
+      LOGGING_LEVEL_COM_SWO: INFO
+    volumes:
+      # Logs
+      - ./logs/backend:/var/log/swo
+      # Certificados (opcional para HTTPS)
+      - ./certificates:/app/certificates:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - swo_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # FRONTEND: Nginx + Angular
+  # ────────────────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-frontend
+      cache_from:
+        - node:18-alpine
+    container_name: swo-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      # Configuración de Nginx
+      - ./nginx.conf:/etc/nginx/sites-available/default:ro
+      # Logs
+      - ./logs/frontend:/var/log/swo
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - swo_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # PHPMYADMIN: Administración de Base de Datos (SOLO DESARROLLO)
+  # ────────────────────────────────────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:5.2.1-apache
+    container_name: swo-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USER:-swo_prod}
+      PMA_PASSWORD: ${DB_PASSWORD:-swo_prod_password}
+      PMA_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+    ports:
+      - "8888:80"
+    networks:
+      - swo_network
+    profiles:
+      - dev
+      - debug
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+# ════════════════════════════════════════════════════════════════════════════════
+# VOLÚMENES (Persistencia de datos)
+# ════════════════════════════════════════════════════════════════════════════════
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+
+# ════════════════════════════════════════════════════════════════════════════════
+# RED (Comunicación entre contenedores)
+# ════════════════════════════════════════════════════════════════════════════════
+networks:
+  swo_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ════════════════════════════════════════════════════════════════════════════════
+# ARCHIVOS ENV REQUERIDOS
+# ════════════════════════════════════════════════════════════════════════════════
+# Crear archivo .env en raíz del proyecto:
+#
+# DB_ROOT_PASSWORD=rootpassword123
+# DB_NAME=swo_prod
+# DB_USER=swo_prod
+# DB_PASSWORD=swo_prod_password456
+#
+# Luego ejecutar: docker-compose --env-file .env up -d
+# ════════════════════════════════════════════════════════════════════════════════
