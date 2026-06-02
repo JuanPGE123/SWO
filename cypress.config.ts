@@ -75,14 +75,4 @@ export default defineConfig({
     }
   },
   
-  // ────────────────────────────────────────────────────────────────────
-  // CONFIGURACIÓN GLOBAL (component & e2e)
-  // ────────────────────────────────────────────────────────────────────
-  component: {
-    devServer: {
-      framework: "angular",
-      bundler: "webpack"
-    },
-    specPattern: "src/**/*.cy.ts"
-  }
 });
