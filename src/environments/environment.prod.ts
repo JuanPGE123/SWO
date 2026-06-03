@@ -43,12 +43,12 @@ export const environment = {
    * - Servidor remoto: 'https://api.swo.empresa.com/api'
    * - Azure: 'https://swo-backend.azurewebsites.net/api'
    */
-  apiUrl: 'http://localhost:8080/SWO/api', // ⚠️ ACTUALIZAR ANTES DE DEPLOY
+  apiUrl: 'https://swo-production.up.railway.app/api',
 
   /**
    * URL base de la aplicación frontend en producción
    */
-  appUrl: 'http://localhost/SWO', // ⚠️ ACTUALIZAR ANTES DE DEPLOY
+  appUrl: 'https://juanpge123.github.io/SWO',
 
   /**
    * Configuración de logging
