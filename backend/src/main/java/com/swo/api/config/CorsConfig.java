@@ -24,9 +24,11 @@ public class CorsConfig {
 
         // ── Orígenes permitidos ──────────────────────────────────────────────
         config.setAllowedOrigins(List.of(
-                "http://localhost:4200",    // Angular dev server
-                "http://localhost:8080",    // Legacy Servlet module
-                "http://127.0.0.1:4200"
+                "http://localhost:4200",
+                "http://localhost:8080",
+                "http://127.0.0.1:4200",
+                "https://juanpge123.github.io",
+                "https://swo-production.up.railway.app"
         ));
 
         // ── Métodos HTTP permitidos ──────────────────────────────────────────
