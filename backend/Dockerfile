@@ -9,7 +9,8 @@ COPY backend/pom.xml .
 RUN mvn dependency:go-offline -q
 
 COPY backend/src ./src
-RUN mvn clean package -DskipTests -q
+RUN mvn clean package -Dmaven.test.skip=true -Djacoco.skip=true
+RUN ls -la target/*.jar
 
 # ─────────────────────────────────────────────────────
 # STAGE 2: Runtime mínimo
