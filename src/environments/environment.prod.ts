@@ -43,7 +43,7 @@ export const environment = {
    * - Servidor remoto: 'https://api.swo.empresa.com/api'
    * - Azure: 'https://swo-backend.azurewebsites.net/api'
    */
-  apiUrl: 'https://swo-production.up.railway.app/api',
+  apiUrl: 'https://swo-production.up.railway.app/api/v1',
 
   /**
    * URL base de la aplicación frontend en producción
