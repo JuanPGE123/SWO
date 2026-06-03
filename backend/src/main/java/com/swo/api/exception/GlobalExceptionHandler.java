@@ -150,8 +150,10 @@ public class GlobalExceptionHandler {
             Exception ex, HttpServletRequest request) {
 
         log.error("[500] Error interno en {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        // Mensaje detallado temporal para diagnóstico en producción
+        String detalle = ex.getClass().getSimpleName() + ": " +
+                (ex.getMessage() != null ? ex.getMessage().substring(0, Math.min(ex.getMessage().length(), 300)) : "null");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500,
-                        "Error interno del servidor. Contacte al administrador del sistema."));
+                .body(ApiResponse.error(500, detalle));
     }
 }
