@@ -633,15 +633,15 @@ export class IncidentsService {
     
     if (!idUsuario) {
       if (usuario) {
-        // Si el usuario es master, usar ID 23 (admin de la BD)
         if (usuario.id === 'USR-MASTER') {
-          idUsuario = 23;
+          // Admin master: usar ID guardado en sesión o fallback 1
+          const stored = parseInt(sessionStorage.getItem('adminBackendId') || '1', 10);
+          idUsuario = stored > 0 ? stored : 1;
         } else {
           idUsuario = parseInt(usuario.id, 10);
         }
       } else {
-        // Si no hay usuario, usar ID 23 (admin) como fallback
-        idUsuario = 23;
+        idUsuario = 1;
       }
     }
 
