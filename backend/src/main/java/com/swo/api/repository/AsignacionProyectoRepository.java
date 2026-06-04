@@ -1,6 +1,7 @@
 package com.swo.api.repository;
 
 import com.swo.api.model.entity.AsignacionProyecto;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +25,9 @@ public interface AsignacionProyectoRepository extends JpaRepository<AsignacionPr
      * @param idProyecto ID del proyecto
      * @return Lista de asignaciones del proyecto
      */
-    List<AsignacionProyecto> findByProyecto_IdProyecto(Long idProyecto);
+    @EntityGraph(attributePaths = {"usuario"})
+    @Query("SELECT a FROM AsignacionProyecto a WHERE a.proyecto.idProyecto = :idProyecto")
+    List<AsignacionProyecto> findByProyecto_IdProyecto(@Param("idProyecto") Long idProyecto);
 
     /**
      * Busca todas las asignaciones de un usuario específico.

@@ -39,10 +39,11 @@ public class IncidenciaController {
     public ResponseEntity<ApiResponse<Page<IncidenciaResponseDTO>>> listarTodas(
             @Parameter(description = "Número de página (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Cantidad de registros por página", example = "10")
+            @Parameter(description = "Cantidad de registros por página (máx. 500)", example = "10")
             @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").descending());
+        int safeSize = Math.min(Math.max(size, 1), 500);
+        Pageable pageable = PageRequest.of(page, safeSize, Sort.by("fechaCreacion").descending());
         return ResponseEntity.ok(ApiResponse.ok(incidenciaService.listarTodas(pageable)));
     }
 

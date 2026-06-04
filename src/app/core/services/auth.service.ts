@@ -241,40 +241,35 @@ export class AuthService {
       // 2. AUTENTICACIÓN NORMAL CONTRA BACKEND
       // ─────────────────────────────────────────────────────────────────────
       
-      // Preparar datos en formato application/x-www-form-urlencoded
-      const params = new HttpParams()
-        .set('correo', credenciales.email.trim())
-        .set('password', credenciales.password);
-
-      // Realizar petición POST al endpoint de login
-      this.http.post<LoginResponse>(`${environment.apiUrl}/login`, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).pipe(
-        // Transformar respuesta del backend a booleano
-        map(resp => {
-          if (resp && resp.success) {
-            // Login exitoso: crear objeto UsuarioAutenticado
+      // Enviar credenciales como JSON al nuevo AuthController
+      this.http.post<any>(`${environment.apiUrl}/login`, {
+        correo:   credenciales.email.trim(),
+        password: credenciales.password
+      }, { headers: { 'Content-Type': 'application/json' } }).pipe(
+        map(response => {
+          // El backend retorna ApiResponse<Map> — extraer data
+          const resp = response?.data ?? response;
+          if (resp && resp.success !== false) {
             const usuario: UsuarioAutenticado = {
-              id: String(resp.id),
-              nombre: resp.nombre || '',
-              apellido: '',
-              correo: resp.correo || credenciales.email,
-              celular: '',
-              area: resp.departamento || 'TI',
+              id:          String(resp.id ?? ''),
+              nombre:      resp.nombre ?? '',
+              apellido:    '',
+              correo:      resp.correo ?? credenciales.email,
+              celular:     resp.telefono ?? '',
+              area:        resp.departamento ?? 'TI',
               jefeDirecto: '',
-              correoJefe: '',
-              role: resp.rol || RolUsuario.USUARIO,
-              token: resp.token,
-              idProyecto: resp.idProyecto,
-              proyecto: resp.proyecto || '',
+              correoJefe:  '',
+              role:        resp.rol ?? RolUsuario.USUARIO,
+              token:       resp.token,
+              idProyecto:  resp.idProyecto,
+              proyecto:    resp.proyecto ?? '',
             };
-
             this.establecerSesion(usuario);
+            // Guardar ID real para incidencias
+            sessionStorage.setItem('adminBackendId', String(resp.id ?? '1'));
             return true;
-          } else {
-            // Respuesta del servidor indica fallo
-            return false;
           }
+          return false;
         }),
         // Manejar errores HTTP
         catchError(httpErr => {

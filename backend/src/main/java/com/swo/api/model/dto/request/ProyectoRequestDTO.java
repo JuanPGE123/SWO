@@ -3,12 +3,9 @@ package com.swo.api.model.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
 /**
  * DTO para recibir datos al crear o actualizar un Proyecto.
- * Incluye validaciones de Bean Validation.
+ * Campos alineados con la entidad Proyecto (nombre, descripcion, estado).
  */
 @Data
 public class ProyectoRequestDTO {
@@ -20,18 +17,7 @@ public class ProyectoRequestDTO {
     @Size(max = 2000, message = "La descripción no puede exceder 2000 caracteres")
     private String descripcion;
 
-    private LocalDate fechaInicio;
-
-    private LocalDate fechaFin;
-
-    @Pattern(regexp = "Activo|En Pausa|Completado|Cancelado", 
+    @Pattern(regexp = "Activo|En Pausa|Completado|Cancelado",
              message = "Estado debe ser: Activo, En Pausa, Completado o Cancelado")
     private String estado;
-
-    @DecimalMin(value = "0.0", message = "El presupuesto no puede ser negativo")
-    private BigDecimal presupuesto;
-
-    @Pattern(regexp = "Baja|Media|Alta|Crítica", 
-             message = "Prioridad debe ser: Baja, Media, Alta o Crítica")
-    private String prioridad;
 }
