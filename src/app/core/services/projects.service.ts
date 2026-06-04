@@ -68,15 +68,18 @@ export class ProjectsService {
    * Carga todos los proyectos desde el backend
    */
   cargarDesdeBackend(): void {
-    this.http.get<any[]>(`${this.apiUrl}/proyectos`)
+    this.http.get<any>(`${this.apiUrl}/proyectos`)
       .pipe(
-        map(data => data.map(p => ({
-          id: p.id,
-          nombre: p.nombre || '',
-          descripcion: p.descripcion || '',
-          estado: p.estado || 'Activo',
-          fechaCreacion: p.fechaCreacion || ''
-        }))),
+        map(response => {
+          const lista = response?.data ?? response ?? [];
+          return (Array.isArray(lista) ? lista : []).map((p: any) => ({
+            id: p.idProyecto ?? p.id,
+            nombre: p.nombreProyecto ?? p.nombre ?? '',
+            descripcion: p.descripcion ?? '',
+            estado: p.estado ?? 'Activo',
+            fechaCreacion: p.fechaCreacion ?? ''
+          }));
+        }),
         catchError(error => {
           console.warn('⚠️ Backend no disponible al cargar proyectos');
           return throwError(() => error);
@@ -253,9 +256,10 @@ export class ProjectsService {
 
     // Enviar al backend
     return new Observable(observer => {
-      this.http.post<any>(`${this.apiUrl}/proyectos`, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).pipe(
+      this.http.post<any>(`${this.apiUrl}/proyectos`,
+        { nombreProyecto: datos.nombre, descripcion: datos.descripcion, estado: datos.estado ?? 'Activo' },
+        { headers: { 'Content-Type': 'application/json' } }
+      ).pipe(
         catchError(error => this.sharedService.manejarErrorHttp(error, 'Crear proyecto'))
       ).subscribe({
         next: (resp) => {
@@ -363,9 +367,10 @@ export class ProjectsService {
       .set('idProyecto', String(idProyecto));
 
     return new Observable(observer => {
-      this.http.post<any>(`${this.apiUrl}/proyectos/asignar`, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).pipe(
+      this.http.post<any>(`${this.apiUrl}/proyectos/asignar-usuario`,
+        { idUsuario: idUsuario, idProyecto: idProyecto },
+        { headers: { 'Content-Type': 'application/json' } }
+      ).pipe(
         catchError(error => this.sharedService.manejarErrorHttp(error, 'Asignar usuario a proyecto'))
       ).subscribe({
         next: (resp) => {

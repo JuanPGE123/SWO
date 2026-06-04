@@ -85,9 +85,12 @@ export class UsersService {
    * Carga todos los usuarios desde el backend y actualiza el estado reactivo
    */
   cargarDesdeBackend(): void {
-    this.http.get<any[]>(`${this.apiUrl}/usuarios`)
+    this.http.get<any>(`${this.apiUrl}/usuarios`)
       .pipe(
-        map(data => data.map(u => this.mapearUsuario(u))),
+        map(response => {
+          const lista = response?.data ?? response ?? [];
+          return (Array.isArray(lista) ? lista : []).map((u: any) => this.mapearUsuario(u));
+        }),
         catchError(error => {
           console.warn('⚠️ Backend no disponible al cargar usuarios');
           return throwError(() => error);
@@ -119,20 +122,20 @@ export class UsersService {
    * @private
    */
   private mapearUsuario(u: any): Usuario {
-    const nombreCompleto: string = u.nombre || '';
+    const nombreCompleto: string = u.nombreCompleto ?? u.nombre ?? '';
     const espacio = nombreCompleto.indexOf(' ');
     const nombre = espacio > 0 ? nombreCompleto.substring(0, espacio).trim() : nombreCompleto;
     const apellido = espacio > 0 ? nombreCompleto.substring(espacio + 1).trim() : '';
-    
+
     return {
-      id: String(u.id),
+      id: String(u.idUsuario ?? u.id),
       nombre,
       apellido,
-      correo: u.correo || '',
-      celular: u.telefono || '',
-      area: u.departamento || 'Sin área',
-      jefeDirecto: u.jefeDirecto || '',
-      correoJefe: u.correoJefe || ''
+      correo: u.correo ?? '',
+      celular: u.telefono ?? '',
+      area: u.departamento ?? 'Sin área',
+      jefeDirecto: u.jefeDirecto ?? '',
+      correoJefe: u.correoJefe ?? ''
     };
   }
 
@@ -427,9 +430,14 @@ export class UsersService {
 
     // 3. Enviar al backend
     return new Observable(observer => {
-      this.http.post<any>(`${this.apiUrl}/usuarios`, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).pipe(
+      this.http.post<any>(`${this.apiUrl}/usuarios`, {
+        nombreCompleto: datos.nombre,
+        correo: datos.correo,
+        password: datos.password,
+        rol: datos.rol,
+        telefono: datos.telefono || '',
+        departamento: datos.departamento || ''
+      }, { headers: { 'Content-Type': 'application/json' } }).pipe(
         catchError(error => this.sharedService.manejarErrorHttp(error, 'Crear usuario'))
       ).subscribe({
         next: (resp) => {

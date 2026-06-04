@@ -218,9 +218,13 @@ export class IncidentsService {
    * @returns void (actualiza el BehaviorSubject autom�ticamente)
    */
   cargarDesdeBackend(): void {
-    this.http.get<any[]>(`${this.apiUrl}/incidencias`)
+    this.http.get<any>(`${this.apiUrl}/incidencias`)
       .pipe(
-        map(datos => datos.map(d => this.mapearDesdeDB(d))),
+        map(response => {
+          const pageData = response?.data;
+          const lista = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
+          return lista.map((d: any) => this.mapearDesdeDB(d));
+        }),
         catchError(error => {
           console.warn('?? Backend no disponible, usando datos locales');
           return throwError(() => error);
@@ -656,9 +660,15 @@ export class IncidentsService {
 
     // 4. Intentar guardar en el backend
     return new Observable(observer => {
-      this.http.post<any>(`${this.apiUrl}/incidencias`, params.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }).subscribe({
+      this.http.post<any>(`${this.apiUrl}/incidencias`, {
+        titulo: datos.titulo,
+        descripcion: datos.descripcion,
+        estado: datos.estado || 'Abierto',
+        impacto: datos.impacto || 'Medio',
+        ubicacion: datos.ubicacion || 'SWO',
+        idUsuarioReporta: idUsuario,
+        idUsuarioAsignado: datos.idUsuarioAsignado || null
+      }, { headers: { 'Content-Type': 'application/json' } }).subscribe({
         next: (resp) => {
           // �xito: recargar desde backend y registrar en historial
           this.cargarDesdeBackend();
