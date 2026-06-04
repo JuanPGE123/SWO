@@ -116,9 +116,14 @@ export class ProjectsComponent implements OnInit {
     this.idProyectoSeleccionado = idProyecto;
     this.idUsuarioSeleccionado = 0;
     this.mostrarAsignar = true;
-    this.http.get<any[]>(`${environment.apiUrl}/usuarios`).subscribe({
-      next: (data) => {
-        this.usuarios = data.map(u => ({ id: u.id, nombre: u.nombre, proyecto: u.proyecto || '' }));
+    this.http.get<any>(`${environment.apiUrl}/usuarios`).subscribe({
+      next: (response) => {
+        const lista = response?.data ?? response ?? [];
+        this.usuarios = (Array.isArray(lista) ? lista : []).map((u: any) => ({
+          id: u.idUsuario ?? u.id,
+          nombre: u.nombreCompleto ?? u.nombre ?? '',
+          proyecto: u.proyecto || ''
+        }));
       },
       error: () => { this.usuarios = []; }
     });

@@ -123,12 +123,18 @@ export class UsersComponent implements OnInit {
 
   /** Abre el modal de nuevo usuario, reinicia el formulario y carga la lista de proyectos disponibles. */
   abrirModal(): void {
-    this.nuevoUsuario = { nombre: '', correo: '', password: '123456', rol: 'Usuario', telefono: '', departamento: '', idProyecto: 0 };
+    this.nuevoUsuario = { nombre: '', correo: '', password: '12345678', rol: 'Usuario', telefono: '', departamento: '', idProyecto: 0 };
     this.mostrarModal = true;
-    // Cargar proyectos disponibles
     this.cargandoProyectos = true;
-    this.http.get<any[]>(`${environment.apiUrl}/proyectos`).subscribe({
-      next: (data) => { this.proyectos = data.map(p => ({ id: p.id, nombre: p.nombre })); this.cargandoProyectos = false; },
+    this.http.get<any>(`${environment.apiUrl}/proyectos`).subscribe({
+      next: (response) => {
+        const lista = response?.data ?? response ?? [];
+        this.proyectos = (Array.isArray(lista) ? lista : []).map((p: any) => ({
+          id: p.idProyecto ?? p.id,
+          nombre: p.nombreProyecto ?? p.nombre ?? ''
+        }));
+        this.cargandoProyectos = false;
+      },
       error: () => { this.proyectos = []; this.cargandoProyectos = false; }
     });
   }
