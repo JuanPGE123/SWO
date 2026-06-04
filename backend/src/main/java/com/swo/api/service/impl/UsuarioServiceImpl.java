@@ -5,6 +5,8 @@ import com.swo.api.exception.ResourceNotFoundException;
 import com.swo.api.model.dto.request.UsuarioRequestDTO;
 import com.swo.api.model.dto.response.UsuarioResponseDTO;
 import com.swo.api.model.entity.Usuario;
+import com.swo.api.repository.AsignacionProyectoRepository;
+import com.swo.api.repository.IncidenciaRepository;
 import com.swo.api.repository.UsuarioRepository;
 import com.swo.api.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final UsuarioRepository             usuarioRepository;
+    private final AsignacionProyectoRepository  asignacionProyectoRepository;
+    private final IncidenciaRepository          incidenciaRepository;
+    private final BCryptPasswordEncoder         passwordEncoder;
 
     // ── Lectura ─────────────────────────────────────────────────────────────
 
@@ -137,7 +141,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (!usuarioRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuario no encontrado con ID: " + id);
         }
+        // 1. Eliminar asignaciones a proyectos
+        asignacionProyectoRepository.deleteByUsuario_IdUsuario(id);
+        // 2. Eliminar incidencias reportadas por el usuario
+        incidenciaRepository.deleteByUsuarioReporta_IdUsuario(id);
+        // 3. Eliminar el usuario
         usuarioRepository.deleteById(id);
+        log.info("Usuario ID {} eliminado junto con sus registros relacionados", id);
     }
 
     // ── Helpers privados ─────────────────────────────────────────────────────

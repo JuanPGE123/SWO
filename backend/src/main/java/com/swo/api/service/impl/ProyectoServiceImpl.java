@@ -92,11 +92,15 @@ public class ProyectoServiceImpl implements ProyectoService {
     }
 
     @Override
+    @Transactional
     public void eliminar(Long id) {
         if (!proyectoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Proyecto no encontrado con ID: " + id);
         }
+        // Eliminar asignaciones antes de eliminar el proyecto (evita FK constraint)
+        asignacionProyectoRepository.deleteByProyecto_IdProyecto(id);
         proyectoRepository.deleteById(id);
+        log.info("Proyecto ID {} eliminado junto con sus asignaciones", id);
     }
 
     @Override

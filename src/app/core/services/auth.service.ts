@@ -225,7 +225,7 @@ export class AuthService {
 
         this.establecerSesion(master);
         // Consultar ID real del admin en el backend para usarlo en incidencias
-        this.http.get<any>(`${environment.apiUrl}/v1/usuarios/correo/admin@swo.com`).subscribe({
+        this.http.get<any>(`${environment.apiUrl}/usuarios/correo/admin@swo.com`).subscribe({
           next: (resp) => {
             const adminId = resp?.data?.idUsuario ?? resp?.idUsuario ?? 1;
             sessionStorage.setItem('adminBackendId', String(adminId));

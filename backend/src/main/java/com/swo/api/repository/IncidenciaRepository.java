@@ -39,4 +39,10 @@ public interface IncidenciaRepository extends JpaRepository<Incidencia, Long> {
     /** Conteo de incidencias agrupadas por estado (para dashboard). */
     @Query("SELECT i.estado, COUNT(i) FROM Incidencia i GROUP BY i.estado")
     List<Object[]> contarPorEstado();
+
+    /** Verifica si un usuario tiene incidencias asociadas. */
+    boolean existsByUsuarioReporta_IdUsuario(Long idUsuario);
+
+    /** Elimina todas las incidencias de un usuario (cascada al eliminar usuario). */
+    void deleteByUsuarioReporta_IdUsuario(Long idUsuario);
 }

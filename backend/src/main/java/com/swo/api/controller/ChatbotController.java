@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador REST para el Chatbot del sistema.
@@ -27,6 +28,25 @@ import java.util.List;
 public class ChatbotController {
 
     private final ChatbotService chatbotService;
+
+    /**
+     * GET /v1/chatbot?q= — Endpoint ligero que el frontend usa para ping y consultas rápidas.
+     * No requiere sesión ni usuario autenticado.
+     */
+    @GetMapping
+    @Operation(summary = "Consulta rápida al chatbot (sin sesión)")
+    public ApiResponse<Map<String, Object>> consultarRapido(
+            @RequestParam(required = false, defaultValue = "") String q) {
+        log.debug("[GET /v1/chatbot] Consulta rápida: {}", q);
+        String respuesta = q.isBlank()
+                ? "Sistema SWO ChatBot disponible. Inicia sesión para una experiencia completa."
+                : "Consulta recibida. Para asistencia personalizada utiliza el chat con sesión iniciada.";
+        return ApiResponse.ok(Map.of(
+                "respuesta",  respuesta,
+                "exito",      true,
+                "tipo",       "rapida"
+        ));
+    }
 
     @PostMapping("/enviar")
     @ResponseStatus(HttpStatus.CREATED)

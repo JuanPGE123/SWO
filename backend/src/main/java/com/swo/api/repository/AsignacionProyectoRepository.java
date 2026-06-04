@@ -63,6 +63,12 @@ public interface AsignacionProyectoRepository extends JpaRepository<AsignacionPr
      */
     void deleteByProyecto_IdProyectoAndUsuario_IdUsuario(Long idProyecto, Long idUsuario);
 
+    /** Elimina todas las asignaciones de un proyecto (para cascada al eliminar proyecto). */
+    void deleteByProyecto_IdProyecto(Long idProyecto);
+
+    /** Elimina todas las asignaciones de un usuario (para cascada al eliminar usuario). */
+    void deleteByUsuario_IdUsuario(Long idUsuario);
+
     /**
      * Cuenta las asignaciones de un proyecto.
      *
