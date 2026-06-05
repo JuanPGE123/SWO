@@ -1,5 +1,4 @@
-<!-- projects.component.html - Gestión de proyectos -->
-
+<!-- projects.component.html -->
 <div class="projects-layout">
   <app-sidebar></app-sidebar>
 
@@ -7,7 +6,7 @@
     <header class="topbar">
       <h1>Gestión de Proyectos</h1>
       <div class="topbar-actions">
-        <button class="btn-action" (click)="cargarProyectos()">Actualizar</button>
+        <button class="btn-action" (click)="cargarProyectos()" title="Actualizar lista">↻ Actualizar</button>
         <button class="btn-action primary" (click)="abrirModal()">+ Nuevo Proyecto</button>
       </div>
     </header>
@@ -19,13 +18,21 @@
           <h4>Total Proyectos</h4>
           <div class="metric-value">{{ proyectos.length }}</div>
         </div>
-        <div class="metric-card">
+        <div class="metric-card active">
           <h4>Activos</h4>
-          <div class="metric-value">{{ proyectos.length }}</div>
+          <div class="metric-value">{{ totalActivos }}</div>
+        </div>
+        <div class="metric-card paused">
+          <h4>En Pausa</h4>
+          <div class="metric-value">{{ totalEnPausa }}</div>
+        </div>
+        <div class="metric-card completed">
+          <h4>Completados</h4>
+          <div class="metric-value">{{ totalCompletados }}</div>
         </div>
       </section>
 
-      <!-- Tabla de proyectos -->
+      <!-- Tabla -->
       <section class="projects-section">
         <div class="section-header">
           <h3>Listado de Proyectos ({{ proyectos.length }})</h3>
@@ -47,21 +54,35 @@
             </thead>
             <tbody>
               <tr *ngFor="let p of proyectos">
-                <td>{{ p.id }}</td>
-                <td><strong>{{ p.nombre }}</strong></td>
-                <td>{{ p.descripcion }}</td>
-                <td><span class="badge" [class.active]="p.estado === 'Activo'" [class.archived]="p.estado !== 'Activo'">{{ p.estado }}</span></td>
-                <td>{{ p.fechaCreacion }}</td>
+                <td class="col-id">{{ p.id }}</td>
+                <td class="col-nombre"><strong>{{ p.nombre }}</strong></td>
+                <td class="col-desc">{{ p.descripcion || '—' }}</td>
+                <td>
+                  <span class="badge"
+                    [class.active]="p.estado === 'Activo'"
+                    [class.paused]="p.estado === 'En Pausa'"
+                    [class.completed]="p.estado === 'Completado'"
+                    [class.cancelled]="p.estado === 'Cancelado'">
+                    {{ p.estado }}
+                  </span>
+                </td>
+                <td>{{ p.fechaCreacion ? (p.fechaCreacion | date:'dd/MM/yyyy') : '—' }}</td>
                 <td class="actions-cell">
-                  <button class="btn-small info" (click)="abrirAsignar(p.id)">👤 Asignar</button>
-                  <button class="btn-small danger" (click)="eliminarProyecto(p.id, p.nombre)">🗑️ Eliminar</button>
+                  <button class="btn-small info" (click)="abrirAsignar(p.id, p.nombre)" title="Asignar usuario">
+                    👤 Asignar
+                  </button>
+                  <button class="btn-small danger" (click)="eliminarProyecto(p.id, p.nombre)" title="Eliminar proyecto">
+                    🗑 Eliminar
+                  </button>
                 </td>
               </tr>
             </tbody>
           </table>
           <ng-template #noProyectos>
             <div class="empty-state">
-              <p>No hay proyectos. Crea el primero con "+ Nuevo Proyecto".</p>
+              <div class="empty-icon">📁</div>
+              <p>No hay proyectos registrados.</p>
+              <button class="btn-action primary" (click)="abrirModal()">+ Crear primer proyecto</button>
             </div>
           </ng-template>
         </div>
@@ -70,7 +91,7 @@
   </main>
 </div>
 
-<!-- Modal Nuevo Proyecto -->
+<!-- ═══════════════ Modal Nuevo Proyecto ═══════════════ -->
 <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -78,21 +99,52 @@
       <button class="btn-close" (click)="cerrarModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Nombre *</label>
-        <input type="text" class="form-input" [(ngModel)]="nuevoProyecto.nombre" placeholder="Plataforma SWO" />
+
+      <!-- Nombre -->
+      <div class="form-group" [class.has-error]="erroresProyecto['nombre']">
+        <label>Nombre del Proyecto <span class="required">*</span></label>
+        <input type="text" class="form-input" [(ngModel)]="nuevoProyecto.nombre"
+          placeholder="Ej: Plataforma SWO Service Desk" maxlength="150" />
+        <span class="field-error" *ngIf="erroresProyecto['nombre']">{{ erroresProyecto['nombre'] }}</span>
+        <span class="field-hint" *ngIf="!erroresProyecto['nombre']">
+          {{ nuevoProyecto.nombre.length }}/150 caracteres
+        </span>
       </div>
-      <div class="form-group">
+
+      <!-- Descripción -->
+      <div class="form-group" [class.has-error]="erroresProyecto['descripcion']">
         <label>Descripción</label>
-        <textarea class="form-input" [(ngModel)]="nuevoProyecto.descripcion" rows="3" placeholder="Descripción del proyecto"></textarea>
+        <textarea class="form-input" [(ngModel)]="nuevoProyecto.descripcion"
+          rows="3" placeholder="Describe el objetivo y alcance del proyecto..." maxlength="2000"></textarea>
+        <span class="field-error" *ngIf="erroresProyecto['descripcion']">{{ erroresProyecto['descripcion'] }}</span>
+        <span class="field-hint" *ngIf="!erroresProyecto['descripcion']">
+          {{ nuevoProyecto.descripcion.length }}/2000 caracteres (opcional)
+        </span>
       </div>
-      <div class="form-group">
-        <label>Estado</label>
-        <select class="form-input" [(ngModel)]="nuevoProyecto.estado">
-          <option value="Activo">Activo</option>
-          <option value="Archivado">Archivado</option>
-        </select>
+
+      <!-- Estado + Jefe de Proyecto -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Estado</label>
+          <select class="form-input" [(ngModel)]="nuevoProyecto.estado">
+            <option *ngFor="let e of estadosProyecto" [value]="e">{{ e }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jefe de Proyecto</label>
+          <select class="form-input" [(ngModel)]="nuevoProyecto.idJefe">
+            <option [value]="0">— Sin jefe asignado —</option>
+            <option *ngFor="let j of jefes" [value]="j.id">
+              {{ j.nombre }} ({{ j.rol }})
+            </option>
+          </select>
+          <span *ngIf="cargandoJefes" class="field-hint">Cargando...</span>
+          <span *ngIf="!cargandoJefes && jefes.length === 0" class="field-hint">
+            No hay usuarios con rol de jefatura disponibles.
+          </span>
+        </div>
       </div>
+
     </div>
     <div class="modal-footer">
       <button class="btn-action" (click)="cerrarModal()">Cancelar</button>
@@ -103,7 +155,7 @@
   </div>
 </div>
 
-<!-- Modal Asignar Usuario -->
+<!-- ═══════════════ Modal Asignar Usuario ═══════════════ -->
 <div class="modal-overlay" *ngIf="mostrarAsignar" (click)="cerrarAsignar()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -111,13 +163,12 @@
       <button class="btn-close" (click)="cerrarAsignar()">✕</button>
     </div>
     <div class="modal-body">
+      <p class="modal-subtitle">Proyecto: <strong>{{ nombreProyectoSeleccionado }}</strong></p>
       <div class="form-group">
-        <label>Selecciona un usuario</label>
+        <label>Selecciona un usuario <span class="required">*</span></label>
         <select class="form-input" [(ngModel)]="idUsuarioSeleccionado">
-          <option [value]="0">-- Seleccionar --</option>
-          <option *ngFor="let u of usuarios" [value]="u.id">
-            {{ u.nombre }} {{ u.proyecto ? '(Proyecto: ' + u.proyecto + ')' : '' }}
-          </option>
+          <option [value]="0">— Seleccionar usuario —</option>
+          <option *ngFor="let u of usuarios" [value]="u.id">{{ u.nombre }}</option>
         </select>
       </div>
     </div>

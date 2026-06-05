@@ -8,10 +8,6 @@ import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * DTO de salida para {@link com.swo.api.model.entity.Usuario}.
- * El campo {@code passwordHash} está EXCLUIDO por seguridad.
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +24,7 @@ public class UsuarioResponseDTO {
     @Schema(description = "Correo electrónico del usuario", example = "carlos.perez@swo.com")
     private String correo;
 
-    @Schema(description = "Rol asignado al usuario", example = "Soporte")
+    @Schema(description = "Rol asignado al usuario", example = "Analista")
     private String rol;
 
     @Schema(description = "Estado activo/inactivo del usuario", example = "true")
@@ -48,4 +44,10 @@ public class UsuarioResponseDTO {
 
     @Schema(description = "Última vez que el usuario inició sesión")
     private LocalDateTime ultimaConexion;
+
+    @Schema(description = "ID del jefe directo del usuario", example = "3")
+    private Long idJefe;
+
+    @Schema(description = "Nombre completo del jefe directo", example = "María González")
+    private String nombreJefe;
 }

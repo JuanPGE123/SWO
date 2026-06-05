@@ -10,11 +10,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-/**
- * Entidad JPA que mapea la tabla {@code usuarios} del esquema {@code swo_db}.
- * <p>
- * Roles válidos: Soporte | Jefe | Usuario | Administrador | Técnico
- */
 @Entity
 @Table(name = "usuarios")
 @EntityListeners(AuditingEntityListener.class)
@@ -37,7 +32,7 @@ public class Usuario {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(name = "rol", nullable = false, length = 20)
+    @Column(name = "rol", nullable = false, length = 30)
     private String rol;
 
     @Column(name = "estado", nullable = false)
@@ -51,6 +46,10 @@ public class Usuario {
 
     @Column(name = "foto_perfil", length = 255)
     private String fotoPerfil;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_jefe")
+    private Usuario jefe;
 
     @CreatedDate
     @Column(name = "fecha_registro", updatable = false)

@@ -3,10 +3,6 @@ package com.swo.api.model.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-/**
- * DTO para recibir datos al crear o actualizar un Proyecto.
- * Campos alineados con la entidad Proyecto (nombre, descripcion, estado).
- */
 @Data
 public class ProyectoRequestDTO {
 
@@ -20,4 +16,6 @@ public class ProyectoRequestDTO {
     @Pattern(regexp = "Activo|En Pausa|Completado|Cancelado",
              message = "Estado debe ser: Activo, En Pausa, Completado o Cancelado")
     private String estado;
+
+    private Long idJefe;
 }

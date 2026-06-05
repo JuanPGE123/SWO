@@ -460,25 +460,9 @@ SWO/
 └── Documento_Arquitectura_SWO.md    # Documento de arquitectura
 ```
 
----
-
-## Documentación Adicional
-
-| Documento | Descripción |
-|-----------|-------------|
-| [MANUAL_TECNICO.md](MANUAL_TECNICO.md) | Configuración de servidores, BD y ambientes |
-| [INFORME_PRUEBAS.md](INFORME_PRUEBAS.md) | Resultados de pruebas unitarias, integración y E2E |
-| [Documento_Arquitectura_SWO.md](Documento_Arquitectura_SWO.md) | Arquitectura completa, patrones y decisiones de diseño |
-| [Swagger UI](http://localhost:8080/api/swagger-ui.html) | Documentación interactiva de la API REST |
-
----
-
 ## Autores
 
 | Nombre | Rol |
 |--------|-----|
 | Juan Pablo Giraldo | Desarrollador Full Stack |
 
-**Institución:** SENA — Servicio Nacional de Aprendizaje  
-**Programa:** Tecnología en Análisis y Desarrollo de Software  
-**Año:** 2026

@@ -1,8 +1,4 @@
-<!--
-  users.component.html
-  Gestión de usuarios
--->
-
+<!-- users.component.html -->
 <div class="users-layout">
   <app-sidebar></app-sidebar>
 
@@ -10,19 +6,14 @@
     <header class="topbar">
       <h1>Gestión de Usuarios</h1>
       <div class="topbar-actions">
-        <input 
-          type="text" 
-          class="search-input" 
-          placeholder="Buscar usuarios"
-          [(ngModel)]="busqueda"
-          (change)="onBusquedaChange()"
-        />
+        <input type="text" class="search-input" placeholder="Buscar por nombre o correo..."
+          [(ngModel)]="busqueda" (input)="onBusquedaChange()" />
         <select [(ngModel)]="areaFiltro" (change)="onAreaChange()" class="filter-select">
           <option value="all">Todas las áreas</option>
           <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
         </select>
-        <button class="btn-action" (click)="cargarUsuarios()">Actualizar</button>
-        <button class="btn-action" (click)="exportar()">Exportar</button>
+        <button class="btn-action" (click)="cargarUsuarios()" title="Actualizar lista">↻ Actualizar</button>
+        <button class="btn-action" (click)="exportar()" title="Exportar CSV">⬇ Exportar</button>
         <button class="btn-action primary" (click)="abrirModal()">+ Nuevo Usuario</button>
       </div>
     </header>
@@ -59,8 +50,7 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
+                <th>Nombre Completo</th>
                 <th>Correo</th>
                 <th>Celular</th>
                 <th>Área</th>
@@ -70,16 +60,25 @@
             </thead>
             <tbody>
               <tr *ngFor="let usr of usuariosFiltrados">
-                <td>{{ usr.id }}</td>
-                <td>{{ usr.nombre }}</td>
-                <td>{{ usr.apellido }}</td>
-                <td>{{ usr.correo }}</td>
-                <td>{{ usr.celular }}</td>
-                <td><span class="area-badge">{{ usr.area }}</span></td>
-                <td>{{ usr.jefeDirecto }}</td>
-                <td>
-                  <button class="btn-small danger" title="Eliminar" (click)="eliminarUsuario(usr.id, usr.nombre)">🗑️ Eliminar</button>
+                <td class="col-id">{{ usr.id }}</td>
+                <td class="col-nombre">{{ usr.nombre }} {{ usr.apellido }}</td>
+                <td class="col-correo">{{ usr.correo }}</td>
+                <td>{{ usr.celular || '—' }}</td>
+                <td><span class="area-badge">{{ usr.area || '—' }}</span></td>
+                <td>{{ usr.jefeDirecto || '—' }}</td>
+                <td class="actions-cell">
+                  <button class="btn-small warn" title="Cambiar contraseña"
+                    (click)="abrirCambiarPassword(usr.id, usr.nombre + ' ' + usr.apellido)">
+                    🔑 Cambiar Clave
+                  </button>
+                  <button class="btn-small danger" title="Eliminar usuario"
+                    (click)="eliminarUsuario(usr.id, usr.nombre + ' ' + usr.apellido)">
+                    🗑 Eliminar
+                  </button>
                 </td>
+              </tr>
+              <tr *ngIf="usuariosFiltrados.length === 0">
+                <td colspan="7" class="empty-row">No se encontraron usuarios.</td>
               </tr>
             </tbody>
           </table>
@@ -89,60 +88,99 @@
   </main>
 </div>
 
-<!-- Modal Nuevo Usuario -->
+<!-- ═══════════════ Modal Nuevo Usuario ═══════════════ -->
 <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card modal-wide" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Nuevo Usuario</h3>
       <button class="btn-close" (click)="cerrarModal()">✕</button>
     </div>
+
     <div class="modal-body">
+      <!-- Fila 1: Nombre + Correo -->
       <div class="form-row">
-        <div class="form-group">
-          <label>Nombre Completo *</label>
-          <input type="text" class="form-input" [(ngModel)]="nuevoUsuario.nombre" placeholder="Juan Pérez" />
+        <div class="form-group" [class.has-error]="erroresForm['nombre']">
+          <label>Nombre Completo <span class="required">*</span></label>
+          <input type="text" class="form-input" [(ngModel)]="nuevoUsuario.nombre"
+            placeholder="Ej: Carlos Andrés Pérez" maxlength="100" />
+          <span class="field-error" *ngIf="erroresForm['nombre']">{{ erroresForm['nombre'] }}</span>
+          <span class="field-hint" *ngIf="!erroresForm['nombre']">Solo letras y espacios, mínimo 3 caracteres</span>
         </div>
-        <div class="form-group">
-          <label>Correo *</label>
-          <input type="email" class="form-input" [(ngModel)]="nuevoUsuario.correo" placeholder="correo@empresa.com" />
+        <div class="form-group" [class.has-error]="erroresForm['correo']">
+          <label>Correo Electrónico <span class="required">*</span></label>
+          <input type="email" class="form-input" [(ngModel)]="nuevoUsuario.correo"
+            placeholder="usuario@empresa.com" maxlength="100" />
+          <span class="field-error" *ngIf="erroresForm['correo']">{{ erroresForm['correo'] }}</span>
         </div>
       </div>
+
+      <!-- Fila 2: Contraseña + Confirmar -->
+      <div class="form-row">
+        <div class="form-group" [class.has-error]="erroresForm['password']">
+          <label>Contraseña <span class="required">*</span></label>
+          <input type="password" class="form-input" [(ngModel)]="nuevoUsuario.password"
+            placeholder="Mínimo 8 caracteres" />
+          <span class="field-error" *ngIf="erroresForm['password']">{{ erroresForm['password'] }}</span>
+        </div>
+        <div class="form-group" [class.has-error]="erroresForm['confirmarPassword']">
+          <label>Confirmar Contraseña <span class="required">*</span></label>
+          <input type="password" class="form-input" [(ngModel)]="nuevoUsuario.confirmarPassword"
+            placeholder="Repite la contraseña" />
+          <span class="field-error" *ngIf="erroresForm['confirmarPassword']">{{ erroresForm['confirmarPassword'] }}</span>
+        </div>
+      </div>
+
+      <!-- Fila 3: Rol + Jefe Directo -->
       <div class="form-row">
         <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" class="form-input" [(ngModel)]="nuevoUsuario.password" placeholder="••••••" />
-        </div>
-        <div class="form-group">
-          <label>Rol</label>
+          <label>Rol <span class="required">*</span></label>
           <select class="form-input" [(ngModel)]="nuevoUsuario.rol">
-            <option value="Analista">Analista</option>
-            <option value="Desarrollador">Desarrollador</option>
-            <option value="Mesa de Servicio">Mesa de Servicio</option>
-            <option value="Soporte">Soporte</option>
-            <option value="Jefe">Jefe</option>
-            <option value="Administrador">Administrador</option>
+            <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Jefe Directo</label>
+          <select class="form-input" [(ngModel)]="nuevoUsuario.idJefe">
+            <option [value]="0">— Sin jefe asignado —</option>
+            <option *ngFor="let j of jefes" [value]="j.id">
+              {{ j.nombre }} ({{ j.rol }})
+            </option>
+          </select>
+          <span *ngIf="cargandoJefes" class="field-hint">Cargando jefes...</span>
+          <span *ngIf="!cargandoJefes && jefes.length === 0" class="field-hint">
+            No hay jefes disponibles. Primero crea un usuario con rol Jefe, Administrador, Gerente o Coordinador.
+          </span>
+        </div>
       </div>
+
+      <!-- Fila 4: Teléfono + Departamento -->
       <div class="form-row">
-        <div class="form-group">
+        <div class="form-group" [class.has-error]="erroresForm['telefono']">
           <label>Teléfono</label>
-          <input type="text" class="form-input" [(ngModel)]="nuevoUsuario.telefono" placeholder="+57 300 000 0000" />
+          <input type="text" class="form-input" [(ngModel)]="nuevoUsuario.telefono"
+            placeholder="+573001234567" maxlength="15" />
+          <span class="field-error" *ngIf="erroresForm['telefono']">{{ erroresForm['telefono'] }}</span>
+          <span class="field-hint" *ngIf="!erroresForm['telefono']">Formato: +57XXXXXXXXXX (opcional)</span>
         </div>
-        <div class="form-group">
+        <div class="form-group" [class.has-error]="erroresForm['departamento']">
           <label>Departamento</label>
-          <input type="text" class="form-input" [(ngModel)]="nuevoUsuario.departamento" placeholder="TI, Soporte..." />
+          <input type="text" class="form-input" [(ngModel)]="nuevoUsuario.departamento"
+            placeholder="TI, Soporte, RRHH..." maxlength="50" />
+          <span class="field-error" *ngIf="erroresForm['departamento']">{{ erroresForm['departamento'] }}</span>
         </div>
       </div>
+
+      <!-- Fila 5: Proyecto -->
       <div class="form-group">
-        <label>Proyecto</label>
+        <label>Proyecto (asignación inicial)</label>
         <select class="form-input" [(ngModel)]="nuevoUsuario.idProyecto">
-          <option [value]="0">-- Sin proyecto --</option>
+          <option [value]="0">— Sin proyecto —</option>
           <option *ngFor="let p of proyectos" [value]="p.id">{{ p.nombre }}</option>
         </select>
-        <span *ngIf="cargandoProyectos" class="hint">Cargando proyectos...</span>
+        <span *ngIf="cargandoProyectos" class="field-hint">Cargando proyectos...</span>
       </div>
     </div>
+
     <div class="modal-footer">
       <button class="btn-action" (click)="cerrarModal()">Cancelar</button>
       <button class="btn-action primary" (click)="guardarUsuario()" [disabled]="guardando">
@@ -152,3 +190,42 @@
   </div>
 </div>
 
+<!-- ═══════════════ Modal Cambiar Contraseña ═══════════════ -->
+<div class="modal-overlay" *ngIf="mostrarModalPassword" (click)="cerrarModalPassword()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🔑 Cambiar Contraseña</h3>
+      <button class="btn-close" (click)="cerrarModalPassword()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-subtitle">Usuario: <strong>{{ usuarioPasswordNombre }}</strong></p>
+
+      <div class="form-group" [class.has-error]="!!errorPassword">
+        <label>Nueva Contraseña <span class="required">*</span></label>
+        <input type="password" class="form-input" [(ngModel)]="nuevaPassword"
+          placeholder="Mínimo 8 caracteres" />
+      </div>
+
+      <div class="form-group" [class.has-error]="!!errorPassword">
+        <label>Confirmar Nueva Contraseña <span class="required">*</span></label>
+        <input type="password" class="form-input" [(ngModel)]="confirmarNuevaPassword"
+          placeholder="Repite la nueva contraseña" />
+        <span class="field-error" *ngIf="errorPassword">{{ errorPassword }}</span>
+      </div>
+
+      <div class="password-rules">
+        <p>Requisitos:</p>
+        <ul>
+          <li [class.ok]="nuevaPassword.length >= 8">Mínimo 8 caracteres</li>
+          <li [class.ok]="nuevaPassword === confirmarNuevaPassword && nuevaPassword.length > 0">Las contraseñas coinciden</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action" (click)="cerrarModalPassword()">Cancelar</button>
+      <button class="btn-action primary" (click)="guardarNuevaPassword()" [disabled]="cambiandoPassword">
+        {{ cambiandoPassword ? 'Actualizando...' : 'Actualizar Contraseña' }}
+      </button>
+    </div>
+  </div>
+</div>

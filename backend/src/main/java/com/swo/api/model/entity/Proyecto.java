@@ -8,17 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
-/**
- * Entidad JPA que mapea la tabla {@code proyectos} del esquema {@code swo_db}.
- * <p>
- * Gestiona proyectos del sistema con asignación de usuarios mediante relación ManyToMany.
- */
 @Entity
 @Table(name = "proyectos")
 @EntityListeners(AuditingEntityListener.class)
@@ -39,9 +30,17 @@ public class Proyecto {
     private String descripcion;
 
     @Column(name = "estado", nullable = false, length = 20)
-    private String estado = "Activo"; // Activo, En Pausa, Completado, Cancelado
+    private String estado = "Activo";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_jefe")
+    private Usuario jefe;
 
     @CreatedDate
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
+
+    @LastModifiedDate
+    @Column(name = "fecha_actualizacion")
+    private LocalDateTime fechaActualizacion;
 }

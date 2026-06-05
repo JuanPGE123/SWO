@@ -103,8 +103,11 @@
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  &.active { background: rgba(5,208,230,0.15); color: #05d0e6; }
-  &.archived { background: rgba(255,255,255,0.07); color: #9aa5b1; }
+  &.active    { background: rgba(34,197,94,0.15);  color: #22c55e; }
+  &.paused    { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  &.completed { background: rgba(5,208,230,0.15);  color: #05d0e6; }
+  &.cancelled { background: rgba(239,68,68,0.15);  color: #ef4444; }
+  &.archived  { background: rgba(255,255,255,0.07); color: #9aa5b1; }
 }
 
 .actions-cell {
@@ -139,10 +142,56 @@
   &.info { border-color: rgba(5,208,230,0.3); color: #05d0e6; &:hover { background: rgba(5,208,230,0.1); } }
 }
 
-.loading-msg, .empty-state {
-  padding: 40px;
+.loading-msg { padding: 40px; text-align: center; color: #9aa5b1; }
+
+.empty-state {
+  padding: 60px 40px;
   text-align: center;
   color: #9aa5b1;
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  p { margin: 0 0 16px; font-size: 14px; }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: #6b7480;
+  margin-top: 2px;
+}
+
+.field-error {
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+.has-error .form-input { border-color: #ef4444 !important; }
+
+.required { color: #ef4444; }
+
+.modal-subtitle {
+  font-size: 13px;
+  color: #9aa5b1;
+  margin: 0 0 4px;
+  padding: 10px 14px;
+  background: rgba(5,208,230,0.05);
+  border-radius: 6px;
+  border-left: 3px solid #05d0e6;
+}
+
+.col-id { width: 50px; color: #6b7480; }
+.col-nombre { color: #e6eef6; min-width: 160px; }
+.col-desc { color: #9aa5b1; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.metric-card {
+  &.active    .metric-value { color: #22c55e; }
+  &.paused    .metric-value { color: #f59e0b; }
+  &.completed .metric-value { color: #05d0e6; }
 }
 
 // Modal

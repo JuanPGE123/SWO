@@ -44,6 +44,7 @@ export interface CrearUsuarioDTO {
   telefono?: string;       // Teléfono (opcional)
   departamento: string;    // Departamento/área
   idProyecto?: number;     // ID del proyecto asignado (opcional)
+  idJefe?: number;         // ID del jefe directo (opcional)
 }
 
 /**
@@ -436,7 +437,8 @@ export class UsersService {
         password: datos.password,
         rol: datos.rol,
         telefono: datos.telefono || '',
-        departamento: datos.departamento || ''
+        departamento: datos.departamento || '',
+        ...(datos.idJefe ? { idJefe: datos.idJefe } : {})
       }, { headers: { 'Content-Type': 'application/json' } }).pipe(
         catchError(error => this.sharedService.manejarErrorHttp(error, 'Crear usuario'))
       ).subscribe({
@@ -470,6 +472,15 @@ export class UsersService {
    * @param id - ID del usuario a eliminar
    * @returns Observable con el resultado
    */
+  cambiarPasswordBackend(id: string, nuevaPassword: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/usuarios/${id}/cambiar-password`,
+      { nuevaPassword },
+      { headers: { 'Content-Type': 'application/json' } }
+    ).pipe(
+      catchError(error => this.sharedService.manejarErrorHttp(error, 'Cambiar contraseña'))
+    );
+  }
+
   eliminarUsuarioBackend(id: string): Observable<any> {
     if (!id || id.trim() === '') {
       return throwError(() => this.sharedService.crearError(

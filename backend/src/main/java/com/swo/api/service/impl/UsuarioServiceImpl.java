@@ -2,6 +2,7 @@ package com.swo.api.service.impl;
 
 import com.swo.api.exception.BusinessException;
 import com.swo.api.exception.ResourceNotFoundException;
+import com.swo.api.model.dto.request.CambiarPasswordDTO;
 import com.swo.api.model.dto.request.UsuarioRequestDTO;
 import com.swo.api.model.dto.response.UsuarioResponseDTO;
 import com.swo.api.model.entity.Usuario;
@@ -15,22 +16,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
-/**
- * Implementación de {@link UsuarioService}.
- * <p>
- * Responsabilidades:
- * <ul>
- *   <li>Hashear contraseñas con BCrypt antes de persistir.</li>
- *   <li>Validar unicidad de correo electrónico.</li>
- *   <li>Mapear entidad ↔ DTO sin exponer datos sensibles.</li>
- * </ul>
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
+
+    private static final List<String> ROLES_JEFE = Arrays.asList(
+            "Jefe", "Administrador", "Gerente", "Coordinador"
+    );
 
     private final UsuarioRepository             usuarioRepository;
     private final AsignacionProyectoRepository  asignacionProyectoRepository;
@@ -53,6 +49,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> listarActivos() {
         return usuarioRepository.findByEstadoTrue()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> listarJefes() {
+        return usuarioRepository.findByRolIn(ROLES_JEFE)
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();
@@ -84,6 +89,10 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new BusinessException("Ya existe un usuario registrado con el correo: " + dto.getCorreo());
         }
 
+        if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+            throw new BusinessException("La contraseña es obligatoria para crear un usuario");
+        }
+
         Usuario usuario = new Usuario();
         mapDtoToEntity(dto, usuario);
         usuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
@@ -100,7 +109,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         log.info("Actualizando usuario ID: {}", id);
         Usuario usuario = findOrThrow(id);
 
-        // Si el correo cambia, verificar que no esté en uso por otro usuario
         if (!usuario.getCorreo().equalsIgnoreCase(dto.getCorreo())
                 && usuarioRepository.existsByCorreo(dto.getCorreo())) {
             throw new BusinessException("El correo '" + dto.getCorreo() + "' ya está en uso por otro usuario.");
@@ -108,12 +116,21 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         mapDtoToEntity(dto, usuario);
 
-        // Solo actualiza el hash si se envió una nueva contraseña
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             usuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         }
 
         return toResponseDTO(usuarioRepository.save(usuario));
+    }
+
+    @Override
+    @Transactional
+    public void cambiarPassword(Long id, CambiarPasswordDTO dto) {
+        log.info("Cambiando contraseña del usuario ID: {}", id);
+        Usuario usuario = findOrThrow(id);
+        usuario.setPasswordHash(passwordEncoder.encode(dto.getNuevaPassword()));
+        usuarioRepository.save(usuario);
+        log.info("Contraseña actualizada para usuario ID: {}", id);
     }
 
     @Override
@@ -141,11 +158,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (!usuarioRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuario no encontrado con ID: " + id);
         }
-        // 1. Eliminar asignaciones a proyectos
         asignacionProyectoRepository.deleteByUsuario_IdUsuario(id);
-        // 2. Eliminar incidencias reportadas por el usuario
         incidenciaRepository.deleteByUsuarioReporta_IdUsuario(id);
-        // 3. Eliminar el usuario
         usuarioRepository.deleteById(id);
         log.info("Usuario ID {} eliminado junto con sus registros relacionados", id);
     }
@@ -163,20 +177,30 @@ public class UsuarioServiceImpl implements UsuarioService {
         entity.setRol(dto.getRol());
         entity.setTelefono(dto.getTelefono());
         entity.setDepartamento(dto.getDepartamento());
+
+        if (dto.getIdJefe() != null) {
+            usuarioRepository.findById(dto.getIdJefe()).ifPresent(entity::setJefe);
+        } else {
+            entity.setJefe(null);
+        }
     }
 
     private UsuarioResponseDTO toResponseDTO(Usuario u) {
-        return new UsuarioResponseDTO(
-                u.getIdUsuario(),
-                u.getNombreCompleto(),
-                u.getCorreo(),
-                u.getRol(),
-                u.getEstado(),
-                u.getTelefono(),
-                u.getDepartamento(),
-                u.getFotoPerfil(),
-                u.getFechaRegistro(),
-                u.getUltimaConexion()
-        );
+        UsuarioResponseDTO dto = new UsuarioResponseDTO();
+        dto.setIdUsuario(u.getIdUsuario());
+        dto.setNombreCompleto(u.getNombreCompleto());
+        dto.setCorreo(u.getCorreo());
+        dto.setRol(u.getRol());
+        dto.setEstado(u.getEstado());
+        dto.setTelefono(u.getTelefono());
+        dto.setDepartamento(u.getDepartamento());
+        dto.setFotoPerfil(u.getFotoPerfil());
+        dto.setFechaRegistro(u.getFechaRegistro());
+        dto.setUltimaConexion(u.getUltimaConexion());
+        if (u.getJefe() != null) {
+            dto.setIdJefe(u.getJefe().getIdUsuario());
+            dto.setNombreJefe(u.getJefe().getNombreCompleto());
+        }
+        return dto;
     }
 }
