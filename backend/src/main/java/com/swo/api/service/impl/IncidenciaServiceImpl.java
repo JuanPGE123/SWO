@@ -113,6 +113,17 @@ public class IncidenciaServiceImpl implements IncidenciaService {
         if (dto.getEstado() != null) {
             validarEstado(dto.getEstado());
             incidencia.setEstado(dto.getEstado());
+            if ("Resuelto".equals(dto.getEstado()) || "Cerrado".equals(dto.getEstado())) {
+                incidencia.setFechaCierre(java.time.LocalDateTime.now());
+            }
+        }
+
+        if (dto.getResolucion() != null && !dto.getResolucion().isBlank()) {
+            incidencia.setResolucion(dto.getResolucion());
+        }
+
+        if (dto.getIdUsuarioAsignado() != null) {
+            incidencia.setIdUsuarioAsignado(dto.getIdUsuarioAsignado());
         }
 
         if (dto.getIdCategoria() != null) {
@@ -165,20 +176,26 @@ public class IncidenciaServiceImpl implements IncidenciaService {
     }
 
     private IncidenciaResponseDTO toResponseDTO(Incidencia i) {
-        return new IncidenciaResponseDTO(
-                i.getIdIncidencia(),
-                i.getTitulo(),
-                i.getDescripcion(),
-                i.getEstado(),
-                i.getImpacto(),
-                i.getUbicacion(),
-                i.getFechaCreacion(),
-                i.getFechaActualizacion(),
-                i.getFechaCierre(),
-                i.getUsuarioReporta() != null ? i.getUsuarioReporta().getIdUsuario() : null,
-                i.getUsuarioReporta() != null ? i.getUsuarioReporta().getNombreCompleto() : null,
-                i.getCategoria() != null ? i.getCategoria().getIdCategoria() : null,
-                i.getCategoria() != null ? i.getCategoria().getNombreCategoria() : null
-        );
+        IncidenciaResponseDTO dto = new IncidenciaResponseDTO();
+        dto.setIdIncidencia(i.getIdIncidencia());
+        dto.setTitulo(i.getTitulo());
+        dto.setDescripcion(i.getDescripcion());
+        dto.setEstado(i.getEstado());
+        dto.setImpacto(i.getImpacto());
+        dto.setUbicacion(i.getUbicacion());
+        dto.setFechaCreacion(i.getFechaCreacion());
+        dto.setFechaActualizacion(i.getFechaActualizacion());
+        dto.setFechaCierre(i.getFechaCierre());
+        dto.setResolucion(i.getResolucion());
+        dto.setIdUsuarioAsignado(i.getIdUsuarioAsignado());
+        if (i.getUsuarioReporta() != null) {
+            dto.setIdUsuarioReporta(i.getUsuarioReporta().getIdUsuario());
+            dto.setNombreUsuarioReporta(i.getUsuarioReporta().getNombreCompleto());
+        }
+        if (i.getCategoria() != null) {
+            dto.setIdCategoria(i.getCategoria().getIdCategoria());
+            dto.setNombreCategoria(i.getCategoria().getNombreCategoria());
+        }
+        return dto;
     }
 }

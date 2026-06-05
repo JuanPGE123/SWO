@@ -449,7 +449,7 @@ export class UsersService {
             observer.error(this.sharedService.crearError(
               'BACKEND_ERROR',
               'Error al crear usuario',
-              resp?.error || 'Respuesta inválida del servidor'
+              resp?.message || 'Respuesta inválida del servidor'
             ));
             observer.complete();
           }
@@ -485,7 +485,9 @@ export class UsersService {
         )
         .subscribe({
           next: (resp) => {
-            if (resp?.success) {
+            // resp es null cuando el backend retorna 204 No Content.
+            // resp?.success es true cuando retorna 200 con cuerpo ApiResponse.
+            if (resp === null || resp?.success) {
               this.usuariosData = this.usuariosData.filter(u => u.id !== id);
               this.usuariosSubject.next([...this.usuariosData]);
               observer.next({ success: true, mensaje: 'Usuario eliminado exitosamente' });
@@ -494,7 +496,7 @@ export class UsersService {
               observer.error(this.sharedService.crearError(
                 'BACKEND_ERROR',
                 'Error al eliminar usuario',
-                resp?.error || 'No se pudo eliminar'
+                resp?.message || 'No se pudo eliminar'
               ));
               observer.complete();
             }

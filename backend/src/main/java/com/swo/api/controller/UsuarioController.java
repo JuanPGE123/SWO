@@ -146,11 +146,11 @@ public class UsuarioController {
     @Operation(summary = "Eliminar un usuario permanentemente",
                description = "Elimina físicamente el usuario de la base de datos. Operación irreversible.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Usuario eliminado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario eliminado"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         usuarioService.eliminar(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        return ResponseEntity.ok(ApiResponse.ok("Usuario eliminado exitosamente", null));
     }
 }

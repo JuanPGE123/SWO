@@ -47,6 +47,12 @@ public class Incidencia {
     @Column(name = "fecha_cierre")
     private LocalDateTime fechaCierre;
 
+    @Column(name = "resolucion", columnDefinition = "TEXT")
+    private String resolucion;
+
+    @Column(name = "id_usuario_asignado")
+    private Long idUsuarioAsignado;
+
     @CreatedDate
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;

@@ -258,17 +258,17 @@ export class IncidentsService {
    */
   private mapearDesdeDB(db: any): Incidencia {
     return {
-      id: 'INC-' + db.id,
-      title: db.titulo || 'Sin t�tulo',
+      id: 'INC-' + (db.idIncidencia ?? db.id),
+      title: db.titulo || 'Sin título',
       state: this.mapearEstado(db.estado),
       priority: this.mapearImpacto(db.impacto),
-      assignee: db.asignado || 'Sin asignar',
+      assignee: db.idUsuarioAsignado ? 'ID: ' + db.idUsuarioAsignado : 'Sin asignar',
       idUsuarioAsignado: db.idUsuarioAsignado || undefined,
       project: db.ubicacion || 'SWO',
       date: db.fechaCreacion || new Date().toISOString().split('T')[0],
       tags: db.tags ? JSON.parse(db.tags) : [],
       comments: db.comentarios ? JSON.parse(db.comentarios) : [],
-      user: 'Usuario ' + (db.idUsuarioReporta || 1),
+      user: db.nombreUsuarioReporta || ('Usuario ' + (db.idUsuarioReporta || 1)),
       userEmail: db.correoUsuario || '',
       userPhones: db.telefonosUsuario ? JSON.parse(db.telefonosUsuario) : [],
       app: 'SWO',
@@ -673,7 +673,7 @@ export class IncidentsService {
           // �xito: recargar desde backend y registrar en historial
           this.cargarDesdeBackend();
           
-          const incidenciaId = 'INC-' + resp.id;
+          const incidenciaId = 'INC-' + (resp?.data?.idIncidencia ?? resp?.id ?? 'unknown');
           this.registrarCambio(incidenciaId, {
             tipo: 'creacion',
             usuario: `${usuario?.nombre || 'Sistema'} ${usuario?.apellido || ''}`.trim(),

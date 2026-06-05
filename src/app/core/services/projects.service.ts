@@ -263,7 +263,7 @@ export class ProjectsService {
         catchError(error => this.sharedService.manejarErrorHttp(error, 'Crear proyecto'))
       ).subscribe({
         next: (resp) => {
-          if (resp?.success) {
+          if (resp === null || resp?.success) {
             this.cargarDesdeBackend();
             observer.next({ success: true, mensaje: 'Proyecto creado exitosamente', data: resp });
             observer.complete();
@@ -271,7 +271,7 @@ export class ProjectsService {
             observer.error(this.sharedService.crearError(
               'BACKEND_ERROR',
               'Error al crear proyecto',
-              resp?.error || 'Error desconocido'
+              resp?.message || 'Error desconocido'
             ));
             observer.complete();
           }
@@ -320,7 +320,9 @@ export class ProjectsService {
         )
         .subscribe({
           next: (resp) => {
-            if (resp?.success) {
+            // resp es null cuando el backend retorna 204 No Content.
+            // resp?.success es true cuando retorna 200 con cuerpo ApiResponse.
+            if (resp === null || resp?.success) {
               this.proyectosData = this.proyectosData.filter(p => p.id !== id);
               this.proyectosSubject.next([...this.proyectosData]);
               observer.next({ success: true, mensaje: 'Proyecto eliminado exitosamente' });
@@ -329,7 +331,7 @@ export class ProjectsService {
               observer.error(this.sharedService.crearError(
                 'BACKEND_ERROR',
                 'Error al eliminar proyecto',
-                resp?.error || 'No se pudo eliminar'
+                resp?.message || 'No se pudo eliminar'
               ));
               observer.complete();
             }

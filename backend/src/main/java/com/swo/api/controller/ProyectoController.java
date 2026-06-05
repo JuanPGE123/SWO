@@ -52,11 +52,10 @@ public class ProyectoController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Eliminar proyecto", description = "Elimina un proyecto por ID")
     public ApiResponse<Void> eliminar(@Parameter(description = "ID del proyecto") @PathVariable Long id) {
         proyectoService.eliminar(id);
-        return ApiResponse.noContent();
+        return ApiResponse.ok("Proyecto eliminado exitosamente", null);
     }
 
     @GetMapping("/{id}")

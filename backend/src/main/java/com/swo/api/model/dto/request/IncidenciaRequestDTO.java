@@ -50,4 +50,11 @@ public class IncidenciaRequestDTO {
     @Positive(message = "El ID de categoría debe ser un número positivo")
     @Schema(description = "ID de la categoría asociada (opcional)", example = "2")
     private Long idCategoria;
+
+    @Positive(message = "El ID de usuario asignado debe ser positivo")
+    @Schema(description = "ID del usuario asignado (opcional)", example = "3")
+    private Long idUsuarioAsignado;
+
+    @Schema(description = "Texto de resolución al cerrar la incidencia")
+    private String resolucion;
 }

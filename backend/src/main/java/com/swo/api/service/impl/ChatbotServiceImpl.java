@@ -150,6 +150,9 @@ public class ChatbotServiceImpl implements ChatbotService {
      * Esta es una implementación simplificada. En producción, integraría con un modelo de IA.
      */
     private String generarRespuestaBot(String mensaje, String tipoConsulta) {
+        if (mensaje == null || mensaje.isBlank()) {
+            return "No recibí ningún mensaje. Por favor escribe tu consulta y con gusto te ayudo.";
+        }
         String mensajeLower = mensaje.toLowerCase();
 
         // Respuestas contextuales según palabras clave

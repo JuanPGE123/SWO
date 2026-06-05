@@ -158,11 +158,11 @@ public class IncidenciaController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una incidencia permanentemente")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Incidencia eliminada"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Incidencia eliminada"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Incidencia no encontrada")
     })
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         incidenciaService.eliminar(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+        return ResponseEntity.ok(ApiResponse.ok("Incidencia eliminada exitosamente", null));
     }
 }

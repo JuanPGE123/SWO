@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -12,14 +11,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Schema(description = "Representación de una incidencia registrada en el sistema")
 public class IncidenciaResponseDTO {
 
     @Schema(description = "Identificador único de la incidencia", example = "42")
     private Long idIncidencia;
 
-    @Schema(description = "Título de la incidencia", example = "Falla en el sistema de autenticación")
+    @Schema(description = "Título de la incidencia")
     private String titulo;
 
     @Schema(description = "Descripción detallada de la incidencia")
@@ -31,7 +29,7 @@ public class IncidenciaResponseDTO {
     @Schema(description = "Nivel de impacto", example = "Alto")
     private String impacto;
 
-    @Schema(description = "Ubicación donde ocurrió la incidencia", example = "Piso 3 - Sala Servidores")
+    @Schema(description = "Ubicación donde ocurrió la incidencia")
     private String ubicacion;
 
     @Schema(description = "Fecha y hora de creación")
@@ -40,18 +38,24 @@ public class IncidenciaResponseDTO {
     @Schema(description = "Fecha y hora de última actualización")
     private LocalDateTime fechaActualizacion;
 
-    @Schema(description = "Fecha y hora de cierre (si fue resuelta)")
+    @Schema(description = "Fecha y hora de cierre")
     private LocalDateTime fechaCierre;
 
-    @Schema(description = "ID del usuario que reportó la incidencia", example = "5")
+    @Schema(description = "ID del usuario que reportó la incidencia")
     private Long idUsuarioReporta;
 
-    @Schema(description = "Nombre del usuario que reportó la incidencia", example = "Ana García")
+    @Schema(description = "Nombre del usuario que reportó la incidencia")
     private String nombreUsuarioReporta;
 
-    @Schema(description = "ID de la categoría asociada", example = "2")
+    @Schema(description = "ID de la categoría asociada")
     private Long idCategoria;
 
-    @Schema(description = "Nombre de la categoría asociada", example = "Hardware")
+    @Schema(description = "Nombre de la categoría asociada")
     private String nombreCategoria;
+
+    @Schema(description = "ID del usuario asignado para resolver la incidencia")
+    private Long idUsuarioAsignado;
+
+    @Schema(description = "Texto de resolución al cerrar la incidencia")
+    private String resolucion;
 }
