@@ -1,7 +1,18 @@
-# SWO - Sistema de Gestión de Incidencias (Service Desk)
+# SWO — Sistema de Gestión de Incidencias (Service Desk)
 
-> **SENA - Tecnología en Análisis y Desarrollo de Software**  
-> Proyecto Formativo — Ficha de Caracterización del Proyecto
+> **SENA — Tecnología en Análisis y Desarrollo de Software**  
+> Proyecto Formativo — Análisis y Desarrollo de Software
+
+---
+
+## Sistema en producción
+
+| Componente | URL | Estado |
+|------------|-----|--------|
+| **Frontend (Angular)** | https://juanpge123.github.io/SWO/ | ✅ Activo |
+| **Backend API (Spring Boot)** | https://swo-production.up.railway.app/api | ✅ Activo |
+| **Documentación API (Swagger)** | https://swo-production.up.railway.app/api/swagger-ui.html | ✅ Activo |
+| **Repositorio** | https://github.com/JuanPGE123/SWO | ✅ Público |
 
 ---
 
@@ -19,7 +30,7 @@
 - [Despliegue](#despliegue)
 - [Control de Versiones](#control-de-versiones)
 - [Estructura del Proyecto](#estructura-del-proyecto)
-- [Documentación Adicional](#documentación-adicional)
+- [Documentación del Proyecto](#documentación-del-proyecto)
 
 ---
 
@@ -44,21 +55,21 @@ El sistema sigue una arquitectura de **tres capas** con separación clara entre 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         CLIENTE (Browser)                       │
-│                    Angular 17 SPA — Puerto 80                   │
+│          Angular 17 SPA — GitHub Pages (producción)             │
 └─────────────────────────────┬───────────────────────────────────┘
-                              │ HTTP/REST (JSON)
+                              │ HTTPS / REST (JSON)
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    BACKEND (Spring Boot 3.2)                     │
-│               API REST — Puerto 8080  /api/v1/**                │
+│                    BACKEND (Spring Boot 3.2.4)                  │
+│         API REST — Railway  /api/v1/**                          │
 │                                                                 │
 │   Controller → Service → Repository → Entity → MySQL           │
 └─────────────────────────────┬───────────────────────────────────┘
-                              │ JDBC / JPA
+                              │ JDBC / JPA (HikariCP)
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                     BASE DE DATOS                               │
-│                    MySQL 8.0 — Puerto 3306                      │
+│             MySQL 8.0 — Railway (managed)                       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -77,8 +88,8 @@ El sistema sigue una arquitectura de **tres capas** con separación clara entre 
 
 | Módulo | Descripción | Frontend | Backend |
 |--------|-------------|----------|---------|
-| **Auth** | Autenticación y autorización JWT | `features/auth` | `SecurityConfig` |
-| **Dashboard** | Panel de control con métricas | `features/dashboard` | `/v1/estadisticas` |
+| **Auth** | Autenticación y autorización | `features/auth` | `/v1/login` |
+| **Dashboard** | Panel de control con métricas | `features/dashboard` | `/v1/incidencias` |
 | **Incidencias** | CRUD completo de tickets | `features/incidents` | `/v1/incidencias` |
 | **Proyectos** | Gestión de proyectos y asignaciones | `features/projects` | `/v1/proyectos` |
 | **Usuarios** | Administración de usuarios y roles | `features/users` | `/v1/usuarios` |
@@ -108,32 +119,32 @@ El sistema sigue una arquitectura de **tres capas** con separación clara entre 
 | Spring Data JPA | 3.2.4 | ORM y acceso a datos |
 | Spring Security | 3.2.4 | Autenticación/Autorización |
 | Springdoc OpenAPI | 2.3.0 | Documentación API Swagger |
-| Lombok | 1.18.32 | Reducción de código boilerplate |
-| MapStruct | 1.5.5 | Mapeo de entidades/DTOs |
 | JUnit 5 | 5.10 | Framework de pruebas |
 | Mockito | 5.3.1 | Mocks para pruebas unitarias |
-| JaCoCo | 0.8.10 | Cobertura de código (min. 80%) |
+| JaCoCo | 0.8.10 | Cobertura de código (mín. 45%) |
 
 ### Base de Datos
 | Tecnología | Versión | Propósito |
 |-----------|---------|-----------|
-| MySQL | 8.0.35 | Base de datos relacional |
-| phpMyAdmin | 5.2 | Administración visual BD |
+| MySQL | 8.0 | Base de datos relacional |
+| HikariCP | — | Pool de conexiones |
 
 ### Infraestructura
-| Tecnología | Versión | Propósito |
+| Tecnología | Hosting | Propósito |
 |-----------|---------|-----------|
-| Docker | 24+ | Contenedorización |
-| Docker Compose | 3.9 | Orquestación de servicios |
-| Nginx | Latest | Servidor web / Reverse Proxy |
-| Maven | 3.8+ | Gestión de dependencias Java |
-| npm | 9+ | Gestión de dependencias JS |
+| GitHub Pages | github.io | Frontend SPA |
+| Railway | railway.app | Backend + MySQL gestionado |
+| Docker | — | Contenedorización (local) |
+| Docker Compose | — | Orquestación local |
+| Nginx | — | Reverse proxy (Docker) |
+| Maven | — | Gestión de dependencias Java |
+| npm | — | Gestión de dependencias JS |
 
 ---
 
 ## Requisitos Previos
 
-### Opción A — Con Docker (Recomendado)
+### Opción A — Con Docker (Recomendado para local)
 - Docker Desktop 24+
 - Docker Compose 3.9+
 
@@ -155,49 +166,62 @@ El sistema sigue una arquitectura de **tres capas** con separación clara entre 
 git clone https://github.com/JuanPGE123/SWO.git
 cd SWO
 
-# 2. Configurar variables de entorno
-cp .env.example .env
-# Editar .env con los valores apropiados
-
-# 3. Iniciar todos los servicios
+# 2. Iniciar todos los servicios
 docker-compose up -d
 
-# 4. Verificar que los servicios están corriendo
+# 3. Verificar que los servicios están corriendo
 docker-compose ps
 
-# 5. Ver logs en tiempo real
-docker-compose logs -f backend
+# 4. Ver logs del backend
+docker-compose logs swo-backend -f
 ```
 
 **URLs disponibles con Docker:**
+
 | Servicio | URL |
 |----------|-----|
 | Frontend (Angular) | http://localhost:80 |
 | Backend (API REST) | http://localhost:8080/api |
 | Swagger UI | http://localhost:8080/api/swagger-ui.html |
-| phpMyAdmin | http://localhost:8888 (perfil dev) |
+| phpMyAdmin | http://localhost:8090 (perfil dev) |
 
 ---
 
 ### Sin Docker — Desarrollo Local
 
-#### Backend (Spring Boot)
+#### 1. Base de datos MySQL
+
+```sql
+CREATE DATABASE IF NOT EXISTS swo_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+```
+
+Ejecutar el script de tablas:
+```bash
+mysql -u root -p swo_db < java/swo_database.sql
+```
+
+#### 2. Backend (Spring Boot)
 
 ```bash
 cd backend
 
-# Opción 1: Maven Wrapper
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# Opción Maven Wrapper
+./mvnw spring-boot:run
 
-# Opción 2: Maven instalado
-mvn spring-boot:run -Dspring.profiles.active=dev
+# Opción Maven instalado
+mvn spring-boot:run
 
-# Opción 3: JAR compilado
+# Opción JAR compilado
 mvn clean package -DskipTests
-java -jar target/swo-api-1.0.0.jar --spring.profiles.active=dev
+java -jar target/swo-api-1.0.0.jar
 ```
 
-#### Frontend (Angular)
+Backend disponible en: `http://localhost:8081/api`  
+Swagger local: `http://localhost:8081/api/swagger-ui.html`
+
+#### 3. Frontend (Angular)
 
 ```bash
 # Desde la raíz del proyecto
@@ -206,43 +230,41 @@ npm start
 # Disponible en: http://localhost:4200
 ```
 
-#### Windows — Script de inicio completo
+#### Credenciales de acceso (desarrollo)
 
-```cmd
-INICIAR_TODO.bat
-```
+| Correo | Contraseña | Rol |
+|--------|-----------|-----|
+| `admin@swo.com` | (ver DataInitializer) | Administrador |
 
 ---
 
 ## Variables de Entorno
 
-Copiar `.env.example` como `.env` y configurar:
-
 | Variable | Descripción | Ejemplo |
 |----------|-------------|---------|
-| `DB_HOST` | Host de MySQL | `localhost` |
-| `DB_PORT` | Puerto MySQL | `3306` |
-| `DB_NAME` | Nombre de la BD | `swo_dev` |
-| `DB_USER` | Usuario BD | `root` |
-| `DB_PASSWORD` | Contraseña BD | `root` |
-| `JWT_SECRET_KEY` | Clave secreta JWT | `clave_muy_segura...` |
-| `JWT_EXPIRATION_TIME` | Expiración token (ms) | `86400000` |
-| `SPRING_PROFILES_ACTIVE` | Perfil activo | `dev` / `test` / `prod` |
-| `NG_APP_API_URL` | URL del backend | `http://localhost:8080/api` |
+| `DATABASE_URL` | URL JDBC completa de MySQL | `jdbc:mysql://host:3306/swo_db` |
+| `DATABASE_USER` | Usuario de la base de datos | `root` |
+| `DATABASE_PASSWORD` | Contraseña de la base de datos | `secreto` |
+| `SPRING_PROFILES_ACTIVE` | Perfil activo de Spring | `prod` |
+| `PORT` | Puerto del servidor (Railway lo asigna) | `8080` |
+| `JAVA_OPTS` | Opciones JVM | `-Xmx512m -Xms256m` |
 
-> **NUNCA** commitear el archivo `.env`. Está incluido en `.gitignore`.
+> Las variables de producción se configuran directamente en Railway. Ver guía completa en [DESPLIEGUE.md](DESPLIEGUE.md).
 
 ---
 
 ## API REST — Endpoints
 
-La documentación interactiva completa está disponible en Swagger UI:  
-**http://localhost:8080/api/swagger-ui.html**
+La documentación interactiva completa está disponible en Swagger UI:
+
+- **Producción:** https://swo-production.up.railway.app/api/swagger-ui.html
+- **Local:** http://localhost:8081/api/swagger-ui.html
 
 ### Resumen de Endpoints
 
 | Módulo | Método | Endpoint | Descripción |
 |--------|--------|----------|-------------|
+| **Auth** | POST | `/v1/login` | Autenticar usuario |
 | **Incidencias** | GET | `/v1/incidencias` | Listar todas (paginado) |
 | | GET | `/v1/incidencias/{id}` | Obtener por ID |
 | | GET | `/v1/incidencias/estado/{estado}` | Filtrar por estado |
@@ -255,16 +277,22 @@ La documentación interactiva completa está disponible en Swagger UI:
 | **Proyectos** | GET | `/v1/proyectos` | Listar proyectos |
 | | GET | `/v1/proyectos/{id}` | Obtener proyecto |
 | | POST | `/v1/proyectos` | Crear proyecto |
+| | POST | `/v1/proyectos/asignar-usuario` | Asignar usuario a proyecto |
 | | PUT | `/v1/proyectos/{id}` | Actualizar proyecto |
 | | DELETE | `/v1/proyectos/{id}` | Eliminar proyecto |
 | **Usuarios** | GET | `/v1/usuarios` | Listar usuarios |
+| | GET | `/v1/usuarios/activos` | Listar usuarios activos |
 | | GET | `/v1/usuarios/{id}` | Obtener usuario |
 | | POST | `/v1/usuarios` | Crear usuario |
 | | PUT | `/v1/usuarios/{id}` | Actualizar usuario |
+| | PATCH | `/v1/usuarios/{id}/desactivar` | Desactivar (soft delete) |
+| | DELETE | `/v1/usuarios/{id}` | Eliminar permanentemente |
 | **Categorías** | GET | `/v1/categorias` | Listar categorías |
 | | POST | `/v1/categorias` | Crear categoría |
-| **Chatbot** | POST | `/v1/chatbot/mensaje` | Enviar mensaje |
-| | GET | `/v1/chatbot/historial/{id}` | Historial de conversación |
+| | PUT | `/v1/categorias/{id}` | Actualizar categoría |
+| | DELETE | `/v1/categorias/{id}` | Eliminar categoría |
+| **Chatbot** | POST | `/v1/chatbot/consulta` | Enviar consulta al chatbot |
+| | POST | `/v1/chatbot/escalar` | Escalar a incidencia |
 
 ### Formato de Respuesta
 
@@ -275,7 +303,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
   "success": true,
   "message": "Operación exitosa",
   "data": { ... },
-  "timestamp": "2026-06-02T10:00:00Z"
+  "timestamp": "2026-06-07T10:00:00"
 }
 ```
 
@@ -285,10 +313,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 |--------|-------------|
 | `200 OK` | Operación exitosa |
 | `201 Created` | Recurso creado |
-| `204 No Content` | Eliminación exitosa |
-| `400 Bad Request` | Datos de entrada inválidos |
-| `401 Unauthorized` | No autenticado |
-| `403 Forbidden` | Sin permisos |
+| `400 Bad Request` | Datos de entrada inválidos o regla de negocio violada |
+| `401 Unauthorized` | No autenticado o credenciales incorrectas |
 | `404 Not Found` | Recurso no encontrado |
 | `500 Internal Server Error` | Error del servidor |
 
@@ -296,7 +322,15 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ## Pruebas
 
-### Pruebas Unitarias — Backend
+**Resumen:** 76 pruebas totales — 100% exitosas
+
+| Tipo | Framework | Total | Resultado |
+|------|-----------|-------|-----------|
+| Unitarias backend | JUnit 5 + Mockito | 44 | ✅ 44/44 |
+| Unitarias frontend | Jasmine/Karma | 32 | ✅ 32/32 |
+| E2E | Cypress | 1 suite | ✅ Pass |
+
+### Ejecutar pruebas unitarias — Backend
 
 ```bash
 cd backend
@@ -304,114 +338,120 @@ cd backend
 # Ejecutar todas las pruebas
 mvn test
 
-# Con reporte de cobertura JaCoCo (mín. 80%)
+# Con reporte de cobertura JaCoCo
 mvn test jacoco:report
-
-# Ver reporte en: backend/target/site/jacoco/index.html
+# Reporte en: backend/target/site/jacoco/index.html
 ```
 
-### Pruebas Unitarias — Frontend
+### Ejecutar pruebas unitarias — Frontend
 
 ```bash
-# Desde la raíz del proyecto
+# Modo CI (sin ventana de navegador)
+npx ng test --no-watch
 
-# Modo interactivo (con Chrome)
-npm test
-
-# Modo CI (Chrome headless + cobertura)
-npm run test:coverage
+# Con reporte de cobertura
+npx ng test --no-watch --code-coverage
+# Reporte en: coverage/swo-servicedesk/index.html
 ```
 
-### Pruebas E2E — Cypress
+### Ejecutar pruebas E2E — Cypress
 
 ```bash
-# Requiere que frontend y backend estén corriendo
+# Modo headless
+npx cypress run
 
 # Modo interactivo
 npx cypress open
-
-# Modo headless (CI)
-npm run e2e:headless
 ```
 
-Ver resultados detallados en [INFORME_PRUEBAS.md](INFORME_PRUEBAS.md).
+Ver resultados completos en [INFORME_PRUEBAS.md](INFORME_PRUEBAS.md).
 
 ---
 
 ## Despliegue
 
-### Ambientes Disponibles
+### URLs del sistema desplegado
 
-| Ambiente | Descripción | Configuración |
-|----------|-------------|---------------|
-| **Desarrollo** | Local del desarrollador | `.env` + `SPRING_PROFILES_ACTIVE=dev` |
-| **Pruebas** | Pruebas automatizadas CI | BD H2 en memoria + `profile=test` |
-| **Producción** | Contenedores Docker | `docker-compose.yml` + `profile=prod` |
+| Capa | URL | Hosting |
+|------|-----|---------|
+| **Frontend** | https://juanpge123.github.io/SWO/ | GitHub Pages |
+| **Backend API** | https://swo-production.up.railway.app/api | Railway |
+| **Swagger UI** | https://swo-production.up.railway.app/api/swagger-ui.html | Railway |
+| **Base de datos** | MySQL 8 gestionado por Railway | Railway |
 
-### Despliegue con Docker (Producción)
+### Despliegue del frontend (GitHub Pages)
 
 ```bash
-# Construir imágenes
-docker-compose build
+# 1. Generar build de producción
+npx ng build --configuration production --base-href /SWO/
 
-# Iniciar en modo producción
-docker-compose --env-file .env up -d
-
-# Escalar backend (múltiples instancias)
-docker-compose up -d --scale backend=3
+# 2. Publicar en rama gh-pages
+npx gh-pages -d dist/swo-servicedesk
 ```
 
-### Archivos Ejecutables
+### Despliegue del backend (Railway)
+
+Railway detecta automáticamente el `railway.json` y construye desde el `backend/Dockerfile`.
+
+**Variables de entorno requeridas en Railway:**
+
+| Variable | Valor |
+|----------|-------|
+| `DATABASE_URL` | `jdbc:mysql://${{MySQL.MYSQL_HOST}}:${{MySQL.MYSQL_PORT}}/${{MySQL.MYSQLDATABASE}}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` |
+| `DATABASE_USER` | `${{MySQL.MYSQL_USER}}` |
+| `DATABASE_PASSWORD` | `${{MySQL.MYSQL_PASSWORD}}` |
+| `SPRING_PROFILES_ACTIVE` | `prod` |
+| `JAVA_OPTS` | `-Xmx512m -Xms256m` |
+
+### Archivos ejecutables
 
 | Artefacto | Ruta | Descripción |
 |-----------|------|-------------|
-| Backend JAR | `backend/target/swo-api-1.0.0.jar` | Ejecutable Spring Boot |
-| Frontend dist | `dist/swo-servicedesk/` | Build de producción Angular |
-| Docker Image | `docker build -t swo-app .` | Imagen multi-stage |
+| Backend JAR | `backend/target/swo-api-1.0.0.jar` | Fat-JAR ejecutable Spring Boot |
+| Frontend build | `dist/swo-servicedesk/` | Build de producción Angular |
+| Dockerfile | `backend/Dockerfile` | Imagen Docker del backend |
+| Docker Compose | `docker-compose.yml` | Orquestación completa local |
 
-### Generar Artefactos
+### Generar artefactos
 
 ```bash
 # Backend — genera JAR ejecutable
 cd backend && mvn clean package -DskipTests
 
 # Frontend — genera build de producción
-npm run build:prod
-
-# Script de build completo (Windows)
-build.bat
-
-# Script de build completo (Linux/Mac)
-./build.sh
+npx ng build --configuration production --base-href /SWO/
 ```
+
+Ver guía completa de despliegue en [DESPLIEGUE.md](DESPLIEGUE.md).
 
 ---
 
 ## Control de Versiones
 
-**Repositorio:** https://github.com/JuanPGE123/SWO
+**Repositorio:** https://github.com/JuanPGE123/SWO  
+**Rama principal:** `main`  
+**Rama de despliegue frontend:** `gh-pages`
 
-### Convención de Commits (Conventional Commits)
+### Convención de commits
 
 ```
 feat:     Nueva funcionalidad
 fix:      Corrección de error
 docs:     Cambios en documentación
-style:    Formato (no afecta lógica)
 refactor: Refactorización de código
 test:     Agregar o actualizar pruebas
 chore:    Tareas de mantenimiento
 ```
 
-### Ramas
+### Commits recientes
 
-| Rama | Propósito |
-|------|-----------|
-| `main` | Código estable — producción |
-| `develop` | Integración de features |
-| `feature/*` | Nuevas funcionalidades |
-| `fix/*` | Correcciones de errores |
-| `release/*` | Preparación de versiones |
+| Hash | Descripción |
+|------|-------------|
+| `f9366d0` | feat: cambiar clave admin, jefes, 13 roles, validaciones, chatbot expandido |
+| `02f0718` | fix: todos los bugs Railway, DELETE 200, INC-undefined, N+1, HikariCP |
+| `7b260d1` | fix: cascada DELETE usuarios/proyectos + chatbot GET + URL doble v1 |
+| `5be9aed` | audit: corregir endpoints faltantes, pool hikari, N+1, reportes y login |
+| `d64911a` | fix: ddl-auto update para persistir datos + DataInitializer admin |
 
 ---
 
@@ -422,47 +462,58 @@ SWO/
 ├── backend/                          # Spring Boot API REST
 │   └── src/
 │       ├── main/java/com/swo/api/
-│       │   ├── controller/           # Controladores REST
-│       │   ├── service/              # Lógica de negocio
-│       │   │   └── impl/             # Implementaciones
-│       │   ├── repository/           # Acceso a datos (JPA)
+│       │   ├── controller/           # 7 Controladores REST
+│       │   ├── service/              # Servicios + implementaciones
+│       │   ├── repository/           # Repositorios JPA (7)
 │       │   ├── model/
-│       │   │   ├── entity/           # Entidades JPA
-│       │   │   ├── dto/
-│       │   │   │   ├── request/      # DTOs de entrada
-│       │   │   │   └── response/     # DTOs de salida
-│       │   │   └── enums/            # Enumeraciones
-│       │   ├── config/               # Configuraciones Spring
-│       │   ├── exception/            # Manejo de excepciones
-│       │   └── common/               # Utilitarios comunes
-│       └── test/                     # Pruebas unitarias
+│       │   │   ├── entity/           # Entidades JPA (7)
+│       │   │   └── dto/              # DTOs request / response
+│       │   ├── config/               # SecurityConfig, CorsConfig, OpenAPI
+│       │   └── exception/            # GlobalExceptionHandler
+│       └── test/                     # 44 pruebas unitarias
 ├── src/                              # Angular 17 Frontend
 │   └── app/
-│       ├── core/                     # Servicios, guards, interceptores
-│       ├── shared/                   # Componentes reutilizables
+│       ├── core/                     # Servicios, guards, interceptores, modelos
+│       ├── shared/                   # Componentes reutilizables (button, modal...)
 │       └── features/                 # Módulos funcionales
-│           ├── auth/
-│           ├── dashboard/
-│           ├── incidents/
-│           ├── projects/
-│           ├── users/
-│           ├── chatbot/
-│           └── reports/
+│           ├── auth/                 # Login
+│           ├── dashboard/            # Panel de métricas
+│           ├── incidents/            # Gestión de incidencias
+│           ├── projects/             # Gestión de proyectos
+│           ├── users/                # Gestión de usuarios
+│           ├── chatbot/              # Asistente virtual
+│           └── reports/              # Reportes PDF/Excel
 ├── cypress/                          # Pruebas E2E
-├── java/                             # Scripts SQL de BD
+├── java/                             # Scripts SQL de base de datos
 ├── dist/                             # Build frontend (generado)
-├── Dockerfile                        # Imagen multi-stage
-├── docker-compose.yml                # Orquestación de contenedores
-├── .env.example                      # Plantilla de variables de entorno
-├── build.bat / build.sh              # Scripts de build
-├── MANUAL_TECNICO.md                 # Manual técnico
-├── INFORME_PRUEBAS.md               # Resultados de pruebas
-└── Documento_Arquitectura_SWO.md    # Documento de arquitectura
+├── Dockerfile                        # Imagen multi-stage (build + runtime)
+├── docker-compose.yml                # Orquestación local completa
+├── railway.json                      # Configuración Railway
+├── angular.json                      # Config Angular CLI
+├── package.json                      # Dependencias npm
+└── backend/pom.xml                   # Dependencias Maven
 ```
+
+---
+
+## Documentación del Proyecto
+
+| Documento | Descripción |
+|-----------|-------------|
+| [ACTA_APROBACION_REQUERIMIENTOS.md](ACTA_APROBACION_REQUERIMIENTOS.md) | Acta formal de aprobación de requerimientos (RF-01 a RF-04) |
+| [DOCUMENTACION_MODULOS.md](DOCUMENTACION_MODULOS.md) | Documentación por módulo: datos de entrada/salida, servicios, componentes |
+| [INFORME_PRUEBAS.md](INFORME_PRUEBAS.md) | Resultados de pruebas, configuración de servidores y ambientes |
+| [MANUAL_TECNICO.md](MANUAL_TECNICO.md) | Manual técnico: instalación, arquitectura, seguridad, despliegue |
+| [DESPLIEGUE.md](DESPLIEGUE.md) | URLs desplegadas, archivos ejecutables, guía Railway y GitHub Pages |
+
+---
 
 ## Autores
 
 | Nombre | Rol |
 |--------|-----|
-| Juan Pablo Giraldo | Desarrollador Full Stack |
+| Juan Pablo Giraldo E. | Desarrollador Full Stack — SENA ADS |
 
+---
+
+*SWO ServiceDesk v1.0.0 · SENA — Análisis y Desarrollo de Software · Junio 2026*
