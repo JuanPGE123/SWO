@@ -1,0 +1,708 @@
+{
+  "info": {
+    "name": "SWO API - Sistema de Gestión de Incidencias",
+    "description": "Colección completa de endpoints REST para la API SWO (Spring Boot 3 + MySQL).\n\nBase URL: {{baseUrl}}/api\n\nVariables de entorno requeridas:\n- baseUrl: URL de Railway (ej: https://swo-api.up.railway.app) o http://localhost:8081 en local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "description": "Cambiar a la URL de Railway al desplegar"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Autenticación",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@swo.com\",\n  \"password\": \"Admin1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "login"]
+            },
+            "description": "Autentica al usuario con correo y contraseña. Retorna datos del usuario si las credenciales son correctas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Usuarios",
+      "item": [
+        {
+          "name": "Listar todos los usuarios",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar usuarios activos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/activos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "activos"]
+            }
+          }
+        },
+        {
+          "name": "Listar jefes / supervisores",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/jefes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "jefes"]
+            }
+          }
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Obtener usuario por correo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/correo/admin@swo.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "correo", "admin@swo.com"]
+            }
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Carlos Andrés Pérez\",\n  \"correo\": \"carlos.perez@swo.com\",\n  \"password\": \"Segura@2024\",\n  \"rol\": \"Técnico\",\n  \"telefono\": \"+573001234567\",\n  \"departamento\": \"Soporte TI\",\n  \"idJefe\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios"]
+            },
+            "description": "Roles válidos: Soporte, Jefe, Usuario, Administrador, Técnico, Analista, Desarrollador, Mesa de Servicio, Consultor, Auditor, Coordinador, Gerente, QA"
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Carlos Andrés Pérez López\",\n  \"correo\": \"carlos.perez@swo.com\",\n  \"rol\": \"Analista\",\n  \"telefono\": \"+573009876543\",\n  \"departamento\": \"Soporte TI\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar contraseña",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nuevaPassword\": \"NuevaClave@2024\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/1/cambiar-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "1", "cambiar-password"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar usuario (soft delete)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/1/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "1", "desactivar"]
+            }
+          }
+        },
+        {
+          "name": "Activar usuario",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/1/activar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "1", "activar"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario permanentemente",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usuarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usuarios", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚨 Incidencias",
+      "item": [
+        {
+          "name": "Listar todas (paginado)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por estado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/estado/Abierto?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "estado", "Abierto"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "Estados válidos: Abierto | En Progreso | Pendiente | Resuelto | Cerrado | Cancelado"
+          }
+        },
+        {
+          "name": "Listar por usuario",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/usuario/1?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "usuario", "1"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Búsqueda de texto libre",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/buscar?q=autenticación&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "buscar"],
+              "query": [
+                { "key": "q", "value": "autenticación" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener incidencia por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Crear incidencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Falla en el sistema de autenticación\",\n  \"descripcion\": \"Los usuarios no pueden iniciar sesión desde las 08:00 am. El error muestra código 500.\",\n  \"estado\": \"Abierto\",\n  \"impacto\": \"Alto\",\n  \"ubicacion\": \"Piso 3 - Sala Servidores\",\n  \"idUsuarioReporta\": 1,\n  \"idCategoria\": 1,\n  \"idUsuarioAsignado\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias"]
+            },
+            "description": "Impacto válido: Bajo | Medio | Alto | Crítico"
+          }
+        },
+        {
+          "name": "Actualizar incidencia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Falla en el sistema de autenticación - ACTUALIZADO\",\n  \"descripcion\": \"Los usuarios no pueden iniciar sesión. Se asignó técnico para revisión.\",\n  \"estado\": \"En Progreso\",\n  \"impacto\": \"Alto\",\n  \"ubicacion\": \"Piso 3 - Sala Servidores\",\n  \"idUsuarioReporta\": 1,\n  \"idCategoria\": 1,\n  \"idUsuarioAsignado\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado de incidencia",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/1/estado?nuevoEstado=Resuelto",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "1", "estado"],
+              "query": [
+                { "key": "nuevoEstado", "value": "Resuelto" }
+              ]
+            },
+            "description": "Estados válidos: Abierto | En Progreso | Pendiente | Resuelto | Cerrado | Cancelado"
+          }
+        },
+        {
+          "name": "Eliminar incidencia",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidencias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "incidencias", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📁 Proyectos",
+      "item": [
+        {
+          "name": "Listar todos los proyectos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos"]
+            }
+          }
+        },
+        {
+          "name": "Filtrar proyectos por estado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/estado/Activo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "estado", "Activo"]
+            },
+            "description": "Estados: Activo | En Pausa | Completado | Cancelado"
+          }
+        },
+        {
+          "name": "Buscar proyectos por nombre",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/buscar?q=sistema",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "buscar"],
+              "query": [
+                { "key": "q", "value": "sistema" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener proyecto por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Listar usuarios asignados a proyecto",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/1/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "1", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Crear proyecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProyecto\": \"Sistema de Gestión Documental\",\n  \"descripcion\": \"Implementación del módulo de gestión documental para el área de Recursos Humanos.\",\n  \"estado\": \"Activo\",\n  \"idJefe\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar proyecto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreProyecto\": \"Sistema de Gestión Documental v2\",\n  \"descripcion\": \"Actualización del módulo con nuevas funcionalidades.\",\n  \"estado\": \"En Pausa\",\n  \"idJefe\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Asignar usuario a proyecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProyecto\": 1,\n  \"idUsuario\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/asignar-usuario",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "asignar-usuario"]
+            }
+          }
+        },
+        {
+          "name": "Remover usuario de proyecto",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/1/usuario/2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "1", "usuario", "2"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar proyecto",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/proyectos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "proyectos", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏷️ Categorías",
+      "item": [
+        {
+          "name": "Listar todas las categorías",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias"]
+            }
+          }
+        },
+        {
+          "name": "Listar categorías activas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/activas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "activas"]
+            }
+          }
+        },
+        {
+          "name": "Obtener categoría por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Hardware\",\n  \"descripcion\": \"Incidencias relacionadas con equipos físicos y periféricos\",\n  \"activa\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Hardware y Periféricos\",\n  \"descripcion\": \"Incidencias de equipos físicos, periféricos e impresoras\",\n  \"activa\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar categoría",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/1/desactivar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "1", "desactivar"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar categoría permanentemente",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 Chatbot",
+      "item": [
+        {
+          "name": "Consulta rápida (sin sesión)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/chatbot?q=cómo reportar una incidencia",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "chatbot"],
+              "query": [
+                { "key": "q", "value": "cómo reportar una incidencia" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enviar mensaje al chatbot",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 1,\n  \"mensaje\": \"¿Cómo puedo reportar una incidencia de red?\",\n  \"sessionId\": \"session-abc-123\",\n  \"tipoConsulta\": \"soporte\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/chatbot/enviar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "chatbot", "enviar"]
+            }
+          }
+        },
+        {
+          "name": "Obtener historial del usuario",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/chatbot/historial/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "chatbot", "historial", "1"]
+            }
+          }
+        },
+        {
+          "name": "Obtener conversaciones por sesión",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/chatbot/sesion/session-abc-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "chatbot", "sesion", "session-abc-123"]
+            }
+          }
+        },
+        {
+          "name": "Marcar conversación como resuelta",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/chatbot/1/resolver",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "chatbot", "1", "resolver"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Reportes y Estadísticas",
+      "item": [
+        {
+          "name": "Estadísticas generales del sistema",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/estadisticas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "estadisticas"]
+            },
+            "description": "Retorna totales de incidencias por estado, proyectos activos y usuarios."
+          }
+        },
+        {
+          "name": "Listar reportes generados",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reportes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reportes"]
+            }
+          }
+        },
+        {
+          "name": "Registrar reporte generado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Reporte Incidencias Junio 2026\",\n  \"tipo\": \"incidencias\",\n  \"fechaGenerado\": \"2026-06-18\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reportes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reportes"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📖 Documentación",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/swagger-ui.html",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "swagger-ui.html"]
+            }
+          }
+        },
+        {
+          "name": "OpenAPI JSON (api-docs)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v3/api-docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v3", "api-docs"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

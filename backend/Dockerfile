@@ -5,12 +5,11 @@ FROM maven:3.9.4-eclipse-temurin-17-alpine AS build
 
 WORKDIR /app
 
-COPY backend/pom.xml .
+COPY pom.xml .
 RUN mvn dependency:go-offline -q
 
-COPY backend/src ./src
+COPY src ./src
 RUN mvn clean package -Dmaven.test.skip=true -Djacoco.skip=true
-RUN ls -la target/*.jar
 
 # ─────────────────────────────────────────────────────
 # STAGE 2: Runtime mínimo

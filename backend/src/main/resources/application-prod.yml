@@ -1,26 +1,31 @@
 # =====================================================
 #  SWO API - Perfil PRODUCCIÓN (Railway)
-#  Las variables ${...} son inyectadas por Railway
+#  Variables inyectadas por Railway MySQL plugin:
+#  MYSQLHOST, MYSQLPORT, MYSQL_DATABASE, MYSQLUSER, MYSQLPASSWORD, PORT
 # =====================================================
 
 server:
   port: ${PORT:8080}
   servlet:
     context-path: /api
+  error:
+    include-message: always
 
 spring:
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
+    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota&characterEncoding=UTF-8
+    username: ${MYSQLUSER}
+    password: ${MYSQLPASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
+      pool-name: SwoHikariPool
       connection-timeout: 30000
       maximum-pool-size: 10
       minimum-idle: 3
       idle-timeout: 300000
       max-lifetime: 1200000
       keepalive-time: 60000
+      connection-test-query: SELECT 1
 
   jpa:
     hibernate:
@@ -33,6 +38,7 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+      indent-output: false
     deserialization:
       fail-on-unknown-properties: false
     default-property-inclusion: non_null
@@ -43,6 +49,7 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    try-it-out-enabled: true
 
 logging:
   level:
