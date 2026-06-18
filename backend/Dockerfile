@@ -9,7 +9,9 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -q
 
 COPY src ./src
-RUN mvn clean package -Dmaven.test.skip=true -Djacoco.skip=true
+RUN mvn clean package -Dmaven.test.skip=true -Djacoco.skip=true \
+    && echo "=== JARs generados ===" \
+    && ls -la target/*.jar
 
 # ─────────────────────────────────────────────────────
 # STAGE 2: Runtime mínimo
@@ -18,7 +20,8 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/target/swo-api-1.0.0.jar app.jar
+# Wildcard para no depender del nombre exacto del JAR
+COPY --from=build /app/target/*.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=prod
 
