@@ -28,7 +28,8 @@ public class CorsConfig {
                 "http://localhost:8080",
                 "http://127.0.0.1:4200",
                 "https://juanpge123.github.io",
-                "https://swo-production.up.railway.app"
+                "https://swo-production.up.railway.app",
+                "https://swo-web-production.up.railway.app"
         ));
 
         // ── Métodos HTTP permitidos ──────────────────────────────────────────
