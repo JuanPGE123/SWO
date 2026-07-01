@@ -38,9 +38,9 @@ describe('SWO - Flujo Completo: Autenticación y Navegación', () => {
   describe('1. Autenticación', () => {
 
     beforeEach(() => {
-      // Limpiar datos de sesión anterior
-      cy.clearAuth();
+      // Limpiar datos de sesión anterior (visitar primero para que sessionStorage sea del origen correcto)
       cy.visit('/login');
+      cy.clearAuth();
     });
 
     it('should display login form', () => {

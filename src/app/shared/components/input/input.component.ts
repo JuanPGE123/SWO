@@ -216,6 +216,11 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   @Input() customClass?: string;
 
   /**
+   * Atributo name del input nativo (necesario para selectores en tests y gestores de contraseñas)
+   */
+  @Input() name?: string;
+
+  /**
    * ID único del input
    * Se genera automáticamente si no se proporciona
    */

@@ -37,6 +37,10 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 
+# ── CYPRESS ───────────────────────────────────────────────────────
+cypress/videos/
+cypress/screenshots/
+
 # ── INTELLIJ IDEA ────────────────────────────────────────────────
 .idea/
 *.iws

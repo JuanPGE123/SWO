@@ -47,7 +47,7 @@ export default defineConfig({
     screenshotsFolder: "cypress/screenshots",
     videosFolder: "cypress/videos",
     trashAssetsBeforeRuns: true,
-    video: false,  // Desactivar videos por defecto (activar para CI)
+    video: true,  // Desactivar videos por defecto (activar para CI)
     
     // ────────────────────────────────────────────────────────────────────
     // NAVEGADOR

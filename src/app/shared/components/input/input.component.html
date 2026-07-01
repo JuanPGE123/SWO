@@ -17,6 +17,7 @@
       *ngIf="type !== 'textarea'"
       #inputElement
       [id]="inputId"
+      [attr.name]="name || null"
       [type]="getInputType()"
       [class]="getInputClasses()"
       [value]="value"
@@ -43,6 +44,7 @@
       *ngIf="type === 'textarea'"
       #inputElement
       [id]="inputId"
+      [attr.name]="name || null"
       [class]="getInputClasses()"
       [value]="value"
       [placeholder]="placeholder || ''"

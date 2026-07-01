@@ -102,12 +102,10 @@ Cypress.Commands.add('setStorageToken', (token: string) => {
 /**
  * Comando: cy.clearAuth()
  * Propósito: Limpiar datos de autenticación
+ * Nota: AuthService usa sessionStorage con claves 'authToken' y 'usuarioAutenticado'
  */
 Cypress.Commands.add('clearAuth', () => {
-  cy.window().then((win) => {
-    win.localStorage.removeItem('authToken');
-    win.localStorage.removeItem('user');
-  });
+  cy.clearAllSessionStorage();
 });
 
 // ────────────────────────────────────────────────────────────────────────

@@ -42,7 +42,7 @@ export const environment = {
    * 
    * **Nota:** Asegúrate que el backend esté corriendo antes de iniciar el frontend
    */
-  apiUrl: 'http://localhost:8080/SWO/api',
+  apiUrl: 'https://swo-production.up.railway.app/api/v1',
 
   /**
    * URL base de la aplicación frontend
